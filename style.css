@@ -1,41 +1,72 @@
-/* =================================================
-   GLOBAL RESET
-================================================= */
+/* ===============================
+   GLOBAL STYLES
+=============================== */
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  font-family: Arial, sans-serif;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 body {
-  background: #f4f6fb;
-  color: #333;
+  min-height: 100vh;
+  background: #f0f4f8;
+  color: #0f172a;
+  overflow-x: hidden;
 }
 
-/* =================================================
+body::-webkit-scrollbar {
+  width: 10px;
+}
+body::-webkit-scrollbar-track {
+  background: #e5e7eb;
+}
+body::-webkit-scrollbar-thumb {
+  background: #9ca3af;
+  border-radius: 5px;
+}
+
+/* ===============================
    HEADER
-================================================= */
-header {
-  background: #1e3a8a;
+=============================== */
+.top-header {
+  background: linear-gradient(90deg, #2563eb, #3b82f6);
   color: #fff;
-  padding: 16px 20px;
+  padding: 25px 20px;
+  text-align: center;
+  border-bottom: 1px solid #cbd5e1;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
 }
 
-header h1 {
-  font-size: 22px;
+.top-header h1 {
+  font-size: clamp(22px, 4vw, 32px);
+  font-weight: 700;
+  margin-bottom: 6px;
+  animation: fadeInDown 1s ease;
 }
 
-/* =================================================
-   CONTAINER
-================================================= */
-.container {
-  padding: 20px;
+.top-header p {
+  font-size: 14px;
+  color: #e0f2fe;
+  animation: fadeIn 1s ease;
 }
 
-/* =================================================
-   DASHBOARD
-================================================= */
+/* ===============================
+   PAGE WRAPPER
+=============================== */
+.page-wrapper {
+  max-width: 1200px;
+  margin: 20px auto;
+  padding: 24px;
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+  animation: fadeIn 0.8s ease;
+}
+
+/* ===============================
+   DASHBOARD GRID
+=============================== */
 .dashboard {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -43,131 +74,328 @@ header h1 {
 }
 
 .dashboard .card {
-  background: #fff;
-  padding: 22px;
+  background: #f8fafc;
   border-radius: 14px;
-  box-shadow: 0 6px 14px rgba(0,0,0,0.1);
+  padding: 28px 22px;
+  cursor: pointer;
+  border: 1px solid #e5e7eb;
+  transition: all 0.3s ease;
   text-align: center;
-  cursor: pointer;
-  transition: 0.25s;
-}
-
-.dashboard .card:hover {
-  transform: translateY(-6px);
-}
-
-/* =================================================
-   CARDS (ALL PAGES)
-================================================= */
-.card {
-  background: #fff;
-  padding: 18px;
-  border-radius: 12px;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.08);
-  margin-bottom: 18px;
-}
-
-/* =================================================
-   FORMS
-================================================= */
-label {
-  font-weight: bold;
-  margin-bottom: 6px;
-  display: block;
-}
-
-input, select {
-  width: 100%;
-  padding: 10px;
-  border-radius: 8px;
-  border: 1px solid #ccc;
-  margin-bottom: 14px;
-}
-
-input:focus, select:focus {
-  outline: none;
-  border-color: #1e3a8a;
-}
-
-/* =================================================
-   BUTTONS
-================================================= */
-button {
-  background: #1e3a8a;
-  color: white;
-  padding: 10px 16px;
-  border-radius: 8px;
-  border: none;
-  cursor: pointer;
-}
-
-button:hover {
-  background: #162e6f;
-}
-
-/* =================================================
-   TABLES
-================================================= */
-table {
-  width: 100%;
-  border-collapse: collapse;
-  background: white;
-  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  position: relative;
   overflow: hidden;
 }
 
-th, td {
-  padding: 12px;
+/* Color variations for cards */
+.dashboard .card:nth-child(1) { border-left: 6px solid #2563eb; }
+.dashboard .card:nth-child(2) { border-left: 6px solid #16a34a; }
+.dashboard .card:nth-child(3) { border-left: 6px solid #f59e0b; }
+.dashboard .card:nth-child(4) { border-left: 6px solid #dc2626; }
+.dashboard .card:nth-child(5) { border-left: 6px solid #8b5cf6; }
+.dashboard .card:nth-child(6) { border-left: 6px solid #ec4899; }
+.dashboard .card:nth-child(7) { border-left: 6px solid #0ea5e9; }
+
+.dashboard .card h2 {
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 8px;
+  color: #1e293b;
+  transition: color 0.3s ease;
+}
+
+.dashboard .card p {
+  font-size: 14px;
+  color: #475569;
+  line-height: 1.4;
+  transition: color 0.3s ease;
+}
+
+/* Card hover animations */
+.dashboard .card:hover {
+  transform: translateY(-6px) scale(1.02);
+  box-shadow: 0 12px 24px rgba(0,0,0,0.15);
+}
+
+.dashboard .card:hover h2 {
+  color: #2563eb;
+}
+
+.dashboard .card::after {
+  content: '';
+  position: absolute;
+  width: 120%;
+  height: 120%;
+  background: rgba(37, 99, 235, 0.05);
+  top: -10%;
+  left: -10%;
+  border-radius: 50%;
+  transform: scale(0);
+  transition: transform 0.6s ease;
+}
+
+.dashboard .card:hover::after {
+  transform: scale(1);
+}
+
+/* ===============================
+   TABLES & LISTS
+=============================== */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 20px;
+  animation: fadeIn 0.8s ease;
+}
+
+table thead tr {
+  background: #2563eb;
+  color: #fff;
+  text-align: left;
+}
+
+table th, table td {
+  padding: 12px 10px;
   border-bottom: 1px solid #e5e7eb;
 }
 
-th {
-  background: #eef2ff;
-  font-weight: bold;
+table tr:hover {
+  background: #f0f9ff;
 }
 
-/* =================================================
-   STATUS COLORS
-================================================= */
-.status-low {
-  color: red;
-  font-weight: bold;
+/* ===============================
+   FORMS & INPUTS
+=============================== */
+input, select, textarea, button {
+  font-family: inherit;
 }
 
-.status-ok {
-  color: green;
-  font-weight: bold;
-}
-
-/* =================================================
-   SETTINGS
-================================================= */
-.setting-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 14px;
-  border-bottom: 1px solid #e5e7eb;
-}
-
-/* =================================================
-   ALERTS
-================================================= */
-.alert {
-  background: #fee2e2;
-  color: #991b1b;
-  padding: 12px;
+input, select, textarea {
+  width: 100%;
+  padding: 10px 12px;
+  margin: 6px 0 16px 0;
+  border: 1px solid #cbd5e1;
   border-radius: 8px;
-  margin-bottom: 12px;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
-/* =================================================
-   NAV BACK BUTTON
-================================================= */
-.back-btn {
-  display: inline-block;
-  margin-bottom: 14px;
-  color: #1e3a8a;
-  text-decoration: none;
-  font-weight: bold;
+input:focus, select:focus, textarea:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 8px rgba(37,99,235,0.2);
+}
+
+button {
+  padding: 10px 18px;
+  border: none;
+  border-radius: 8px;
+  background-color: #2563eb;
+  color: #fff;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+button:hover {
+  background-color: #1d4ed8;
+  transform: translateY(-2px);
+}
+
+/* ===============================
+   ALERTS & MESSAGES
+=============================== */
+.alert {
+  padding: 12px 16px;
+  margin-bottom: 16px;
+  border-radius: 8px;
+  font-weight: 500;
+  animation: fadeIn 0.6s ease;
+}
+
+.alert-success {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.alert-error {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.alert-info {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+/* ===============================
+   JOB & REPAIR CARDS
+=============================== */
+.job-card {
+  background: #f8fafc;
+  padding: 18px 14px;
+  border-radius: 12px;
+  border-left: 4px solid #3b82f6;
+  margin-bottom: 12px;
+  transition: all 0.3s ease;
+}
+
+.job-card:hover {
+  background: #e0f2fe;
+  transform: translateX(3px);
+}
+
+/* ===============================
+   ANIMATIONS
+=============================== */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeInDown {
+  from { opacity: 0; transform: translateY(-20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ===============================
+   RESPONSIVE
+=============================== */
+@media (max-width: 480px) {
+  .page-wrapper {
+    padding: 16px;
+    margin: 10px;
+  }
+
+  .dashboard .card {
+    padding: 20px 16px;
+  }
+
+  table th, table td {
+    padding: 8px 6px;
+  }
+
+  input, select, textarea, button {
+    padding: 8px 10px;
+  }
+}
+
+/* ===============================
+   STOCK PAGE STYLES
+=============================== */
+
+/* Page heading */
+body h1 {
+  text-align: center;
+  font-size: clamp(26px, 4vw, 32px);
+  color: #1e293b;
+  margin: 24px 0;
+  animation: fadeInDown 0.8s ease;
+}
+
+body h2 {
+  font-size: 22px;
+  color: #1e293b;
+  margin: 20px 0 12px 0;
+  animation: fadeIn 0.8s ease;
+}
+
+/* ===============================
+   FORM STYLING
+=============================== */
+#addStockForm {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+  animation: fadeIn 0.8s ease;
+}
+
+#addStockForm input {
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid #cbd5e1;
+  outline: none;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+#addStockForm input:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 6px rgba(37,99,235,0.2);
+}
+
+#addStockForm button {
+  grid-column: span 2; /* full width button on small screens */
+  padding: 12px;
+  background: #2563eb;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.3s ease, transform 0.2s ease;
+}
+
+#addStockForm button:hover {
+  background: #1d4ed8;
+  transform: translateY(-2px);
+}
+
+/* ===============================
+   TABLE STYLING
+=============================== */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+  border-radius: 12px;
+  overflow: hidden;
+  animation: fadeIn 0.8s ease;
+  box-shadow: 0 6px 15px rgba(0,0,0,0.05);
+}
+
+table thead tr {
+  background: #2563eb;
+  color: #fff;
+  text-align: left;
+}
+
+table th, table td {
+  padding: 12px 10px;
+  border-bottom: 1px solid #e5e7eb;
+  transition: background 0.2s ease;
+}
+
+table tr:hover {
+  background: #f0f9ff;
+}
+
+table tbody tr:nth-child(even) {
+  background: #f8fafc;
+}
+
+/* ===============================
+   RESPONSIVE GRID
+=============================== */
+@media (max-width: 600px) {
+  #addStockForm {
+    grid-template-columns: 1fr;
+  }
+
+  #addStockForm button {
+    grid-column: span 1;
+  }
+}
+
+/* ===============================
+   ANIMATIONS
+=============================== */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeInDown {
+  from { opacity: 0; transform: translateY(-20px); }
+  to { opacity: 1; transform: translateY(0); }
 }

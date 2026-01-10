@@ -1,3 +1,7 @@
+let currentUser = JSON.parse(localStorage.getItem("currentUser"));
+if(!currentUser){
+    window.location = "login.html"; // redirect if not logged in
+}
 // ================================
 // STOCK DATA MODEL
 // ================================
@@ -57,3 +61,17 @@ function addStock(stockData) {
 function getAllStock() {
   return getData(STORAGE_KEYS.STOCK);
 }
+document.addEventListener("DOMContentLoaded", function() {
+    // Make sure currentUser exists
+    let currentUser = JSON.parse(localStorage.getItem("currentUser"));
+
+    // Redirect if not logged in
+    if(!currentUser){
+        window.location = "login.html";
+    }
+
+    // Hide owner-only elements for workers
+    if(currentUser.role === "worker"){
+        document.querySelectorAll(".owner-only").forEach(el => el.style.display = "none");
+    }
+});

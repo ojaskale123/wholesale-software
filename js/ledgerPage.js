@@ -1,3 +1,7 @@
+let currentUser = JSON.parse(localStorage.getItem("currentUser"));
+if(!currentUser){
+    window.location = "login.html"; // redirect if not logged in
+}
 // ================================
 // LEDGER PAGE LOGIC
 // ================================
