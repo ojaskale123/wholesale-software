@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Wholesale Software Dashboard</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <header>
+    <h1>Wholesale Software Dashboard</h1>
+  </header>
+
+  <div class="dashboard">
+    <div class="card" onclick="openPage('pages/stock.html')">
+      <h2>Stock</h2>
+      <p>View & Manage Inventory</p>
+    </div>
+
+    <div class="card" onclick="openPage('pages/customers.html')">
+      <h2>Customers</h2>
+      <p>Manage Customers</p>
+    </div>
+
+    <div class="card" onclick="openPage('pages/sales.html')">
+      <h2>Sales</h2>
+      <p>Make & View Sales</p>
+    </div>
+
+    <div class="card" onclick="openPage('pages/ledger.html')">
+      <h2>Ledger</h2>
+      <p>Check Customer Ledger</p>
+    </div>
+
+    <div class="card" onclick="openPage('pages/history.html')">
+      <h2>History</h2>
+      <p>Sales & Transactions</p>
+    </div>
+
+    <div class="card" onclick="openPage('pages/repairs.html')">
+      <h2>Repairs</h2>
+      <p>Track Repairs & Jobs</p>
+    </div>
+
+    <div class="card" onclick="openPage('pages/settings.html')">
+      <h2>Settings</h2>
+      <p>Configure Software</p>
+    </div>
+  </div>
+
+  <script>
+    function openPage(url) {
+      window.location.href = url;
+    }
+  </script>
+
+</body>
+</html>

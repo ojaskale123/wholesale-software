@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Stock Management</title>
+  <link rel="stylesheet" href="../style.css" />
+</head>
+<body>
+
+  <h1>Stock Management</h1>
+
+  <form id="addStockForm">
+    <input type="text" id="name" placeholder="Item Name" required />
+    <input type="text" id="category" placeholder="Category" required />
+    <input type="number" id="quantity" placeholder="Quantity" required />
+    <input type="number" id="costPrice" placeholder="Cost Price" required />
+    <input type="number" id="retailPrice" placeholder="Retail Price" required />
+    <input type="number" id="wholesalePrice" placeholder="Wholesale Price" required />
+    <input type="text" id="barcode" placeholder="Barcode (optional)" />
+
+    <button type="submit">Add / Refill Stock</button>
+  </form>
+
+  <hr />
+
+  <h2>Current Stock</h2>
+  <table border="1" width="100%">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Category</th>
+        <th>Qty</th>
+        <th>Barcode</th>
+      </tr>
+    </thead>
+    <tbody id="stockTable"></tbody>
+  </table>
+
+  <script src="../js/storage.js"></script>
+  <script src="../js/app.js"></script>
+  <script src="../js/stock.js"></script>
+  <script src="../js/stockPage.js"></script>
+
+</body>
+</html>

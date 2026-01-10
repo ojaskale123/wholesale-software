@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Customers</title>
+  <link rel="stylesheet" href="../style.css" />
+</head>
+<body>
+
+  <h1>Customer Management</h1>
+
+  <form id="customerForm">
+    <input type="text" id="custName" placeholder="Customer Name" required />
+    <input type="text" id="custPhone" placeholder="Phone Number" required />
+    
+    <select id="custType">
+      <option value="retail">Retail</option>
+      <option value="wholesale">Wholesale</option>
+    </select>
+
+    <input type="text" id="custAddress" placeholder="Address (optional)" />
+    <button type="submit">Add Customer</button>
+  </form>
+
+  <hr />
+
+  <h2>Customer List</h2>
+  <table border="1" width="100%">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Phone</th>
+        <th>Type</th>
+      </tr>
+    </thead>
+    <tbody id="customerTable"></tbody>
+  </table>
+
+  <script src="../js/storage.js"></script>
+  <script src="../js/app.js"></script>
+  <script src="../js/customers.js"></script>
+  <script src="../js/customersPage.js"></script>
+
+</body>
+</html>

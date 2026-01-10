@@ -1,0 +1,173 @@
+/* =================================================
+   GLOBAL RESET
+================================================= */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: Arial, sans-serif;
+}
+
+body {
+  background: #f4f6fb;
+  color: #333;
+}
+
+/* =================================================
+   HEADER
+================================================= */
+header {
+  background: #1e3a8a;
+  color: #fff;
+  padding: 16px 20px;
+}
+
+header h1 {
+  font-size: 22px;
+}
+
+/* =================================================
+   CONTAINER
+================================================= */
+.container {
+  padding: 20px;
+}
+
+/* =================================================
+   DASHBOARD
+================================================= */
+.dashboard {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 20px;
+}
+
+.dashboard .card {
+  background: #fff;
+  padding: 22px;
+  border-radius: 14px;
+  box-shadow: 0 6px 14px rgba(0,0,0,0.1);
+  text-align: center;
+  cursor: pointer;
+  transition: 0.25s;
+}
+
+.dashboard .card:hover {
+  transform: translateY(-6px);
+}
+
+/* =================================================
+   CARDS (ALL PAGES)
+================================================= */
+.card {
+  background: #fff;
+  padding: 18px;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+  margin-bottom: 18px;
+}
+
+/* =================================================
+   FORMS
+================================================= */
+label {
+  font-weight: bold;
+  margin-bottom: 6px;
+  display: block;
+}
+
+input, select {
+  width: 100%;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  margin-bottom: 14px;
+}
+
+input:focus, select:focus {
+  outline: none;
+  border-color: #1e3a8a;
+}
+
+/* =================================================
+   BUTTONS
+================================================= */
+button {
+  background: #1e3a8a;
+  color: white;
+  padding: 10px 16px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+}
+
+button:hover {
+  background: #162e6f;
+}
+
+/* =================================================
+   TABLES
+================================================= */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+th, td {
+  padding: 12px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+th {
+  background: #eef2ff;
+  font-weight: bold;
+}
+
+/* =================================================
+   STATUS COLORS
+================================================= */
+.status-low {
+  color: red;
+  font-weight: bold;
+}
+
+.status-ok {
+  color: green;
+  font-weight: bold;
+}
+
+/* =================================================
+   SETTINGS
+================================================= */
+.setting-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+/* =================================================
+   ALERTS
+================================================= */
+.alert {
+  background: #fee2e2;
+  color: #991b1b;
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 12px;
+}
+
+/* =================================================
+   NAV BACK BUTTON
+================================================= */
+.back-btn {
+  display: inline-block;
+  margin-bottom: 14px;
+  color: #1e3a8a;
+  text-decoration: none;
+  font-weight: bold;
+}
