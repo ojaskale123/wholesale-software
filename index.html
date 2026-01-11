@@ -14,7 +14,7 @@
 
 <div class="dashboard-container">
 
-    <!-- LEFT BIG SQUARE -->
+    <!-- LEFT -->
     <div class="left-cards owner-only">
         <div class="big-card">
             Total Stock<br><span id="totalStock">0</span>
@@ -27,7 +27,7 @@
         </div>
     </div>
 
-    <!-- MIDDLE CARDS -->
+    <!-- MIDDLE -->
     <div class="middle-cards owner-only">
         <div class="big-card" onclick="location.href='workers.html'">
             Workers<br><span id="presentWorkers">0</span>
@@ -37,14 +37,23 @@
         </div>
     </div>
 
-    <!-- RIGHT BIG CARD -->
-    <div class="right-card owner-only">
+    <!-- RIGHT -->
+    <div class="right-cards owner-only">
+
         <div class="big-card big-rectangle">
-            Total Revenue<br><span id="totalRevenue">0</span>
+            Total Revenue<br>
+            <span id="totalRevenue">0</span>
         </div>
+
+        <!-- SHOP CARTS CARD -->
+        <div class="big-card" onclick="location.href='shops.html'">
+            Shops<br>
+            <span id="totalShops">0</span>
+        </div>
+
     </div>
 
-    <!-- BOTTOM HISTORY CARD -->
+    <!-- BOTTOM -->
     <div class="bottom-card owner-only">
         <div class="big-card big-horizontal" onclick="location.href='history.html'">
             History Entries<br><span id="historyCount">0</span>

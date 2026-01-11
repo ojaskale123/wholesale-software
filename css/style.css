@@ -4,7 +4,7 @@
 body {
     margin: 0;
     font-family: Arial, sans-serif;
-    background: #f4f6f9;
+    background: #aec6eb;
 }
 
 /* =======================
@@ -36,7 +36,7 @@ body {
     grid-template-areas:
         "left middle right"
         "bottom bottom bottom";
-    grid-gap: 20px;
+    gap: 20px;
     padding: 25px;
 }
 
@@ -54,12 +54,14 @@ body {
     gap: 20px;
 }
 
-/* RIGHT BIG CARD */
-.right-card {
+/* RIGHT STACKED CARDS */
+.right-cards {
     grid-area: right;
+    display: grid;
+    gap: 20px;
 }
 
-/* BOTTOM HISTORY CARD */
+/* BOTTOM CARD */
 .bottom-card {
     grid-area: bottom;
 }
@@ -85,29 +87,26 @@ body {
 .big-card span {
     display: block;
     font-size: 30px;
-    font-weight: bold;
     margin-top: 10px;
 }
 
-/* WARNING BORDER FOR LOW/OUT OF STOCK */
+/* WARNING BORDER */
 .warning {
     border-left: 6px solid crimson;
 }
 
-/* BIG RECTANGLE FOR REVENUE */
+/* BIG RECTANGLE */
 .big-rectangle {
     padding: 50px;
-    text-align: center;
 }
 
-/* BOTTOM HORIZONTAL CARD */
+/* BOTTOM HORIZONTAL */
 .big-horizontal {
     width: 100%;
-    text-align: center;
 }
 
 /* =======================
-   SMALL CARDS (COMMON)
+   SMALL CARDS
 ======================= */
 .small-cards {
     margin-top: 30px;
@@ -124,15 +123,10 @@ body {
     cursor: pointer;
     font-weight: bold;
     box-shadow: 0 3px 10px rgba(0,0,0,0.1);
-    transition: transform 0.2s ease;
-}
-
-.small-card:hover {
-    transform: translateY(-2px);
 }
 
 /* =======================
-   LOGIN PAGE STYLES
+   LOGIN PAGE
 ======================= */
 .login-body {
     display: flex;
@@ -165,7 +159,7 @@ body {
 .worker-only { display: none; }
 
 /* =======================
-   RESPONSIVE DESIGN
+   RESPONSIVE
 ======================= */
 @media (max-width: 1200px) {
     .dashboard-container {
@@ -183,5 +177,154 @@ body {
     }
     .big-rectangle {
         padding: 30px;
+    }
+}
+/* =========================
+   STOCK PAGE STYLES
+========================= */
+
+.stock-container {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 25px;
+    padding: 25px;
+}
+
+/* ADD PRODUCT BUTTON */
+.add-product-btn {
+    background: black;
+    color: white;
+    border: none;
+    padding: 10px 18px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.add-product-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(0,0,0,0.3);
+}
+
+/* LEFT SIDE */
+.stock-left {
+    display: grid;
+    gap: 25px;
+}
+
+/* TOP TWO CARDS */
+.stock-top-cards {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 25px;
+}
+
+/* RIGHT SIDE */
+.stock-right {
+    display: grid;
+    grid-template-rows: 2fr 1fr;
+    gap: 25px;
+}
+
+/* =========================
+   STOCK CARDS
+========================= */
+
+.stock-card {
+    background: white;
+    border-radius: 16px;
+    padding: 30px;
+    font-size: 20px;
+    font-weight: bold;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+    transition: all 0.4s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+/* SIZE VARIANTS */
+.stock-card.small {
+    height: 120px;
+}
+
+.stock-card.wide {
+    height: 140px;
+}
+
+.stock-card.tall {
+    height: 100%;
+}
+
+/* =========================
+   PREMIUM EFFECTS
+========================= */
+
+.premium-hover:hover {
+    transform: translateY(-6px) scale(1.02);
+    box-shadow: 0 20px 45px rgba(0,0,0,0.25);
+}
+
+/* GLOW EFFECT */
+.glow::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        120deg,
+        transparent,
+        rgba(0,0,0,0.08),
+        transparent
+    );
+    opacity: 0;
+    transition: opacity 0.4s;
+}
+
+.glow:hover::after {
+    opacity: 1;
+}
+
+/* NEON EFFECT */
+.neon:hover {
+    box-shadow:
+        0 0 15px rgba(0,0,0,0.4),
+        0 0 30px rgba(0,0,0,0.25);
+}
+
+/* =========================
+   SLOGAN CARD
+========================= */
+
+.slogan-card {
+    background: linear-gradient(
+        135deg,
+        #0f2027,
+        #203a43,
+        #2c5364
+    );
+    color: white;
+    border-radius: 16px;
+    padding: 30px;
+    text-align: center;
+    animation: float 4s ease-in-out infinite;
+}
+
+.slogan-card h3 {
+    margin: 0;
+    font-size: 22px;
+}
+
+.slogan-card p {
+    margin-top: 10px;
+    opacity: 0.85;
+}
+
+/* FLOAT ANIMATION */
+@keyframes float {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-8px);
     }
 }
