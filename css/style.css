@@ -1,0 +1,187 @@
+/* =======================
+   GLOBAL STYLES
+======================= */
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #f4f6f9;
+}
+
+/* =======================
+   HEADER
+======================= */
+.top-header {
+    background: linear-gradient(90deg, #0f2027, #203a43, #2c5364);
+    color: white;
+    padding: 15px 25px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logout-btn {
+    background: crimson;
+    border: none;
+    padding: 8px 14px;
+    color: white;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+/* =======================
+   DASHBOARD GRID
+======================= */
+.dashboard-container {
+    display: grid;
+    grid-template-areas:
+        "left middle right"
+        "bottom bottom bottom";
+    grid-gap: 20px;
+    padding: 25px;
+}
+
+/* LEFT STACKED CARDS */
+.left-cards {
+    grid-area: left;
+    display: grid;
+    gap: 20px;
+}
+
+/* MIDDLE CARDS */
+.middle-cards {
+    grid-area: middle;
+    display: grid;
+    gap: 20px;
+}
+
+/* RIGHT BIG CARD */
+.right-card {
+    grid-area: right;
+}
+
+/* BOTTOM HISTORY CARD */
+.bottom-card {
+    grid-area: bottom;
+}
+
+/* =======================
+   BIG CARDS
+======================= */
+.big-card {
+    background: white;
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+    text-align: center;
+    font-weight: bold;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+}
+
+.big-card:hover {
+    transform: translateY(-3px);
+}
+
+.big-card span {
+    display: block;
+    font-size: 30px;
+    font-weight: bold;
+    margin-top: 10px;
+}
+
+/* WARNING BORDER FOR LOW/OUT OF STOCK */
+.warning {
+    border-left: 6px solid crimson;
+}
+
+/* BIG RECTANGLE FOR REVENUE */
+.big-rectangle {
+    padding: 50px;
+    text-align: center;
+}
+
+/* BOTTOM HORIZONTAL CARD */
+.big-horizontal {
+    width: 100%;
+    text-align: center;
+}
+
+/* =======================
+   SMALL CARDS (COMMON)
+======================= */
+.small-cards {
+    margin-top: 30px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 15px;
+}
+
+.small-card {
+    background: white;
+    padding: 20px;
+    text-align: center;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: bold;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+    transition: transform 0.2s ease;
+}
+
+.small-card:hover {
+    transform: translateY(-2px);
+}
+
+/* =======================
+   LOGIN PAGE STYLES
+======================= */
+.login-body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background: linear-gradient(120deg, #0f2027, #203a43, #2c5364);
+}
+
+.login-box {
+    background: white;
+    padding: 30px;
+    width: 300px;
+    border-radius: 12px;
+    text-align: center;
+}
+
+.login-box input {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 12px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+}
+
+/* =======================
+   ROLE VISIBILITY
+======================= */
+.owner-only { display: none; }
+.worker-only { display: none; }
+
+/* =======================
+   RESPONSIVE DESIGN
+======================= */
+@media (max-width: 1200px) {
+    .dashboard-container {
+        grid-template-areas:
+            "left"
+            "middle"
+            "right"
+            "bottom";
+    }
+}
+
+@media (max-width: 768px) {
+    .big-card span {
+        font-size: 24px;
+    }
+    .big-rectangle {
+        padding: 30px;
+    }
+}

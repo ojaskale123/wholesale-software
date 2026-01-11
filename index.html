@@ -1,63 +1,58 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Wholesale Software</title>
-  <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 
-  <header class="top-header">
-    <div class="header-content">
-      <h1>Wholesale Software</h1>
-      <p>Business Management Dashboard</p>
+<header class="top-header">
+    <h2>Wholesale Manager</h2>
+    <button onclick="logout()" class="logout-btn">Logout</button>
+</header>
+
+<div class="dashboard-container">
+
+    <!-- LEFT BIG SQUARE -->
+    <div class="left-cards owner-only">
+        <div class="big-card">
+            Total Stock<br><span id="totalStock">0</span>
+        </div>
+        <div class="big-card warning">
+            Low Stock<br><span id="lowStock">0</span>
+        </div>
+        <div class="big-card warning">
+            Out of Stock<br><span id="outOfStock">0</span>
+        </div>
     </div>
-  </header>
 
-  <main class="page-wrapper">
-    <div class="dashboard">
-      <div class="card" onclick="openPage('pages/stock.html')">
-        <h2>Stock</h2>
-        <p>Manage inventory & items</p>
-      </div>
-
-      <div class="card" onclick="openPage('pages/customers.html')">
-        <h2>Customers</h2>
-        <p>Customer records & details</p>
-      </div>
-
-      <div class="card" onclick="openPage('pages/sales.html')">
-        <h2>Sales</h2>
-        <p>Create and manage sales</p>
-      </div>
-
-      <div class="card" onclick="openPage('pages/ledger.html')">
-        <h2>Ledger</h2>
-        <p>Balances & transactions</p>
-      </div>
-
-      <div class="card" onclick="openPage('pages/history.html')">
-        <h2>History</h2>
-        <p>Sales & payment history</p>
-      </div>
-
-      <div class="card" onclick="openPage('pages/repairs.html')">
-        <h2>Repairs</h2>
-        <p>Repair & job tracking</p>
-      </div>
-
-      <div class="card" onclick="openPage('pages/settings.html')">
-        <h2>Settings</h2>
-        <p>Software configuration</p>
-      </div>
+    <!-- MIDDLE CARDS -->
+    <div class="middle-cards owner-only">
+        <div class="big-card" onclick="location.href='workers.html'">
+            Workers<br><span id="presentWorkers">0</span>
+        </div>
+        <div class="big-card" onclick="location.href='customers.html'">
+            Customers<br><span id="totalCustomers">0</span>
+        </div>
     </div>
-  </main>
 
-  <script>
-    function openPage(url) {
-      window.location.href = url;
-    }
-  </script>
+    <!-- RIGHT BIG CARD -->
+    <div class="right-card owner-only">
+        <div class="big-card big-rectangle">
+            Total Revenue<br><span id="totalRevenue">0</span>
+        </div>
+    </div>
 
+    <!-- BOTTOM HISTORY CARD -->
+    <div class="bottom-card owner-only">
+        <div class="big-card big-horizontal" onclick="location.href='history.html'">
+            History Entries<br><span id="historyCount">0</span>
+        </div>
+    </div>
+
+</div>
+
+<script src="js/dashboard.js"></script>
 </body>
 </html>
