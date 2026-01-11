@@ -424,3 +424,55 @@ body {
         grid-template-columns: 1fr;
     }
 }
+/* =========================
+   ADD PRODUCT ACTION BUTTONS
+========================= */
+
+.add-product-actions {
+    display: flex;
+    justify-content: center;   /* center buttons */
+    gap: 20px;                 /* spacing between buttons */
+    margin-top: 40px;          /* push buttons below all cards */
+    padding-bottom: 40px;      /* extra space at bottom */
+    flex-wrap: wrap;           /* wrap on smaller screens */
+}
+
+/* PRIMARY BUTTON (Add Product) */
+.primary-btn {
+    background: #004d00;       /* dark green */
+    color: white;
+    border: none;
+    padding: 18px 50px;        /* bigger size */
+    font-size: 18px;
+    font-weight: bold;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+}
+
+/* PRIMARY BUTTON HOVER ANIMATION */
+.primary-btn:hover {
+    transform: translateY(-4px) scale(1.05);
+    box-shadow: 0 12px 25px rgba(0,0,0,0.35);
+}
+
+/* SECONDARY BUTTON (Cancel) */
+.secondary-btn {
+    background: #000;           /* black */
+    color: white;
+    border: none;
+    padding: 18px 50px;
+    font-size: 18px;
+    font-weight: bold;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+}
+
+/* SECONDARY BUTTON HOVER ANIMATION */
+.secondary-btn:hover {
+    transform: translateY(-4px) scale(1.05);
+    box-shadow: 0 12px 25px rgba(0,0,0,0.35);
+}
