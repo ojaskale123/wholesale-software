@@ -24,7 +24,10 @@ function updateDashboardCards() {
     let workers = JSON.parse(localStorage.getItem("workers")) || [];
 
     // Total stock
-    let totalStock = stock.reduce((sum, item) => sum + Number(item.qty), 0);
+    let totalStock = stock.reduce((sum, item) => {
+    return sum + (Number(item.qty) || 0);
+}, 0);
+
     document.getElementById("totalStock").textContent = totalStock;
 
     // Low stock
