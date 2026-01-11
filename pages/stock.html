@@ -8,57 +8,43 @@
 <body>
 
 <header class="top-header">
-    <h2>Stock</h2>
+    <h2>Stock Page</h2>
 </header>
 
-<!-- ADD PRODUCT BUTTON (MOVED INTO BODY) -->
-<div class="stock-action-bar owner-only">
-    <button class="add-product-btn">
-        ＋ Add Products
-    </button>
+<!-- ACTION BAR ABOVE GRID -->
+<div class="stock-action-bar">
+    <button class="add-product-btn" onclick="location.href='add-product.html'">Add Product</button>
 </div>
 
-<div class="stock-container owner-only">
 
-    <!-- LEFT SIDE -->
+<!-- MAIN STOCK GRID -->
+<div class="stock-container">
+
+    <!-- LEFT SIDE CARDS -->
     <div class="stock-left">
 
+        <!-- TOP TWO CARDS -->
         <div class="stock-top-cards">
-            <div class="stock-card small premium-hover">
-                Full Stock
-            </div>
-
-            <div class="stock-card small premium-hover">
-                Spare Parts
-            </div>
+            <div class="stock-card small premium-hover glow">Full Stock</div>
+            <div class="stock-card small premium-hover glow">Spare Parts</div>
         </div>
 
-        <div class="stock-card wide premium-hover glow">
-            Electronic Devices
-        </div>
-
-        <div class="stock-card wide premium-hover glow">
-            Batteries
-        </div>
-
+        <!-- WIDE CARDS -->
+        <div class="stock-card wide premium-hover glow">Electronic Devices</div>
+        <div class="stock-card wide premium-hover glow">Batteries</div>
     </div>
 
-    <!-- RIGHT SIDE -->
+    <!-- RIGHT SIDE CARDS -->
     <div class="stock-right">
-
-        <div class="stock-card tall premium-hover neon">
-            Second-Hand Mobiles
+        <div class="stock-card tall premium-hover glow">Second Hand Mobiles</div>
+        <div class="slogan-card neon">
+            <h3>Keep it Premium!</h3>
+            <p>Stock managed smartly and efficiently.</p>
         </div>
-
-        <div class="slogan-card">
-            <h3>Stock isn’t inventory.</h3>
-            <p>It’s your silent profit engine.</p>
-        </div>
-
     </div>
 
 </div>
 
-<script src="../js/stock.js"></script>
+
 </body>
 </html>
