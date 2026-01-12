@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Customers</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+
+<header class="top-header">
+    <button class="back-btn" onclick="history.back()">← Back</button>
+    <h2>Customers</h2>
+</header>
+
+<div class="page-spacing"></div>
+
+<!-- TOP SUMMARY CARDS -->
+<div class="customers-top-cards">
+
+    <div class="customer-card small">
+        <h3>All Customers</h3>
+        <p id="totalCustomers">0</p>
+    </div>
+
+    <div class="customer-card small">
+        <h3>Retailers</h3>
+        <p id="retailerCount">0</p>
+    </div>
+
+    <div class="customer-card small">
+        <h3>Regular Customers</h3>
+        <p id="regularCount">0</p>
+    </div>
+
+</div>
+
+<!-- CUSTOMER LIST -->
+<div class="customers-list" id="customersList"></div>
+
+<!-- ADD CUSTOMER -->
+<div class="add-customer-bottom">
+    <a href="add-customer.html" class="primary-btn add-customer-btn">
+        Add Customer
+    </a>
+</div>
+
+<script src="../js/customers.js"></script>
+</body>
+</html>
