@@ -1,61 +1,71 @@
 // ==========================
-// USER & ROLE CHECK
+// WORKERS PAGE (OWNER)
 // ==========================
-const user = JSON.parse(localStorage.getItem("currentUser"));
 
-if (!user) {
-    location.href = "../login.html";
-}
+console.log("Workers page loaded");
 
-if (user.role !== "owner") {
-    alert("Access denied");
-    location.href = "../index.html";
-}
-
-// ==========================
-// SHOW OWNER-ONLY SECTIONS
-// ==========================
-document.querySelectorAll(".owner-only").forEach(el => {
-    el.style.display = "grid";
-});
-
-// ==========================
 // LOAD WORKERS
-// ==========================
-let workers = JSON.parse(localStorage.getItem("workers")) || [
-    { name: "John Doe", joined: "2026-01-01", profit: 5000, contact: "9876543210" },
-    { name: "Jane Smith", joined: "2026-01-05", profit: 3000, contact: "9876543211" }
-];
+let workers = JSON.parse(localStorage.getItem("workers")) || [];
 
-// ==========================
-// UPDATE WORKERS LIST
-// ==========================
-function updateWorkersList() {
-    const list = document.getElementById("workersList");
+// DOM
+const list = document.getElementById("workersList");
+
+// COUNTS
+const totalWorkersEl = document.getElementById("totalWorkers");
+const salesCountEl = document.getElementById("salesCount");
+const techCountEl = document.getElementById("techCount");
+
+// UPDATE COUNTS
+function updateCounts() {
+    totalWorkersEl.textContent = workers.length;
+
+    let sales = workers.filter(w => w.role === "Salesman").length;
+    let tech = workers.filter(w => w.role === "Technician").length;
+
+    salesCountEl.textContent = sales;
+    techCountEl.textContent = tech;
+}
+
+// RENDER WORKERS
+function renderWorkers() {
     list.innerHTML = "";
 
-    workers.forEach(w => {
-        const div = document.createElement("div");
-        div.className = "worker-item";
+    if (workers.length === 0) {
+        list.innerHTML = `<p style="text-align:center; opacity:0.6;">
+            No workers added yet
+        </p>`;
+        return;
+    }
 
-        div.innerHTML = `
+    workers.forEach(w => {
+        const card = document.createElement("div");
+        card.className = "worker-item";
+
+        card.innerHTML = `
             <div class="worker-details">
-                <div><strong>Name</strong><span>${w.name}</span></div>
-                <div><strong>Date Joined</strong><span>${w.joined}</span></div>
-                <div><strong>Profit</strong><span>${w.profit}</span></div>
-                <div><strong>Contact</strong><span>${w.contact}</span></div>
+                <div>
+                    <strong>Name</strong>
+                    <span>${w.name}</span>
+                </div>
+                <div>
+                    <strong>Role</strong>
+                    <span>${w.role}</span>
+                </div>
+                <div>
+                    <strong>Contact</strong>
+                    <span>${w.contact}</span>
+                </div>
+                <div>
+                    <strong>Joined</strong>
+                    <span>${w.joined}</span>
+                </div>
             </div>
         `;
 
-        list.appendChild(div);
+        list.appendChild(card);
     });
-
-    document.getElementById("pendingWorkCount").textContent = workers.length;
-    document.getElementById("assignedWorkCount").textContent = Math.floor(workers.length / 2);
-    document.getElementById("completedWorkCount").textContent = Math.floor(workers.length / 3);
 }
 
-// ==========================
 // INIT
-// ==========================
-updateWorkersList();
+updateCounts();
+renderWorkers();

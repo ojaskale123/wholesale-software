@@ -593,13 +593,15 @@ body {
    WORKERS PAGE
 ========================= */
 
+/* SPACE BELOW HEADER */
 .page-spacing {
-    height: 20px;
+    height: 25px;
 }
 
+/* BACK BUTTON */
 .back-btn {
     background: #000;
-    color: white;
+    color: #fff;
     border: none;
     padding: 10px 18px;
     font-size: 16px;
@@ -607,86 +609,84 @@ body {
     border-radius: 8px;
     cursor: pointer;
     margin-right: 20px;
+    transition: all 0.2s ease;
 }
 
 .back-btn:hover {
-    transform: translateY(-2px) scale(1.02);
+    transform: translateY(-2px);
     box-shadow: 0 6px 15px rgba(0,0,0,0.3);
 }
 
-/* TOP CARDS */
+/* =========================
+   TOP SUMMARY CARDS
+========================= */
+
 .workers-top-cards {
     display: grid;
-    grid-template-columns: repeat(4, 1fr); /* 3 cards + add worker button */
+    grid-template-columns: repeat(3, 1fr);
     gap: 25px;
     padding: 0 30px;
-    margin-bottom: 30px;
+    margin-bottom: 35px;
 }
 
-/* WORKER CARD STYLES */
+/* SMALL CARD */
 .worker-card {
-    background: white;
+    background: #ffffff;
     border-radius: 16px;
     padding: 25px;
     text-align: center;
     box-shadow: 0 10px 25px rgba(0,0,0,0.15);
-    transition: all 0.4s ease;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
-.worker-card.small {
-    height: 120px;
+.worker-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 16px 35px rgba(0,0,0,0.25);
 }
 
-/* ADD WORKER BUTTON */
-.add-worker-btn {
-    background: #004d00;      /* dark green */
-    color: white;
-    border: none;
-    padding: 16px 30px;
+.worker-card h3 {
+    margin: 0;
     font-size: 18px;
+    color: #203a43;
+}
+
+.worker-card p {
+    margin-top: 12px;
+    font-size: 28px;
     font-weight: bold;
-    border-radius: 12px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    justify-self: center;
-    align-self: center;
+    color: #004d00;
 }
 
-.add-worker-btn:hover {
-    transform: translateY(-4px) scale(1.05);
-    box-shadow: 0 12px 25px rgba(0,0,0,0.35);
-}
+/* =========================
+   WORKERS LIST
+========================= */
 
-/* WORKERS LIST */
 .workers-list {
     display: flex;
     flex-direction: column;
-    gap: 20px;
-    padding: 0 30px 50px 30px;
+    gap: 22px;
+    padding: 0 30px 40px;
 }
 
 /* BIG WORKER CARD */
 .worker-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background: #fff;
-    padding: 20px 25px;
-    border-radius: 16px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
-    transition: all 0.3s ease;
+    background: #ffffff;
+    border-radius: 18px;
+    padding: 22px 28px;
+    box-shadow: 0 12px 30px rgba(0,0,0,0.15);
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
 }
 
 .worker-item:hover {
     transform: translateY(-3px);
-    box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+    box-shadow: 0 18px 40px rgba(0,0,0,0.25);
 }
 
+/* DETAILS GRID */
 .worker-details {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     gap: 20px;
-    width: 100%;
 }
 
 .worker-details div {
@@ -694,82 +694,69 @@ body {
     flex-direction: column;
 }
 
-.worker-actions {
-    position: relative;
+.worker-details strong {
+    font-size: 13px;
+    color: #555;
+    margin-bottom: 4px;
 }
 
-.worker-actions .dots {
-    cursor: pointer;
-    font-size: 24px;
+.worker-details span {
+    font-size: 15px;
+    font-weight: bold;
+    color: #111;
 }
 
-.worker-menu {
-    display: none;
-    position: absolute;
-    right: 0;
-    top: 30px;
-    background: #fff;
-    border-radius: 12px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-    overflow: hidden;
-    z-index: 10;
-}
-
-.worker-menu button {
-    background: none;
-    border: none;
-    width: 100%;
-    padding: 12px 20px;
-    cursor: pointer;
-    text-align: left;
-    transition: background 0.2s ease;
-}
-
-.worker-menu button:hover {
-    background: #004d00;
-    color: #fff;
-}
-
-/* RESPONSIVE */
-@media(max-width: 900px) {
-    .workers-top-cards {
-        grid-template-columns: repeat(2, 1fr);
-    }
-    .worker-details {
-        grid-template-columns: repeat(2, 1fr);
-    }
-}
 /* =========================
-   ADD WORKER BUTTON HOVER
+   ADD WORKER BUTTON
 ========================= */
 
-.add-worker-bottom .add-worker-btn {
-    background: #004d00;              /* same green */
-    color: white;
-    border: none;
+.add-worker-bottom {
+    display: flex;
+    justify-content: center;
+    padding: 45px 0 60px;
+}
+
+.add-worker-btn {
+    text-decoration: none;
+    background: #004d00;
+    color: #fff;
     padding: 20px 60px;
     font-size: 20px;
     font-weight: bold;
     border-radius: 14px;
-    cursor: pointer;
-    transition: 
-        transform 0.25s ease,
-        box-shadow 0.25s ease,
-        background 0.25s ease;
+    transition: all 0.3s ease;
     box-shadow: 0 10px 22px rgba(0,0,0,0.25);
 }
 
-/* HOVER EFFECT */
-.add-worker-bottom .add-worker-btn:hover {
-    background: #006600;              /* slightly brighter green */
-    transform: translateY(-4px) scale(1.06);
+.add-worker-btn:hover {
+    background: #006600;
+    transform: translateY(-4px) scale(1.05);
     box-shadow: 0 18px 40px rgba(0,0,0,0.35);
 }
 
-/* CLICK FEEDBACK */
-.add-worker-bottom .add-worker-btn:active {
+.add-worker-btn:active {
     transform: translateY(-1px) scale(1.02);
     box-shadow: 0 8px 18px rgba(0,0,0,0.3);
+}
+
+/* =========================
+   RESPONSIVE
+========================= */
+
+@media (max-width: 900px) {
+    .workers-top-cards {
+        grid-template-columns: 1fr;
+    }
+
+    .worker-details {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 500px) {
+    .worker-details {
+        grid-template-columns: 1fr;
+    }
 }
 
 /* =========================

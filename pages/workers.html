@@ -12,42 +12,38 @@
     <h2>Workers</h2>
 </header>
 
-<!-- SPACE BELOW HEADER -->
 <div class="page-spacing"></div>
 
-<!-- TOP CARDS (FULL WIDTH, NO BUTTON HERE) -->
-<div class="workers-top-cards owner-only">
+<!-- TOP SUMMARY CARDS -->
+<div class="workers-top-cards">
 
-    <div class="worker-card small glow neon">
-        <h3>Pending Work</h3>
-        <p id="pendingWorkCount">0</p>
+    <div class="worker-card small">
+        <h3>Total Workers</h3>
+        <p id="totalWorkers">0</p>
     </div>
 
-    <div class="worker-card small glow neon">
-        <h3>Assign Work</h3>
-        <p id="assignedWorkCount">0</p>
+    <div class="worker-card small">
+        <h3>Salesmen</h3>
+        <p id="salesCount">0</p>
     </div>
 
-    <div class="worker-card small glow neon">
-        <h3>Completed Work</h3>
-        <p id="completedWorkCount">0</p>
+    <div class="worker-card small">
+        <h3>Technicians</h3>
+        <p id="techCount">0</p>
     </div>
 
 </div>
 
-<!-- WORKER LIST -->
+<!-- WORKERS LIST -->
 <div class="workers-list" id="workersList"></div>
 
-<!-- ADD WORKER BUTTON AT BOTTOM (SIMPLE & SAFE) -->
-<div class="add-worker-bottom owner-only">
-    <button class="primary-btn add-worker-btn"
-            onclick="location.href='add-worker.html'">
+<!-- ADD WORKER -->
+<div class="add-worker-bottom">
+    <a href="add-worker.html" class="primary-btn add-worker-btn">
         Add Worker
-    </button>
+    </a>
 </div>
 
-
-<script src="../js/workers.js" defer></script>
+<script src="../js/workers.js"></script>
 </body>
 </html>
-    
