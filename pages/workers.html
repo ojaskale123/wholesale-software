@@ -15,7 +15,7 @@
 <!-- SPACE BELOW HEADER -->
 <div class="page-spacing"></div>
 
-<!-- TOP CARDS: Pending | Assigned | Completed + Add Worker Button -->
+<!-- TOP CARDS (FULL WIDTH, NO BUTTON HERE) -->
 <div class="workers-top-cards owner-only">
 
     <div class="worker-card small glow neon">
@@ -24,7 +24,7 @@
     </div>
 
     <div class="worker-card small glow neon">
-        <h3>Assigned Work</h3>
+        <h3>Assign Work</h3>
         <p id="assignedWorkCount">0</p>
     </div>
 
@@ -33,24 +33,21 @@
         <p id="completedWorkCount">0</p>
     </div>
 
-    <!-- Add Worker Button -->
-    <button class="primary-btn add-worker-btn" id="addWorkerBtn">Add Worker</button>
-
 </div>
 
 <!-- WORKER LIST -->
-<div class="workers-list" id="workersList">
+<div class="workers-list" id="workersList"></div>
 
-    <!-- Sample Worker Card -->
-    <!-- Cards will be generated dynamically by JS -->
-
+<!-- ADD WORKER BUTTON AT BOTTOM (SIMPLE & SAFE) -->
+<div class="add-worker-bottom owner-only">
+    <button class="primary-btn add-worker-btn"
+            onclick="location.href='add-worker.html'">
+        Add Worker
+    </button>
 </div>
 
-<script src="../js/workers.js"></script>
+
+<script src="../js/workers.js" defer></script>
 </body>
 </html>
-
-
-
-
-
+    

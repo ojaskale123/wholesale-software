@@ -28,6 +28,119 @@ body {
     cursor: pointer;
 }
 
+
+/* =========================
+   LOGIN PAGE
+========================= */
+
+.login-body {
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: linear-gradient(
+        135deg,
+        #0f2027,
+        #203a43,
+        #2c5364
+    );
+    font-family: Arial, sans-serif;
+}
+
+/* LOGIN CARD */
+.login-box {
+    background: #ffffff;
+    width: 340px;
+    padding: 35px 30px 30px;
+    border-radius: 18px;
+    text-align: center;
+    box-shadow: 0 20px 45px rgba(0,0,0,0.35);
+    animation: loginFade 0.6s ease;
+}
+
+/* TITLE */
+.login-box h2 {
+    margin-bottom: 25px;
+    color: #203a43;
+    font-size: 24px;
+    letter-spacing: 0.5px;
+}
+
+/* INPUTS */
+.login-box input {
+    width: 100%;
+    padding: 12px 14px;
+    margin-bottom: 16px;
+    border-radius: 10px;
+    border: 1px solid #ccc;
+    font-size: 15px;
+    transition: all 0.25s ease;
+}
+
+/* INPUT FOCUS */
+.login-box input:focus {
+    outline: none;
+    border-color: #2c5364;
+    box-shadow: 0 0 0 2px rgba(44,83,100,0.15);
+}
+
+/* LOGIN BUTTON */
+.login-box button {
+    width: 100%;
+    margin-top: 10px;
+    padding: 14px;
+    background: #004d00;
+    color: #ffffff;
+    border: none;
+    border-radius: 12px;
+    font-size: 17px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 10px 22px rgba(0,0,0,0.25);
+}
+
+/* BUTTON HOVER */
+.login-box button:hover {
+    background: #006600;
+    transform: translateY(-3px) scale(1.03);
+    box-shadow: 0 18px 35px rgba(0,0,0,0.35);
+}
+
+/* BUTTON ACTIVE */
+.login-box button:active {
+    transform: translateY(-1px) scale(1.01);
+    box-shadow: 0 8px 18px rgba(0,0,0,0.3);
+}
+
+/* HINT TEXT */
+.login-box .hint {
+    margin-top: 20px;
+    font-size: 13px;
+    color: #555;
+    line-height: 1.6;
+}
+
+/* FADE ANIMATION */
+@keyframes loginFade {
+    from {
+        opacity: 0;
+        transform: translateY(20px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* MOBILE FRIENDLY */
+@media (max-width: 400px) {
+    .login-box {
+        width: 90%;
+        padding: 30px 20px;
+    }
+}
+
 /* =======================
    DASHBOARD GRID
 ======================= */
@@ -625,4 +738,141 @@ body {
     .worker-details {
         grid-template-columns: repeat(2, 1fr);
     }
+}
+/* =========================
+   ADD WORKER BUTTON HOVER
+========================= */
+
+.add-worker-bottom .add-worker-btn {
+    background: #004d00;              /* same green */
+    color: white;
+    border: none;
+    padding: 20px 60px;
+    font-size: 20px;
+    font-weight: bold;
+    border-radius: 14px;
+    cursor: pointer;
+    transition: 
+        transform 0.25s ease,
+        box-shadow 0.25s ease,
+        background 0.25s ease;
+    box-shadow: 0 10px 22px rgba(0,0,0,0.25);
+}
+
+/* HOVER EFFECT */
+.add-worker-bottom .add-worker-btn:hover {
+    background: #006600;              /* slightly brighter green */
+    transform: translateY(-4px) scale(1.06);
+    box-shadow: 0 18px 40px rgba(0,0,0,0.35);
+}
+
+/* CLICK FEEDBACK */
+.add-worker-bottom .add-worker-btn:active {
+    transform: translateY(-1px) scale(1.02);
+    box-shadow: 0 8px 18px rgba(0,0,0,0.3);
+}
+
+/* =========================
+   ADD WORKER PAGE
+========================= */
+
+.add-worker-layout {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 30px;
+    padding: 0 30px;
+}
+
+/* LEFT & RIGHT COLUMNS */
+.add-worker-left,
+.add-worker-right {
+    display: grid;
+    gap: 25px;
+}
+
+/* FORM CARD BASE */
+.form-card {
+    background: #fff;
+    border-radius: 18px;
+    padding: 26px;
+    box-shadow: 0 12px 30px rgba(0,0,0,0.15);
+}
+
+.form-card h3 {
+    margin-top: 0;
+    margin-bottom: 20px;
+}
+
+/* BIG LEFT CARDS */
+.big-card-box {
+    min-height: 220px;
+}
+
+
+/* ROLE OPTIONS */
+.role-options {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+}
+
+.role-options label {
+    background: #f4f6fa;
+    padding: 14px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: all 0.2s ease;
+}
+
+.role-options input {
+    transform: scale(1.2);
+}
+
+.role-options label:hover {
+    background: #e6ebf5;
+}
+
+/* FORM ACTIONS */
+.form-actions.centered {
+    display: flex;
+    justify-content: center;
+    gap: 25px;
+    margin: 40px 0 50px;
+}
+
+/* HINT TEXT */
+.hint-text {
+    font-size: 12px;
+    opacity: 0.7;
+    margin-top: 6px;
+}
+
+/* RESPONSIVE */
+@media (max-width: 900px) {
+    .add-worker-layout {
+        grid-template-columns: 1fr;
+    }
+}
+/* =========================
+   ADD WORKER BUTTON (BOTTOM)
+========================= */
+
+.add-worker-bottom {
+    display: flex;
+    justify-content: center;
+    padding: 40px 0 60px;
+}
+
+.add-worker-bottom .add-worker-btn {
+    padding: 20px 60px;
+    font-size: 20px;
+}
+
+/* Ensure top cards fill full width */
+.workers-top-cards {
+    grid-template-columns: repeat(3, 1fr);
 }
