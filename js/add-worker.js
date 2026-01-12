@@ -35,17 +35,23 @@ document.querySelector(".primary-btn").addEventListener("click", () => {
 
     // CREATE WORKER OBJECT (BACKEND READY)
     const newWorker = {
-        name,
-        contact,
-        email,
-        role,
-        username,
-        password,
-        shop,
-        joined: new Date().toISOString().slice(0,10),
-        profit: 0,
-        attendance: []
-    };
+    id: "W" + Date.now(),          // UNIQUE WORKER ID
+    name,
+    contact,
+    email,
+    role,
+    username,
+    password,
+    shop,
+    joined: new Date().toISOString().slice(0, 10),
+
+    // TRACKING DATA (FOR FUTURE)
+    profit: 0,
+    attendance: [],
+    assignedWork: [],
+    completedWork: []
+};
+
 
     // SAVE
     workers.push(newWorker);
