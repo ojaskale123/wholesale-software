@@ -1,38 +1,43 @@
 function login() {
-    const username = document.getElementById("username").value;
-    const password = document.getElementById("password").value;
+    const username = document.getElementById("username").value.trim();
+    const password = document.getElementById("password").value.trim();
 
+    // ==========================
+    // OWNER LOGIN (FIXED)
+    // ==========================
     if (username === "admin" && password === "1234") {
         localStorage.setItem("currentUser", JSON.stringify({
             role: "owner",
             name: "Owner"
         }));
-        window.location.href = "index.html";
+        location.href = "index.html";
+        return;
     }
-    else if (username === "worker" && password === "1234") {
+
+    // ==========================
+    // WORKER LOGIN (FROM STORAGE)
+    // ==========================
+    const workers = JSON.parse(localStorage.getItem("workers")) || [];
+
+    const worker = workers.find(w =>
+        w.username === username && w.password === password
+    );
+
+    if (worker) {
         localStorage.setItem("currentUser", JSON.stringify({
             role: "worker",
-            name: "Worker"
+            id: worker.id,
+            name: worker.name,
+            workerRole: worker.role,
+            shop: worker.shop
         }));
-        window.location.href = "index.html";
-    }
-    else {
-        alert("Invalid login");
-    }
-}
-function login() {
-    const u = username.value;
-    const p = password.value;
 
-    if (u === "admin" && p === "1234") {
-        localStorage.setItem("currentUser", JSON.stringify({ role: "owner" }));
-        location.href = "index.html";
+        location.href = "pages/workers/index.html";
+        return;
     }
-    else if (u === "worker" && p === "1234") {
-        localStorage.setItem("currentUser", JSON.stringify({ role: "worker" }));
-        location.href = "index.html";
-    }
-    else {
-        alert("Invalid login");
-    }
+
+    // ==========================
+    // INVALID LOGIN
+    // ==========================
+    alert("Invalid username or password");
 }

@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>History</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+
+<header class="top-header">
+    <button class="back-btn" onclick="history.back()">← Back</button>
+    <h2>History</h2>
+</header>
+
+<div class="page-spacing"></div>
+
+<!-- FILTERS -->
+<div class="history-filters">
+
+    <select id="dateFilter">
+        <option value="today">Today</option>
+        <option value="week">This Week</option>
+        <option value="month">This Month</option>
+        <option value="all">All Time</option>
+    </select>
+
+    <input type="date" id="specificDate">
+
+    <select id="typeFilter">
+        <option value="all">All</option>
+        <option value="buy">Buy</option>
+        <option value="sell">Sell</option>
+    </select>
+
+</div>
+
+<!-- HISTORY LIST -->
+<div class="history-list" id="historyList"></div>
+
+<!-- POPUP -->
+<div class="history-popup" id="historyPopup">
+    <div class="popup-content">
+        <span class="close-popup" onclick="closePopup()">×</span>
+        <div id="popupDetails"></div>
+    </div>
+</div>
+
+<script src="../js/history.js"></script>
+</body>
+</html>

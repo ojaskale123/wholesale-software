@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Worker Panel</title>
+    <link rel="stylesheet" href="../../css/style.css">
+</head>
+<body>
+
+<header class="top-header">
+    <h2>Worker Panel</h2>
+    <button class="logout-btn" onclick="logout()">Logout</button>
+</header>
+
+<div class="worker-dashboard">
+
+    <!-- TOP SECTION -->
+    <div class="worker-top">
+
+        <!-- LEFT STACK -->
+        <div class="worker-left">
+
+            <div class="worker-card">Attendance</div>
+            <div class="worker-card">My Profile</div>
+            <div class="worker-card">Add Task</div>
+
+        </div>
+
+        <!-- RIGHT STACK -->
+        <div class="worker-right">
+
+            <div class="worker-card big-card">Sell</div>
+            <div class="worker-card big-card">History</div>
+
+        </div>
+
+    </div>
+
+    <!-- TASK PANEL -->
+    <div class="task-panel">
+
+        <!-- FILTER -->
+        <div class="task-filter">
+            <button class="filter-btn active">All</button>
+            <button class="filter-btn">New</button>
+            <button class="filter-btn">About to End</button>
+            <button class="filter-btn">Old</button>
+        </div>
+
+        <!-- TASK LIST -->
+        <div class="task-list" id="taskList">
+            <!-- Tasks added by JS -->
+        </div>
+
+    </div>
+
+</div>
+
+<script src="../../js/workers/index.js"></script>
+</body>
+</html>
