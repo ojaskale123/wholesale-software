@@ -476,3 +476,153 @@ body {
     transform: translateY(-4px) scale(1.05);
     box-shadow: 0 12px 25px rgba(0,0,0,0.35);
 }
+/* =========================
+   WORKERS PAGE
+========================= */
+
+.page-spacing {
+    height: 20px;
+}
+
+.back-btn {
+    background: #000;
+    color: white;
+    border: none;
+    padding: 10px 18px;
+    font-size: 16px;
+    font-weight: bold;
+    border-radius: 8px;
+    cursor: pointer;
+    margin-right: 20px;
+}
+
+.back-btn:hover {
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: 0 6px 15px rgba(0,0,0,0.3);
+}
+
+/* TOP CARDS */
+.workers-top-cards {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr); /* 3 cards + add worker button */
+    gap: 25px;
+    padding: 0 30px;
+    margin-bottom: 30px;
+}
+
+/* WORKER CARD STYLES */
+.worker-card {
+    background: white;
+    border-radius: 16px;
+    padding: 25px;
+    text-align: center;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+    transition: all 0.4s ease;
+}
+
+.worker-card.small {
+    height: 120px;
+}
+
+/* ADD WORKER BUTTON */
+.add-worker-btn {
+    background: #004d00;      /* dark green */
+    color: white;
+    border: none;
+    padding: 16px 30px;
+    font-size: 18px;
+    font-weight: bold;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    justify-self: center;
+    align-self: center;
+}
+
+.add-worker-btn:hover {
+    transform: translateY(-4px) scale(1.05);
+    box-shadow: 0 12px 25px rgba(0,0,0,0.35);
+}
+
+/* WORKERS LIST */
+.workers-list {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    padding: 0 30px 50px 30px;
+}
+
+/* BIG WORKER CARD */
+.worker-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #fff;
+    padding: 20px 25px;
+    border-radius: 16px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+    transition: all 0.3s ease;
+}
+
+.worker-item:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+}
+
+.worker-details {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+    width: 100%;
+}
+
+.worker-details div {
+    display: flex;
+    flex-direction: column;
+}
+
+.worker-actions {
+    position: relative;
+}
+
+.worker-actions .dots {
+    cursor: pointer;
+    font-size: 24px;
+}
+
+.worker-menu {
+    display: none;
+    position: absolute;
+    right: 0;
+    top: 30px;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    overflow: hidden;
+    z-index: 10;
+}
+
+.worker-menu button {
+    background: none;
+    border: none;
+    width: 100%;
+    padding: 12px 20px;
+    cursor: pointer;
+    text-align: left;
+    transition: background 0.2s ease;
+}
+
+.worker-menu button:hover {
+    background: #004d00;
+    color: #fff;
+}
+
+/* RESPONSIVE */
+@media(max-width: 900px) {
+    .workers-top-cards {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    .worker-details {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}

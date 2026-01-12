@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Workers</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+
+<header class="top-header">
+    <button class="back-btn" onclick="history.back()">← Back</button>
+    <h2>Workers</h2>
+</header>
+
+<!-- SPACE BELOW HEADER -->
+<div class="page-spacing"></div>
+
+<!-- TOP CARDS: Pending | Assigned | Completed + Add Worker Button -->
+<div class="workers-top-cards owner-only">
+
+    <div class="worker-card small glow neon">
+        <h3>Pending Work</h3>
+        <p id="pendingWorkCount">0</p>
+    </div>
+
+    <div class="worker-card small glow neon">
+        <h3>Assigned Work</h3>
+        <p id="assignedWorkCount">0</p>
+    </div>
+
+    <div class="worker-card small glow neon">
+        <h3>Completed Work</h3>
+        <p id="completedWorkCount">0</p>
+    </div>
+
+    <!-- Add Worker Button -->
+    <button class="primary-btn add-worker-btn" id="addWorkerBtn">Add Worker</button>
+
+</div>
+
+<!-- WORKER LIST -->
+<div class="workers-list" id="workersList">
+
+    <!-- Sample Worker Card -->
+    <!-- Cards will be generated dynamically by JS -->
+
+</div>
+
+<script src="../js/workers.js"></script>
+</body>
+</html>
+
+
+
+
+
