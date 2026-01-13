@@ -7,11 +7,13 @@
 </head>
 <body>
 
+<!-- HEADER -->
 <header class="top-header">
     <h2>Worker Panel</h2>
     <button class="logout-btn" onclick="logout()">Logout</button>
 </header>
 
+<!-- DASHBOARD -->
 <div class="worker-dashboard">
 
     <!-- TOP SECTION -->
@@ -20,17 +22,46 @@
         <!-- LEFT STACK -->
         <div class="worker-left">
 
-            <div class="worker-card">Attendance</div>
-            <div class="worker-card">My Profile</div>
-            <div class="worker-card">Add Task</div>
+            <!-- ATTENDANCE -->
+            <div class="worker-card premium-hover glow"
+                 onclick="location.href='attendance.html'">
+                Attendance
+            </div>
+
+            <!-- MY PROFILE -->
+            <div class="worker-card premium-hover glow"
+                 onclick="location.href='profile.html'">
+                My Profile
+            </div>
+
+            <!-- ADD TASK -->
+            <div class="worker-card premium-hover glow"
+                 onclick="location.href='add-task.html'">
+                Add Task
+            </div>
 
         </div>
 
         <!-- RIGHT STACK -->
         <div class="worker-right">
 
-            <div class="worker-card big-card">Sell</div>
-            <div class="worker-card big-card">History</div>
+            <!-- SELL -->
+            <div class="worker-card big-card premium-hover glow"
+                 onclick="location.href='sell.html'">
+                Sell
+            </div>
+
+            <!-- HISTORY -->
+            <div class="worker-card big-card premium-hover glow"
+                 onclick="location.href='history.html'">
+                History
+            </div>
+
+            <!-- STOCK -->
+            <div class="worker-card big-card premium-hover glow"
+                 onclick="location.href='stock.html'">
+                Stock
+            </div>
 
         </div>
 
@@ -39,7 +70,6 @@
     <!-- TASK PANEL -->
     <div class="task-panel">
 
-        <!-- FILTER -->
         <div class="task-filter">
             <button class="filter-btn active">All</button>
             <button class="filter-btn">New</button>
@@ -47,9 +77,8 @@
             <button class="filter-btn">Old</button>
         </div>
 
-        <!-- TASK LIST -->
         <div class="task-list" id="taskList">
-            <!-- Tasks added by JS -->
+            <!-- Tasks will be added later -->
         </div>
 
     </div>

@@ -1168,3 +1168,116 @@ body {
 .task-row span {
     font-weight: bold;
 }
+/* DASHBOARD CARD BASE */
+.dashboard-card {
+    background: #121212;
+    border-radius: 16px;
+    padding: 20px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: center;
+}
+
+/* SMALL CARDS FOR INDEX PAGE */
+.small-card {
+    width: 220px;
+    height: 130px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 6px;
+}
+
+/* TEXT STYLING */
+.small-card h3 {
+    font-size: 18px;
+    margin: 0;
+}
+
+.small-card p {
+    font-size: 13px;
+    opacity: 0.8;
+    margin: 0;
+}
+
+/* HOVER EFFECT */
+.small-card:hover {
+    transform: translateY(-6px) scale(1.03);
+}
+/* =========================
+   INDEX PAGE CARDS (SMALL)
+========================= */
+
+.index-card {
+    background: #121212;
+    border-radius: 16px;
+    padding: 18px;
+    height: 120px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.index-card h3 {
+    font-size: 17px;
+    margin: 0;
+}
+
+.index-card p {
+    font-size: 13px;
+    opacity: 0.8;
+    margin: 0;
+}
+
+.index-card:hover {
+    transform: translateY(-5px) scale(1.03);
+    box-shadow: 0 14px 30px rgba(0,0,0,0.25);
+}
+/* =====================================================
+   WORKER DASHBOARD CLICK FIX (FINAL)
+   Fixes overlapping click issue between left & right cards
+===================================================== */
+
+/* Create proper stacking context */
+.worker-top {
+    position: relative;
+}
+
+.worker-left,
+.worker-right {
+    position: relative;
+    z-index: 1;
+}
+
+/* Ensure each card handles its own clicks */
+.worker-card {
+    position: relative;
+    z-index: 1;
+    cursor: pointer;
+    transform-origin: center;
+}
+
+/* Bring only hovered card above others */
+.worker-card:hover {
+    z-index: 10;
+}
+
+/* IMPORTANT: REMOVE SCALE from worker dashboard cards */
+.worker-dashboard .premium-hover:hover {
+    transform: translateY(-4px) !important;
+}
+
+/* Extra safety for small/index cards */
+.worker-dashboard .small-card:hover {
+    transform: translateY(-4px) !important;
+}
+
+/* Prevent any accidental overlap */
+.worker-left,
+.worker-right {
+    pointer-events: auto;
+}
