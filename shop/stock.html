@@ -20,6 +20,29 @@
       padding: 20px;
     }
 
+    /* CATEGORY CARDS */
+    .categories {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px,1fr));
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+
+    .cat-card {
+      padding: 18px;
+      border-radius: 12px;
+      color: white;
+      font-weight: bold;
+      text-align: center;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      cursor: pointer;
+    }
+
+    .spare { background: #667eea; }
+    .electronics { background: #38ef7d; color:#000; }
+    .battery { background: #dd2476; }
+    .phone { background: #ffd200; color:#000; }
+
     .card {
       background: white;
       padding: 20px;
@@ -43,13 +66,50 @@
       border-radius: 6px;
     }
 
+    /* POPUP */
+    .overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.55);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 999;
+    }
+
+    .popup {
+      background: white;
+      width: 90%;
+      max-width: 550px;
+      border-radius: 12px;
+      padding: 16px;
+    }
+
+    .popup-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
     .item {
       padding: 10px 0;
       border-bottom: 1px solid #eee;
+      font-size: 14px;
     }
 
-    .item:last-child {
-      border-bottom: none;
+    .profit {
+      color: green;
+      font-weight: bold;
+    }
+
+    .close-btn {
+      background: crimson;
+      color: white;
+      border: none;
+      padding: 6px 10px;
+      border-radius: 6px;
+      cursor: pointer;
     }
   </style>
 </head>
@@ -61,6 +121,14 @@
 </header>
 
 <div class="container">
+
+  <!-- CATEGORY CARDS -->
+  <div class="categories">
+    <div class="cat-card spare" onclick="openCategory('SPARE')">Spare Parts</div>
+    <div class="cat-card electronics" onclick="openCategory('ELECTRONICS')">Electronics</div>
+    <div class="cat-card battery" onclick="openCategory('BATTERY')">Batteries</div>
+    <div class="cat-card phone" onclick="openCategory('SECOND_HAND')">Second-hand Phones</div>
+  </div>
 
   <!-- ADD PRODUCT -->
   <div class="card">
@@ -85,44 +153,26 @@
     <button type="button" onclick="addProduct()">ADD PRODUCT</button>
   </div>
 
-  <!-- STOCK LIST -->
-  <div class="card">
-    <h3>Current Stock</h3>
-    <div id="stockList"></div>
-  </div>
+</div>
 
+<!-- POPUP -->
+<div class="overlay" id="overlay">
+  <div class="popup">
+    <div class="popup-header">
+      <h3 id="popupTitle"></h3>
+      <button class="close-btn" onclick="closePopup()">Back</button>
+    </div>
+    <div id="popupList"></div>
+  </div>
 </div>
 
 <script>
-  const stockList = document.getElementById("stockList");
-
   function getProducts() {
     return JSON.parse(localStorage.getItem("products")) || [];
   }
 
   function saveProducts(products) {
     localStorage.setItem("products", JSON.stringify(products));
-  }
-
-  function renderStock() {
-    const products = getProducts();
-    stockList.innerHTML = "";
-
-    if (products.length === 0) {
-      stockList.innerHTML = "<p>No stock added yet</p>";
-      return;
-    }
-
-    products.forEach(p => {
-      const div = document.createElement("div");
-      div.className = "item";
-      div.innerHTML = `
-        <b>${p.name}</b><br>
-        Category: ${p.category}<br>
-        Sell Price: ₹${p.sellPrice} | Qty: ${p.quantity}
-      `;
-      stockList.appendChild(div);
-    });
   }
 
   function addProduct() {
@@ -163,11 +213,43 @@
     document.getElementById("sellPrice").value = "";
     document.getElementById("quantity").value = "";
     document.getElementById("location").value = "";
-
-    renderStock();
   }
 
-  renderStock();
+  function openCategory(cat) {
+    const products = getProducts().filter(p => p.category === cat);
+    const titleMap = {
+      SPARE: "Spare Parts",
+      ELECTRONICS: "Electronics",
+      BATTERY: "Batteries",
+      SECOND_HAND: "Second-hand Phones"
+    };
+
+    document.getElementById("popupTitle").innerText = titleMap[cat];
+    const list = document.getElementById("popupList");
+    list.innerHTML = "";
+
+    if (products.length === 0) {
+      list.innerHTML = "<p>No items in this category</p>";
+    }
+
+    products.forEach(p => {
+      const profit = p.sellPrice - p.buyPrice;
+      list.innerHTML += `
+        <div class="item">
+          <b>${p.name}</b><br>
+          Sell: ₹${p.sellPrice} | Buy: ₹${p.buyPrice}<br>
+          Qty: ${p.quantity} |
+          <span class="profit">Profit: ₹${profit}</span>
+        </div>
+      `;
+    });
+
+    document.getElementById("overlay").style.display = "flex";
+  }
+
+  function closePopup() {
+    document.getElementById("overlay").style.display = "none";
+  }
 </script>
 
 </body>
