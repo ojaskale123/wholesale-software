@@ -4,17 +4,9 @@
   <title>Jobs Monitor</title>
 
   <style>
-    * {
-      box-sizing: border-box;
-      font-family: Arial, sans-serif;
-    }
+    * { box-sizing: border-box; font-family: Arial, sans-serif; }
+    body { margin: 0; background: #f4f6f8; }
 
-    body {
-      margin: 0;
-      background: #f4f6f8;
-    }
-
-    /* ===== HEADER ===== */
     .app-header {
       background: linear-gradient(90deg, #0f2027, #203a43, #2c5364);
       color: white;
@@ -25,12 +17,6 @@
       box-shadow: 0 4px 10px rgba(0,0,0,0.3);
     }
 
-    .app-header h2 {
-      margin: 0;
-      font-size: 20px;
-      font-weight: 600;
-    }
-
     .header-btn {
       background: rgba(255,255,255,0.15);
       border: none;
@@ -38,13 +24,9 @@
       padding: 6px 12px;
       border-radius: 6px;
       cursor: pointer;
-      font-size: 14px;
     }
 
-    /* ===== PAGE ===== */
-    .container {
-      padding: 18px;
-    }
+    .container { padding: 18px; }
 
     .search {
       width: 100%;
@@ -63,16 +45,9 @@
       box-shadow: 0 4px 12px rgba(0,0,0,0.15);
     }
 
-    .job h4 {
-      margin: 0 0 6px 0;
-      font-size: 16px;
-    }
+    .job h4 { margin: 0 0 6px 0; }
 
-    .job p {
-      margin: 4px 0;
-      font-size: 14px;
-      color: #333;
-    }
+    .job p { margin: 4px 0; font-size: 14px; }
 
     .status {
       display: inline-block;
@@ -86,7 +61,6 @@
     .OPEN { background: #f1c40f; color: #000; }
     .IN_PROGRESS { background: #3498db; color: #fff; }
     .READY { background: #2ecc71; color: #fff; }
-    .DELIVERED { background: #95a5a6; color: #fff; }
 
     .empty {
       text-align: center;
@@ -114,26 +88,25 @@
   <div id="jobs"></div>
 </div>
 
-<script type="module">
-  import { requireAuth } from "../auth/guard.js";
-  import { DB } from "../db/fakeDB.js";
-
-  const user = requireAuth(["SHOPKEEPER"]);
+<script>
   const jobsDiv = document.getElementById("jobs");
   const searchInput = document.getElementById("search");
 
-  const allJobs = (DB.jobs || []).filter(j => j.shopId === user.shopId);
+  // ✅ READ FROM CORRECT STORAGE
+  const tasks = JSON.parse(localStorage.getItem("tasks")) || [];
 
   function render(filter = "") {
     jobsDiv.innerHTML = "";
-
     const f = filter.toLowerCase();
 
-    const filtered = allJobs.filter(j =>
-      (j.device || "").toLowerCase().includes(f) ||
-      (j.customerName || "").toLowerCase().includes(f) ||
-      (j.customerPhone || "").includes(f) ||
-      (j.status || "").toLowerCase().includes(f)
+    const filtered = tasks.filter(j =>
+      j.type === "REPAIR" &&
+      (
+        (j.device || "").toLowerCase().includes(f) ||
+        (j.customerName || "").toLowerCase().includes(f) ||
+        (j.customerPhone || "").includes(f) ||
+        (j.status || "").toLowerCase().includes(f)
+      )
     );
 
     if (!filtered.length) {
@@ -142,8 +115,6 @@
     }
 
     filtered.forEach(job => {
-      const worker = DB.users.find(u => u.id === job.assignedTo);
-
       const div = document.createElement("div");
       div.className = "job";
       div.innerHTML = `
@@ -151,7 +122,7 @@
         <p><b>Customer:</b> ${job.customerName} (${job.customerPhone})</p>
         <p><b>Issue:</b> ${job.issue || "-"}</p>
         <p><b>Expected Cost:</b> ₹${job.expectedCost || "-"}</p>
-        <p><b>Worker:</b> ${worker ? worker.name : "Not accepted yet"}</p>
+        <p><b>Worker:</b> ${job.assignedTo || "Not accepted yet"}</p>
         <span class="status ${job.status}">${job.status}</span>
       `;
       jobsDiv.appendChild(div);

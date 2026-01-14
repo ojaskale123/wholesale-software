@@ -1,21 +1,96 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="UTF-8">
   <title>Worker Dashboard</title>
   <link rel="stylesheet" href="../css/style.css">
+
+  <style>
+    body {
+      background: #aec6eb;
+      font-family: Arial, sans-serif;
+      margin: 0;
+    }
+
+    .dashboard {
+      padding: 22px;
+    }
+
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 20px;
+    }
+
+    .card {
+      background: white;
+      padding: 22px;
+      border-radius: 14px;
+      box-shadow: 0 8px 22px rgba(0,0,0,0.18);
+      cursor: pointer;
+      transition: transform 0.2s ease;
+      text-align: center;
+    }
+
+    .card:hover {
+      transform: scale(1.05);
+    }
+
+    .card h2 {
+      margin: 0;
+      font-size: 26px;
+      color: #203a43;
+    }
+
+    .card p {
+      margin-top: 8px;
+      font-size: 14px;
+      color: #555;
+    }
+  </style>
 </head>
+
 <body>
 
 <header class="top-header">
   <h2>Worker Panel</h2>
 </header>
 
-<div style="padding:20px">
-  <button onclick="location.href='jobs.html'">My Jobs</button>
-  <button onclick="location.href='attendance.html'">Attendance</button>
-  <button onclick="location.href='available-jobs.html'">
-  Available Jobs
-</button>
+<div class="dashboard">
+
+  <div class="card-grid">
+
+    <!-- SELL -->
+    <div class="card" onclick="location.href='sell.html'">
+      <h2>💰</h2>
+      <p>Sell Products</p>
+    </div>
+
+    <!-- MY JOBS -->
+    <div class="card" onclick="location.href='jobs.html'">
+      <h2>🛠</h2>
+      <p>My Jobs</p>
+    </div>
+
+    <!-- AVAILABLE JOBS -->
+    <div class="card" onclick="location.href='available-jobs.html'">
+      <h2>📋</h2>
+      <p>Available Jobs</p>
+    </div>
+
+    <!-- ATTENDANCE -->
+    <div class="card" onclick="location.href='attendance.html'">
+      <h2>🕒</h2>
+      <p>Attendance</p>
+    </div>
+
+    <!-- PROFILE (OPTIONAL / FUTURE) -->
+    <div class="card">
+      <h2>👤</h2>
+      <p>My Profile</p>
+    </div>
+
+  </div>
 
 </div>
 

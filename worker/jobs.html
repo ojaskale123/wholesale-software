@@ -59,16 +59,15 @@
 
 <div class="container" id="jobs"></div>
 
-<script type="module">
-  import { requireAuth } from "../auth/guard.js";
-  import { DB, saveDB } from "../db/fakeDB.js";
-  import { logAction } from "../core/audit.js";
-
-  const user = requireAuth(["WORKER"]);
+<script>
   const container = document.getElementById("jobs");
 
-  const myJobs = (DB.jobs || []).filter(j =>
-    j.assignedTo === user.id
+  // ✅ READ FROM CORRECT STORAGE
+  const tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+
+  // ✅ MY JOBS = ASSIGNED TO WORKER
+  const myJobs = tasks.filter(
+    t => t.type === "REPAIR" && t.assignedTo === "WORKER"
   );
 
   if (!myJobs.length) {
@@ -80,20 +79,27 @@
     div.className = "job";
     div.innerHTML = `
       <b>${job.device}</b><br>
+      Customer: ${job.customerName}<br>
       Status: ${job.status}
-      <button class="btn" onclick="markReady(${job.id})">MARK READY</button>
+      <button class="btn" onclick="markReady(${job.id})">
+        MARK READY
+      </button>
     `;
     container.appendChild(div);
   });
 
-  window.markReady = id => {
-    const job = DB.jobs.find(j => j.id === id);
-    job.status = "READY";
-    job.completedAt = new Date().toISOString();
-    saveDB();
-    logAction(`Worker completed job ${id}`);
+  function markReady(id) {
+    const index = tasks.findIndex(t => t.id === id);
+    if (index === -1) return;
+
+    tasks[index].status = "READY";
+    tasks[index].completedAt = new Date().toLocaleString();
+
+    localStorage.setItem("tasks", JSON.stringify(tasks));
+
+    alert("Job marked as READY");
     location.reload();
-  };
+  }
 </script>
 
 </body>

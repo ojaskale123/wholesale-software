@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Owner Stock Overview</title>
+
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #aec6eb;
+    }
+
+    header {
+      background: linear-gradient(90deg,#0f2027,#203a43,#2c5364);
+      color: white;
+      padding: 16px 22px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .container {
+      padding: 22px;
+    }
+
+    /* CATEGORY CARDS */
+    .categories {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px,1fr));
+      gap: 18px;
+      margin-bottom: 30px;
+    }
+
+    .cat-card {
+      padding: 20px;
+      border-radius: 14px;
+      color: white;
+      font-size: 18px;
+      font-weight: bold;
+      text-align: center;
+      cursor: pointer;
+      box-shadow: 0 8px 22px rgba(0,0,0,0.25);
+      transition: transform 0.2s ease;
+    }
+
+    .cat-card:hover {
+      transform: scale(1.05);
+    }
+
+    .spare { background: linear-gradient(135deg,#667eea,#764ba2); }
+    .electronics { background: linear-gradient(135deg,#38ef7d,#11998e); }
+    .battery { background: linear-gradient(135deg,#dd2476,#ff512f); }
+    .phone { background: linear-gradient(135deg,#ffd200,#f7971e); color:#000; }
+
+    /* POPUP */
+    .overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.6);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 999;
+    }
+
+    .popup {
+      background: #f9fbfc;
+      width: 90%;
+      max-width: 650px;
+      border-radius: 16px;
+      box-shadow: 0 15px 40px rgba(0,0,0,0.35);
+      overflow: hidden;
+    }
+
+    .popup-header {
+      background: linear-gradient(90deg,#0f2027,#203a43,#2c5364);
+      color: white;
+      padding: 14px 18px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .popup-body {
+      padding: 18px;
+      max-height: 65vh;
+      overflow-y: auto;
+    }
+
+    .item {
+      background: white;
+      border-radius: 10px;
+      padding: 14px;
+      margin-bottom: 12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.12);
+      font-size: 14px;
+    }
+
+    .profit {
+      color: #1e8e3e;
+      font-weight: bold;
+    }
+
+    .close-btn {
+      background: crimson;
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+
+<body>
+
+<header>
+  <h2>Owner · Stock Overview</h2>
+  <button class="close-btn" onclick="location.href='index.html'">Back</button>
+</header>
+
+<div class="container">
+
+  <!-- CATEGORY CARDS -->
+  <div class="categories">
+    <div class="cat-card spare" onclick="openCategory('SPARE')">Spare Parts</div>
+    <div class="cat-card electronics" onclick="openCategory('ELECTRONICS')">Electronics</div>
+    <div class="cat-card battery" onclick="openCategory('BATTERY')">Batteries</div>
+    <div class="cat-card phone" onclick="openCategory('SECOND_HAND')">Second-hand Phones</div>
+  </div>
+
+</div>
+
+<!-- POPUP -->
+<div class="overlay" id="overlay">
+  <div class="popup">
+    <div class="popup-header">
+      <h3 id="popupTitle"></h3>
+      <button class="close-btn" onclick="closePopup()">Close</button>
+    </div>
+    <div class="popup-body" id="popupList"></div>
+  </div>
+</div>
+
+<script>
+  function getProducts() {
+    return JSON.parse(localStorage.getItem("products")) || [];
+  }
+
+  function openCategory(category) {
+    const titleMap = {
+      SPARE: "Spare Parts",
+      ELECTRONICS: "Electronics",
+      BATTERY: "Batteries",
+      SECOND_HAND: "Second-hand Phones"
+    };
+
+    const products = getProducts().filter(p => p.category === category);
+    document.getElementById("popupTitle").innerText = titleMap[category];
+
+    const list = document.getElementById("popupList");
+    list.innerHTML = "";
+
+    if (products.length === 0) {
+      list.innerHTML = "<p>No items in this category</p>";
+    }
+
+    products.forEach(p => {
+      const profit = p.sellPrice - p.buyPrice;
+      list.innerHTML += `
+        <div class="item">
+          <b>${p.name}</b><br>
+          Buy: ₹${p.buyPrice} | Sell: ₹${p.sellPrice}<br>
+          Quantity: ${p.quantity}<br>
+          <span class="profit">Profit per item: ₹${profit}</span>
+        </div>
+      `;
+    });
+
+    document.getElementById("overlay").style.display = "flex";
+  }
+
+  function closePopup() {
+    document.getElementById("overlay").style.display = "none";
+  }
+</script>
+
+</body>
+</html>

@@ -70,17 +70,15 @@
 
 <div class="container" id="jobs"></div>
 
-<script type="module">
-  import { requireAuth } from "../auth/guard.js";
-  import { DB, saveDB } from "../db/fakeDB.js";
-  import { logAction } from "../core/audit.js";
-
-  const user = requireAuth(["WORKER"]);
+<script>
   const container = document.getElementById("jobs");
 
-  const openJobs = (DB.jobs || []).filter(j =>
-    j.shopId === user.shopId &&
-    j.status === "OPEN"
+  // ✅ READ FROM CORRECT STORAGE
+  const tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+
+  // ✅ OPEN REPAIR JOBS
+  const openJobs = tasks.filter(
+    t => t.type === "REPAIR" && t.status === "OPEN"
   );
 
   if (!openJobs.length) {
@@ -92,32 +90,32 @@
     div.className = "job";
     div.innerHTML = `
       <h4>${job.device}</h4>
-      <p><b>Issue:</b> ${job.issue}</p>
+      <p><b>Issue:</b> ${job.issue || "-"}</p>
       <p><b>Expected Cost:</b> ₹${job.expectedCost || "-"}</p>
       <p><b>Customer:</b> ${job.customerName}</p>
-      <button class="accept-btn" onclick="acceptJob(${job.id})">ACCEPT JOB</button>
+      <button class="accept-btn" onclick="acceptJob(${job.id})">
+        ACCEPT JOB
+      </button>
     `;
     container.appendChild(div);
   });
 
-  window.acceptJob = id => {
-    const job = DB.jobs.find(j => j.id === id);
-    if (!job || job.status !== "OPEN") {
+  function acceptJob(id) {
+    const index = tasks.findIndex(t => t.id === id);
+    if (index === -1 || tasks[index].status !== "OPEN") {
       alert("Job already taken");
       location.reload();
       return;
     }
 
-    job.status = "IN_PROGRESS";
-    job.assignedTo = user.id;
-    job.acceptedAt = new Date().toISOString();
+    tasks[index].status = "IN_PROGRESS";
+    tasks[index].assignedTo = "WORKER"; // placeholder
 
-    saveDB();
-    logAction(`Worker ${user.id} accepted job ${id}`);
+    localStorage.setItem("tasks", JSON.stringify(tasks));
 
     alert("Job accepted");
     location.href = "jobs.html";
-  };
+  }
 </script>
 
 </body>

@@ -4,31 +4,18 @@
   <title>Sell Items</title>
 
   <style>
-    * {
-      box-sizing: border-box;
-      font-family: Arial, sans-serif;
-    }
+    * { box-sizing: border-box; font-family: Arial, sans-serif; }
+    body { margin: 0; background: #f4f6f8; }
 
-    body {
-      margin: 0;
-      background: #f4f6f8;
-    }
-
-    /* ===== HEADER ===== */
+    /* HEADER */
     .app-header {
-      background: linear-gradient(90deg, #0f2027, #203a43, #2c5364);
+      background: linear-gradient(90deg,#0f2027,#203a43,#2c5364);
       color: white;
       padding: 14px 18px;
       display: flex;
-      align-items: center;
       justify-content: space-between;
+      align-items: center;
       box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-    }
-
-    .app-header h2 {
-      margin: 0;
-      font-size: 20px;
-      font-weight: 600;
     }
 
     .header-btn {
@@ -38,15 +25,14 @@
       padding: 6px 12px;
       border-radius: 6px;
       cursor: pointer;
-      font-size: 14px;
     }
 
-    /* ===== PAGE ===== */
     .container {
       padding: 18px;
       padding-bottom: 90px;
     }
 
+    /* SEARCH */
     .search {
       width: 100%;
       padding: 12px;
@@ -56,6 +42,30 @@
       margin-bottom: 15px;
     }
 
+    /* CATEGORY CARDS */
+    .categories {
+      display: grid;
+      grid-template-columns: repeat(4,1fr);
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .cat {
+      padding: 14px;
+      text-align: center;
+      border-radius: 12px;
+      font-weight: bold;
+      cursor: pointer;
+      color: white;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    }
+
+    .SPARE { background:#667eea; }
+    .ELECTRONICS { background:#11998e; }
+    .BATTERY { background:#ff512f; }
+    .SECOND_HAND { background:#f7971e; color:#000; }
+
+    /* PRODUCT LIST */
     .item {
       background: white;
       padding: 12px;
@@ -74,7 +84,7 @@
       cursor: pointer;
     }
 
-    /* ===== CART BAR ===== */
+    /* CART BAR */
     .cart-bar {
       position: fixed;
       bottom: 0;
@@ -87,7 +97,6 @@
       justify-content: space-between;
       align-items: center;
       font-size: 16px;
-      box-shadow: 0 -4px 10px rgba(0,0,0,0.3);
     }
 
     .cart-bar button {
@@ -112,39 +121,51 @@
 
 <div class="container">
   <input id="search" class="search" placeholder="Search by name or barcode">
+
+  <div class="categories">
+    <div class="cat SPARE" onclick="setCategory('SPARE')">Spare Parts</div>
+    <div class="cat ELECTRONICS" onclick="setCategory('ELECTRONICS')">Electronics</div>
+    <div class="cat BATTERY" onclick="setCategory('BATTERY')">Batteries</div>
+    <div class="cat SECOND_HAND" onclick="setCategory('SECOND_HAND')">Second-hand</div>
+  </div>
+
   <div id="list"></div>
 </div>
 
 <div class="cart-bar" id="cartBar">
-  <div>
-    🛒 <span id="itemCount">0</span> items | ₹<span id="totalAmount">0</span>
-  </div>
-  <button onclick="goToCart()">VIEW CART</button>
+  <div>🛒 <span id="itemCount">0</span> items | ₹<span id="totalAmount">0</span></div>
+  <button onclick="location.href='cart.html'">VIEW CART</button>
 </div>
 
-<script type="module">
-  import { requireAuth } from "../auth/guard.js";
-  import { DB } from "../db/fakeDB.js";
+<script>
+  const user = JSON.parse(localStorage.getItem("currentUser"));
+  if (!user || !["SHOPKEEPER","WORKER"].includes(user.role)) {
+    location.href = "/login.html";
+  }
 
-  const user = requireAuth(["SHOPKEEPER","WORKER"]);
+  let products = JSON.parse(localStorage.getItem("products")) || [];
+  let cart = JSON.parse(localStorage.getItem("cart")) || { items: [] };
 
-  let cart = JSON.parse(localStorage.getItem("cart")) || {
-    shopId: user.shopId,
-    items: []
-  };
-
+  let activeCategory = null;
   const list = document.getElementById("list");
+  const search = document.getElementById("search");
 
-  function render(filter="") {
+  function setCategory(cat) {
+    activeCategory = cat;
+    render();
+  }
+
+  function render() {
+    const filter = search.value.toLowerCase();
     list.innerHTML = "";
 
-    DB.products
+    products
       .filter(p => p.shopId === user.shopId)
+      .filter(p => !activeCategory || p.category === activeCategory)
       .filter(p =>
         p.name.toLowerCase().includes(filter) ||
         (p.barcode || "").includes(filter)
       )
-      .sort((a,b)=>a.name.localeCompare(b.name))
       .forEach(p => {
         const inCart = cart.items.find(i => i.productId === p.id);
         const qty = inCart ? inCart.quantity : 0;
@@ -168,47 +189,39 @@
     updateCartBar();
   }
 
-  window.updateQty = (id, delta) => {
-    const p = DB.products.find(x=>x.id===id);
-    let item = cart.items.find(i=>i.productId===id);
+  function updateQty(id, delta) {
+    const product = products.find(p => p.id === id);
+    let item = cart.items.find(i => i.productId === id);
 
     if (!item && delta > 0) {
+      if (product.quantity <= 0) return alert("Out of stock");
       cart.items.push({
-        productId:id,
-        name:p.name,
-        barcode:p.barcode,
-        sellPrice:p.sellPrice,
-        quantity:1
+        productId: id,
+        name: product.name,
+        sellPrice: product.sellPrice,
+        quantity: 1
       });
     } else if (item) {
       item.quantity += delta;
       if (item.quantity <= 0) {
-        cart.items = cart.items.filter(i=>i.productId!==id);
+        cart.items = cart.items.filter(i => i.productId !== id);
       }
     }
 
     localStorage.setItem("cart", JSON.stringify(cart));
-    render(search.value.toLowerCase());
-  };
-
-  function updateCartBar() {
-    const count = cart.items.length;
-    const total = cart.items.reduce(
-      (s,i)=>s + i.sellPrice*i.quantity, 0
-    );
-
-    document.getElementById("itemCount").innerText = count;
-    document.getElementById("totalAmount").innerText = total;
-
-    document.getElementById("cartBar").style.display =
-      count ? "flex" : "none";
+    render();
   }
 
-  window.goToCart = () => {
-    location.href = "cart.html";
-  };
+  function updateCartBar() {
+    const count = cart.items.reduce((s,i)=>s+i.quantity,0);
+    const total = cart.items.reduce((s,i)=>s+i.sellPrice*i.quantity,0);
 
-  search.oninput = e => render(e.target.value.toLowerCase());
+    itemCount.innerText = count;
+    totalAmount.innerText = total;
+    cartBar.style.display = count ? "flex" : "none";
+  }
+
+  search.oninput = render;
   render();
 </script>
 
