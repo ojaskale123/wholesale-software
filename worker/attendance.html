@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Attendance</title>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+
+<header class="top-header">
+  <h2>Attendance</h2>
+</header>
+
+<div style="padding:20px">
+  <button onclick="checkIn()">Check In</button>
+  <button onclick="checkOut()">Check Out</button>
+</div>
+
+<script type="module">
+  import { requireAuth } from "../auth/guard.js";
+  import { DB, saveDB } from "../db/fakeDB.js";
+  import { logAction } from "../core/audit.js";
+
+  const user = requireAuth(["WORKER"]);
+
+  window.checkIn = () => {
+    DB.attendance.push({
+      id: Date.now(),
+      workerId: user.id,
+      shopId: user.shopId,
+      checkIn: new Date().toISOString()
+    });
+    saveDB();
+    logAction("Worker check-in");
+    alert("Checked in");
+  };
+
+  window.checkOut = () => {
+    const today = DB.attendance.find(
+      a => a.workerId === user.id && !a.checkOut
+    );
+    if (!today) return alert("Not checked in");
+
+    today.checkOut = new Date().toISOString();
+    saveDB();
+    logAction("Worker check-out");
+    alert("Checked out");
+  };
+</script>
+
+</body>
+</html>

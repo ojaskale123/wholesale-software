@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>My Jobs</title>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+
+<header class="top-header">
+  <h2>My Repair Jobs</h2>
+</header>
+
+<ul id="list" style="padding:20px"></ul>
+
+<script type="module">
+  import { requireAuth } from "../auth/guard.js";
+  import { DB, saveDB } from "../db/fakeDB.js";
+  import { logAction } from "../core/audit.js";
+
+  const user = requireAuth(["WORKER"]);
+  const ul = document.getElementById("list");
+
+  (DB.jobs || [])
+    .filter(j => j.assignedTo === user.id)
+    .forEach(job => {
+      const li = document.createElement("li");
+      li.innerHTML = `
+        ${job.device} | ${job.status}
+        <button onclick="markReady(${job.id})">Mark Ready</button>
+      `;
+      ul.appendChild(li);
+    });
+
+  window.markReady = id => {
+    const job = DB.jobs.find(j => j.id === id);
+    job.status = "READY";
+    saveDB();
+    logAction(`Worker marked job ${id} READY`);
+    location.reload();
+  };
+</script>
+
+</body>
+</html>

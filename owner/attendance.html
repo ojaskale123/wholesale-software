@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Attendance</title>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+
+<header class="top-header">
+  <h2>All Attendance</h2>
+</header>
+
+<ul id="list" style="padding:20px"></ul>
+
+<script type="module">
+  import { requireAuth } from "../auth/guard.js";
+  import { DB } from "../db/fakeDB.js";
+
+  requireAuth(["OWNER"]);
+  const ul = document.getElementById("list");
+
+  DB.attendance.forEach(a => {
+    const li = document.createElement("li");
+    li.textContent = `${a.workerId} | ${a.checkIn} | ${a.checkOut || ""}`;
+    ul.appendChild(li);
+  });
+</script>
+
+</body>
+</html>

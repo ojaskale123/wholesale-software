@@ -1,19 +1,23 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Worker</title>
+  <title>Worker Dashboard</title>
   <link rel="stylesheet" href="../css/style.css">
 </head>
 <body>
 
-<div class="container">
-  <h1>Worker Dashboard</h1>
-  <button onclick="location.href='sell.html'">Sell Product</button>
+<header class="top-header">
+  <h2>Worker Panel</h2>
+</header>
+
+<div style="padding:20px">
+  <button onclick="location.href='jobs.html'">My Jobs</button>
+  <button onclick="location.href='attendance.html'">Attendance</button>
 </div>
 
 <script type="module">
-  import { guard } from "../auth/guard.js";
-  guard("WORKER");
+  import { requireAuth } from "../auth/guard.js";
+  requireAuth(["WORKER"]);
 </script>
 
 </body>

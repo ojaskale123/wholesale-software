@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Cart</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      margin: 0;
+      background: #f4f6f8;
+    }
+
+    .app-header {
+      background: linear-gradient(90deg, #0f2027, #203a43, #2c5364);
+      color: white;
+      padding: 14px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    }
+
+    .app-header h2 {
+      margin: 0;
+      font-size: 20px;
+      font-weight: 600;
+    }
+
+    .header-btn {
+      background: rgba(255,255,255,0.15);
+      border: none;
+      color: white;
+      padding: 6px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    .container {
+      padding: 18px;
+    }
+
+    .item {
+      background: white;
+      padding: 12px;
+      margin-bottom: 10px;
+      border-radius: 8px;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+    }
+
+    .total {
+      font-size: 18px;
+      font-weight: bold;
+      margin-top: 15px;
+    }
+
+    input {
+      width: 100%;
+      padding: 10px;
+      margin-top: 8px;
+      font-size: 15px;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 12px;
+      margin-top: 10px;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    .confirm {
+      background: #203a43;
+      color: white;
+    }
+
+    .cancel {
+      background: #ccc;
+    }
+  </style>
+</head>
+
+<body>
+
+<header class="app-header">
+  <button class="header-btn" onclick="location.href='sell.html'">⬅ Back</button>
+  <h2>Cart Summary</h2>
+  <span></span>
+</header>
+
+<div class="container">
+  <div id="cartItems"></div>
+
+  <div class="total">Total: ₹<span id="total">0</span></div>
+
+  <input id="custName" placeholder="Customer Name">
+  <input id="custPhone" placeholder="Customer Phone">
+
+  <button class="btn confirm" onclick="confirmSell()">CONFIRM SELL</button>
+  <button class="btn cancel" onclick="cancelCart()">CANCEL</button>
+</div>
+
+<script type="module">
+  import { requireAuth } from "../auth/guard.js";
+  import { DB, saveDB } from "../db/fakeDB.js";
+  import { logAction } from "../core/audit.js";
+
+  const user = requireAuth(["SHOPKEEPER","WORKER"]);
+
+  let cart = JSON.parse(localStorage.getItem("cart"));
+  if (!cart || !cart.items.length) {
+    alert("Cart is empty");
+    location.href = "sell.html";
+  }
+
+  const div = document.getElementById("cartItems");
+  let total = 0;
+
+  cart.items.forEach(i=>{
+    total += i.sellPrice * i.quantity;
+    const d = document.createElement("div");
+    d.className = "item";
+    d.innerHTML = `
+      <b>${i.name}</b><br>
+      Qty: ${i.quantity} × ₹${i.sellPrice}
+    `;
+    div.appendChild(d);
+  });
+
+  document.getElementById("total").innerText = total;
+
+  window.confirmSell = () => {
+    if (!custName.value || !custPhone.value)
+      return alert("Enter customer details");
+
+    const jobId = Date.now();
+
+    cart.items.forEach(i=>{
+      const p = DB.products.find(x=>x.id===i.productId);
+      p.quantity -= i.quantity;
+    });
+
+    DB.sales.push({
+      id:Date.now(),
+      jobId,
+      shopId:user.shopId,
+      amount:total,
+      soldBy:user.id,
+      createdAt:new Date().toISOString()
+    });
+
+    DB.jobs.push({
+      id:jobId,
+      shopId:user.shopId,
+      type:"SELL",
+      status:"DELIVERED",
+      createdAt:new Date().toISOString()
+    });
+
+    DB.customers = DB.customers || [];
+    DB.customers.push({
+      name:custName.value,
+      phone:custPhone.value,
+      jobId
+    });
+
+    localStorage.removeItem("cart");
+    saveDB();
+    logAction(`Sold items worth ₹${total}`);
+
+    alert("Sale completed");
+    location.href = "sell.html";
+  };
+
+  window.cancelCart = () => {
+    localStorage.removeItem("cart");
+    location.href = "sell.html";
+  };
+</script>
+
+</body>
+</html>

@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Track Repair</title>
+  <link rel="stylesheet" href="./css/style.css">
+</head>
+<body>
+
+<header class="top-header">
+  <h2>Repair Status</h2>
+</header>
+
+<div id="info" style="padding:20px"></div>
+
+<script type="module">
+  import { DB } from "./db/fakeDB.js";
+
+  const params = new URLSearchParams(location.search);
+  const jobId = Number(params.get("jobId"));
+  const job = (DB.jobs || []).find(j => j.id === jobId);
+
+  const div = document.getElementById("info");
+
+  if (!job) {
+    div.innerText = "Invalid Job";
+  } else {
+    div.innerHTML = `
+      <p>Device: ${job.device || "Item"}</p>
+      <p>Status: ${job.status}</p>
+      <p>Expected Cost: ₹${job.expectedCost || "-"}</p>
+    `;
+  }
+</script>
+
+</body>
+</html>

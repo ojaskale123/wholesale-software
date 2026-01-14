@@ -3,19 +3,81 @@
 <head>
   <title>Stock</title>
   <link rel="stylesheet" href="../css/style.css">
+  <style>
+    .container { padding: 20px; }
+    .header {
+      background: linear-gradient(90deg,#0f2027,#203a43,#2c5364);
+      color: white;
+      padding: 15px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+    }
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit,minmax(200px,1fr));
+      gap: 15px;
+    }
+    .card {
+      background: white;
+      padding: 15px;
+      border-radius: 10px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+      cursor: pointer;
+    }
+    .add-box input, .add-box select, .add-box textarea {
+      width: 100%;
+      margin-top: 6px;
+      padding: 6px;
+      font-size: 14px;
+    }
+    .add-btn {
+      margin-top: 10px;
+      width: 100%;
+      padding: 12px;
+      background: #203a43;
+      color: white;
+      font-size: 16px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+  </style>
 </head>
 
 <body>
 
-<header class="top-header">
-  <h2>Stock</h2>
-</header>
+<div class="container">
+  <div class="header">
+    <h2>Stock Management</h2>
+  </div>
 
-<div style="padding:20px">
-  <input id="name" placeholder="Product name">
-  <input id="qty" type="number" placeholder="Quantity">
-  <input id="price" type="number" placeholder="Price">
-  <button onclick="addProduct()">Add</button>
+  <!-- CATEGORY CARDS -->
+  <div class="card-grid">
+    <div class="card">🧩 Spare Parts</div>
+    <div class="card">📱 Electronics</div>
+    <div class="card">🔋 Batteries</div>
+    <div class="card">♻️ Second-Hand Phones</div>
+  </div>
+
+  <br>
+
+  <!-- ADD STOCK (OWNER + SHOPKEEPER ONLY) -->
+  <div class="add-box" id="addBox">
+    <h3>Add Product</h3>
+    <input id="name" placeholder="Product Name">
+    <input id="barcode" placeholder="Barcode / Product ID">
+    <select id="category">
+      <option>Spare Parts</option>
+      <option>Electronics</option>
+      <option>Batteries</option>
+      <option>Second-Hand Phones</option>
+    </select>
+    <input id="retail" placeholder="Retail Price">
+    <input id="sell" placeholder="Sell Price">
+    <input id="qty" placeholder="Quantity">
+    <textarea id="location" placeholder="Location (Wall / Shelf / Box)"></textarea>
+    <button class="add-btn" onclick="addStock()">ADD PRODUCT</button>
+  </div>
 
   <hr>
   <ul id="list"></ul>
@@ -26,9 +88,33 @@
   import { DB, saveDB } from "../db/fakeDB.js";
   import { logAction } from "../core/audit.js";
 
-  const user = requireAuth(["SHOPKEEPER"]);
+  const user = requireAuth(["OWNER","SHOPKEEPER","WORKER"]);
 
-  const list = document.getElementById("list");
+  // hide add stock for worker
+  if (user.role === "WORKER") {
+    document.getElementById("addBox").style.display = "none";
+  }
+
+  window.addStock = () => {
+    if (user.role === "WORKER") return alert("Not allowed");
+
+    DB.products.push({
+      id: Date.now(),
+      shopId: user.shopId,
+      name: name.value,
+      barcode: barcode.value,
+      category: category.value,
+      retailPrice: Number(retail.value),
+      sellPrice: Number(sell.value),
+      quantity: Number(qty.value),
+      location: location.value,
+      createdAt: new Date().toISOString()
+    });
+
+    saveDB();
+    logAction(`Added stock ${name.value}`);
+    render();
+  };
 
   function render() {
     list.innerHTML = "";
@@ -36,24 +122,11 @@
       .filter(p => p.shopId === user.shopId)
       .forEach(p => {
         const li = document.createElement("li");
-        li.textContent = `${p.name} | Qty: ${p.quantity} | ₹${p.price}`;
+        li.textContent =
+          `${p.name} | ${p.category} | Qty:${p.quantity} | ${p.barcode}`;
         list.appendChild(li);
       });
   }
-
-  window.addProduct = () => {
-    DB.products.push({
-      id: Date.now(),
-      shopId: user.shopId,
-      name: name.value,
-      quantity: Number(qty.value),
-      price: Number(price.value)
-    });
-
-    saveDB();
-    logAction(`Added stock item ${name.value}`);
-    render();
-  };
 
   render();
 </script>

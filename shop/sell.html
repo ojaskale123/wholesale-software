@@ -1,76 +1,215 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Sell Item</title>
-  <link rel="stylesheet" href="../css/style.css">
+  <title>Sell Items</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      margin: 0;
+      background: #f4f6f8;
+    }
+
+    /* ===== HEADER ===== */
+    .app-header {
+      background: linear-gradient(90deg, #0f2027, #203a43, #2c5364);
+      color: white;
+      padding: 14px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    }
+
+    .app-header h2 {
+      margin: 0;
+      font-size: 20px;
+      font-weight: 600;
+    }
+
+    .header-btn {
+      background: rgba(255,255,255,0.15);
+      border: none;
+      color: white;
+      padding: 6px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    /* ===== PAGE ===== */
+    .container {
+      padding: 18px;
+      padding-bottom: 90px;
+    }
+
+    .search {
+      width: 100%;
+      padding: 12px;
+      font-size: 16px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      margin-bottom: 15px;
+    }
+
+    .item {
+      background: white;
+      padding: 12px;
+      margin-bottom: 10px;
+      border-radius: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+    }
+
+    .qty button {
+      padding: 4px 10px;
+      font-size: 16px;
+      margin: 0 4px;
+      cursor: pointer;
+    }
+
+    /* ===== CART BAR ===== */
+    .cart-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: #2ecc71;
+      color: white;
+      padding: 14px;
+      display: none;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 16px;
+      box-shadow: 0 -4px 10px rgba(0,0,0,0.3);
+    }
+
+    .cart-bar button {
+      background: white;
+      color: #2ecc71;
+      border: none;
+      padding: 8px 14px;
+      font-weight: bold;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+  </style>
 </head>
 
 <body>
 
-<header class="top-header">
-  <h2>Sell Item</h2>
+<header class="app-header">
+  <button class="header-btn" onclick="location.href='index.html'">⬅ Back</button>
+  <h2>Sell Items</h2>
+  <span></span>
 </header>
 
-<div style="padding:20px">
-  <input id="phone" placeholder="Customer Phone">
-  <select id="product"></select>
-  <input id="qty" type="number" placeholder="Quantity">
-  <button onclick="sell()">Sell</button>
+<div class="container">
+  <input id="search" class="search" placeholder="Search by name or barcode">
+  <div id="list"></div>
+</div>
+
+<div class="cart-bar" id="cartBar">
+  <div>
+    🛒 <span id="itemCount">0</span> items | ₹<span id="totalAmount">0</span>
+  </div>
+  <button onclick="goToCart()">VIEW CART</button>
 </div>
 
 <script type="module">
   import { requireAuth } from "../auth/guard.js";
-  import { DB, saveDB } from "../db/fakeDB.js";
-  import { logAction } from "../core/audit.js";
+  import { DB } from "../db/fakeDB.js";
 
-  const user = requireAuth(["SHOPKEEPER"]);
-  const productSelect = document.getElementById("product");
+  const user = requireAuth(["SHOPKEEPER","WORKER"]);
 
-  DB.products
-    .filter(p => p.shopId === user.shopId)
-    .forEach(p => {
-      const o = document.createElement("option");
-      o.value = p.id;
-      o.textContent = `${p.name} (₹${p.price})`;
-      productSelect.appendChild(o);
-    });
+  let cart = JSON.parse(localStorage.getItem("cart")) || {
+    shopId: user.shopId,
+    items: []
+  };
 
-  window.sell = () => {
-    const prod = DB.products.find(p => p.id == product.value);
-    const quantity = Number(qty.value);
+  const list = document.getElementById("list");
 
-    if (prod.quantity < quantity) {
-      alert("Not enough stock");
-      return;
+  function render(filter="") {
+    list.innerHTML = "";
+
+    DB.products
+      .filter(p => p.shopId === user.shopId)
+      .filter(p =>
+        p.name.toLowerCase().includes(filter) ||
+        (p.barcode || "").includes(filter)
+      )
+      .sort((a,b)=>a.name.localeCompare(b.name))
+      .forEach(p => {
+        const inCart = cart.items.find(i => i.productId === p.id);
+        const qty = inCart ? inCart.quantity : 0;
+
+        const div = document.createElement("div");
+        div.className = "item";
+        div.innerHTML = `
+          <div>
+            <b>${p.name}</b><br>
+            ₹${p.sellPrice} | Stock: ${p.quantity}
+          </div>
+          <div class="qty">
+            <button onclick="updateQty(${p.id},-1)">➖</button>
+            ${qty}
+            <button onclick="updateQty(${p.id},1)">➕</button>
+          </div>
+        `;
+        list.appendChild(div);
+      });
+
+    updateCartBar();
+  }
+
+  window.updateQty = (id, delta) => {
+    const p = DB.products.find(x=>x.id===id);
+    let item = cart.items.find(i=>i.productId===id);
+
+    if (!item && delta > 0) {
+      cart.items.push({
+        productId:id,
+        name:p.name,
+        barcode:p.barcode,
+        sellPrice:p.sellPrice,
+        quantity:1
+      });
+    } else if (item) {
+      item.quantity += delta;
+      if (item.quantity <= 0) {
+        cart.items = cart.items.filter(i=>i.productId!==id);
+      }
     }
 
-    prod.quantity -= quantity;
-
-    const jobId = Date.now();
-
-    DB.sales.push({
-      id: Date.now(),
-      jobId,
-      shopId: user.shopId,
-      amount: prod.price * quantity,
-      soldBy: user.id,
-      createdAt: new Date().toISOString()
-    });
-
-    DB.jobs = DB.jobs || [];
-    DB.jobs.push({
-      id: jobId,
-      shopId: user.shopId,
-      type: "SELL",
-      status: "DELIVERED",
-      createdAt: new Date().toISOString()
-    });
-
-    saveDB();
-    logAction(`Sold ${prod.name} qty ${quantity}`);
-
-    alert("Sold successfully");
+    localStorage.setItem("cart", JSON.stringify(cart));
+    render(search.value.toLowerCase());
   };
+
+  function updateCartBar() {
+    const count = cart.items.length;
+    const total = cart.items.reduce(
+      (s,i)=>s + i.sellPrice*i.quantity, 0
+    );
+
+    document.getElementById("itemCount").innerText = count;
+    document.getElementById("totalAmount").innerText = total;
+
+    document.getElementById("cartBar").style.display =
+      count ? "flex" : "none";
+  }
+
+  window.goToCart = () => {
+    location.href = "cart.html";
+  };
+
+  search.oninput = e => render(e.target.value.toLowerCase());
+  render();
 </script>
 
 </body>

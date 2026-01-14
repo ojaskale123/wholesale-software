@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Revenue</title>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+
+<header class="top-header">
+  <h2>Total Revenue</h2>
+</header>
+
+<ul id="rev" style="padding:20px"></ul>
+
+<script type="module">
+  import { requireAuth } from "../auth/guard.js";
+  import { DB } from "../db/fakeDB.js";
+
+  requireAuth(["OWNER"]);
+  const ul = document.getElementById("rev");
+
+  let total = 0;
+  DB.sales.forEach(s => total += s.amount);
+
+  const li = document.createElement("li");
+  li.textContent = `Total Revenue: ₹${total}`;
+  ul.appendChild(li);
+</script>
+
+</body>
+</html>
