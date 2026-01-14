@@ -30,25 +30,30 @@
 
     .cat-card {
       padding: 18px;
-      border-radius: 12px;
+      border-radius: 14px;
       color: white;
       font-weight: bold;
       text-align: center;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      box-shadow: 0 6px 18px rgba(0,0,0,0.25);
       cursor: pointer;
+      transition: transform 0.2s ease;
     }
 
-    .spare { background: #667eea; }
-    .electronics { background: #38ef7d; color:#000; }
-    .battery { background: #dd2476; }
-    .phone { background: #ffd200; color:#000; }
+    .cat-card:hover {
+      transform: translateY(-4px);
+    }
+
+    .spare { background: linear-gradient(135deg,#667eea,#764ba2); }
+    .electronics { background: linear-gradient(135deg,#38ef7d,#11998e); }
+    .battery { background: linear-gradient(135deg,#dd2476,#ff512f); }
+    .phone { background: linear-gradient(135deg,#ffd200,#f7971e); color:#000; }
 
     .card {
       background: white;
       padding: 20px;
-      border-radius: 10px;
+      border-radius: 12px;
       margin-bottom: 20px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
     }
 
     input, select, button {
@@ -66,11 +71,11 @@
       border-radius: 6px;
     }
 
-    /* POPUP */
+    /* ===== POPUP ===== */
     .overlay {
       position: fixed;
       inset: 0;
-      background: rgba(0,0,0,0.55);
+      background: rgba(0,0,0,0.6);
       display: none;
       align-items: center;
       justify-content: center;
@@ -78,38 +83,65 @@
     }
 
     .popup {
-      background: white;
-      width: 90%;
-      max-width: 550px;
-      border-radius: 12px;
-      padding: 16px;
+      background: #f9fbfc;
+      width: 92%;
+      max-width: 620px;
+      border-radius: 16px;
+      box-shadow: 0 15px 40px rgba(0,0,0,0.35);
+      overflow: hidden;
+      animation: scaleIn 0.2s ease;
+    }
+
+    @keyframes scaleIn {
+      from { transform: scale(0.95); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
     }
 
     .popup-header {
+      background: linear-gradient(90deg,#0f2027,#203a43,#2c5364);
+      color: white;
+      padding: 14px 18px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 10px;
     }
 
-    .item {
-      padding: 10px 0;
-      border-bottom: 1px solid #eee;
-      font-size: 14px;
-    }
-
-    .profit {
-      color: green;
-      font-weight: bold;
+    .popup-header h3 {
+      margin: 0;
+      font-size: 18px;
     }
 
     .close-btn {
       background: crimson;
       color: white;
       border: none;
-      padding: 6px 10px;
+      padding: 6px 12px;
       border-radius: 6px;
       cursor: pointer;
+    }
+
+    .popup-body {
+      padding: 18px;
+      max-height: 65vh;
+      overflow-y: auto;
+    }
+
+    .item {
+      background: white;
+      border-radius: 10px;
+      padding: 14px;
+      margin-bottom: 12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.12);
+      font-size: 14px;
+    }
+
+    .item b {
+      font-size: 15px;
+    }
+
+    .profit {
+      color: #1e8e3e;
+      font-weight: bold;
     }
   </style>
 </head>
@@ -162,7 +194,7 @@
       <h3 id="popupTitle"></h3>
       <button class="close-btn" onclick="closePopup()">Back</button>
     </div>
-    <div id="popupList"></div>
+    <div class="popup-body" id="popupList"></div>
   </div>
 </div>
 
