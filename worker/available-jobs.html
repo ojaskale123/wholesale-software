@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Available Jobs</title>
+
+  <style>
+    * { box-sizing: border-box; font-family: Arial, sans-serif; }
+    body { margin:0; background:#f4f6f8; }
+
+    .app-header {
+      background: linear-gradient(90deg,#0f2027,#203a43,#2c5364);
+      color:white;
+      padding:14px 18px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      box-shadow:0 4px 10px rgba(0,0,0,0.3);
+    }
+
+    .header-btn {
+      background:rgba(255,255,255,0.15);
+      border:none;
+      color:white;
+      padding:6px 12px;
+      border-radius:6px;
+      cursor:pointer;
+    }
+
+    .container { padding:18px; }
+
+    .job {
+      background:white;
+      padding:15px;
+      margin-bottom:12px;
+      border-radius:10px;
+      box-shadow:0 4px 12px rgba(0,0,0,0.15);
+    }
+
+    .job h4 { margin:0 0 6px 0; }
+
+    .job p { margin:4px 0; font-size:14px; }
+
+    .accept-btn {
+      margin-top:10px;
+      width:100%;
+      padding:10px;
+      background:#2ecc71;
+      color:white;
+      border:none;
+      border-radius:8px;
+      font-size:15px;
+      cursor:pointer;
+    }
+
+    .empty {
+      text-align:center;
+      color:#777;
+      margin-top:40px;
+    }
+  </style>
+</head>
+
+<body>
+
+<header class="app-header">
+  <button class="header-btn" onclick="location.href='index.html'">⬅ Back</button>
+  <h2>Available Jobs</h2>
+  <span></span>
+</header>
+
+<div class="container" id="jobs"></div>
+
+<script type="module">
+  import { requireAuth } from "../auth/guard.js";
+  import { DB, saveDB } from "../db/fakeDB.js";
+  import { logAction } from "../core/audit.js";
+
+  const user = requireAuth(["WORKER"]);
+  const container = document.getElementById("jobs");
+
+  const openJobs = (DB.jobs || []).filter(j =>
+    j.shopId === user.shopId &&
+    j.status === "OPEN"
+  );
+
+  if (!openJobs.length) {
+    container.innerHTML = `<div class="empty">No available jobs right now</div>`;
+  }
+
+  openJobs.forEach(job => {
+    const div = document.createElement("div");
+    div.className = "job";
+    div.innerHTML = `
+      <h4>${job.device}</h4>
+      <p><b>Issue:</b> ${job.issue}</p>
+      <p><b>Expected Cost:</b> ₹${job.expectedCost || "-"}</p>
+      <p><b>Customer:</b> ${job.customerName}</p>
+      <button class="accept-btn" onclick="acceptJob(${job.id})">ACCEPT JOB</button>
+    `;
+    container.appendChild(div);
+  });
+
+  window.acceptJob = id => {
+    const job = DB.jobs.find(j => j.id === id);
+    if (!job || job.status !== "OPEN") {
+      alert("Job already taken");
+      location.reload();
+      return;
+    }
+
+    job.status = "IN_PROGRESS";
+    job.assignedTo = user.id;
+    job.acceptedAt = new Date().toISOString();
+
+    saveDB();
+    logAction(`Worker ${user.id} accepted job ${id}`);
+
+    alert("Job accepted");
+    location.href = "jobs.html";
+  };
+</script>
+
+</body>
+</html>

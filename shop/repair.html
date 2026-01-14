@@ -2,21 +2,126 @@
 <html>
 <head>
   <title>Create Repair Job</title>
-  <link rel="stylesheet" href="../css/style.css">
+
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      margin: 0;
+      background: #f4f6f8;
+    }
+
+    /* ===== HEADER ===== */
+    .app-header {
+      background: linear-gradient(90deg, #0f2027, #203a43, #2c5364);
+      color: white;
+      padding: 14px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    }
+
+    .app-header h2 {
+      margin: 0;
+      font-size: 20px;
+      font-weight: 600;
+    }
+
+    .header-btn {
+      background: rgba(255,255,255,0.15);
+      border: none;
+      color: white;
+      padding: 6px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    /* ===== PAGE ===== */
+    .container {
+      padding: 20px;
+    }
+
+    .card {
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 6px 15px rgba(0,0,0,0.15);
+      max-width: 520px;
+      margin: auto;
+    }
+
+    .card h3 {
+      margin-top: 0;
+      margin-bottom: 14px;
+      font-size: 18px;
+    }
+
+    input, textarea {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 10px;
+      font-size: 15px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 70px;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 12px;
+      background: #203a43;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+
+    .note {
+      font-size: 13px;
+      color: #666;
+      margin-top: 10px;
+      text-align: center;
+    }
+  </style>
 </head>
 
 <body>
 
-<header class="top-header">
-  <h2>Repair Job</h2>
+<header class="app-header">
+  <button class="header-btn" onclick="location.href='index.html'">⬅ Back</button>
+  <h2>Create Repair Job</h2>
+  <span></span>
 </header>
 
-<div style="padding:20px">
-  <input id="phone" placeholder="Customer Phone">
-  <input id="device" placeholder="Device Name">
-  <input id="issue" placeholder="Issue">
-  <input id="cost" placeholder="Expected Cost">
-  <button onclick="createJob()">Create Job</button>
+<div class="container">
+  <div class="card">
+    <h3>Repair Job Details</h3>
+
+    <input id="custName" placeholder="Customer Name">
+    <input id="custPhone" placeholder="Customer Phone Number">
+    <input id="device" placeholder="Device Name (e.g. Redmi Note 10)">
+    <textarea id="issue" placeholder="Issue description"></textarea>
+    <input id="expectedCost" type="number" placeholder="Expected Repair Cost">
+    <input id="expectedDate" type="date">
+
+    <button class="btn" onclick="createJob()">CREATE JOB</button>
+
+    <div class="note">
+      This job will be visible to all workers.  
+      Any worker can accept and start work.
+    </div>
+  </div>
 </div>
 
 <script type="module">
@@ -27,22 +132,37 @@
   const user = requireAuth(["SHOPKEEPER"]);
 
   window.createJob = () => {
+    if (!custName.value || !custPhone.value || !device.value) {
+      alert("Please fill Customer Name, Phone, and Device");
+      return;
+    }
+
     DB.jobs = DB.jobs || [];
 
     DB.jobs.push({
       id: Date.now(),
       shopId: user.shopId,
       type: "REPAIR",
+
+      customerName: custName.value,
+      customerPhone: custPhone.value,
+
       device: device.value,
       issue: issue.value,
-      expectedCost: cost.value,
-      status: "IN_PROGRESS",
+      expectedCost: expectedCost.value,
+      expectedDate: expectedDate.value,
+
+      status: "OPEN",          // 🔓 worker can accept
+      assignedTo: null,        // not forced
+      createdBy: user.id,
       createdAt: new Date().toISOString()
     });
 
     saveDB();
     logAction(`Created repair job for ${device.value}`);
-    alert("Job created");
+
+    alert("Repair job created successfully");
+    location.href = "index.html";
   };
 </script>
 

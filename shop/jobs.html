@@ -1,32 +1,165 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Jobs</title>
-  <link rel="stylesheet" href="../css/style.css">
+  <title>Jobs Monitor</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      margin: 0;
+      background: #f4f6f8;
+    }
+
+    /* ===== HEADER ===== */
+    .app-header {
+      background: linear-gradient(90deg, #0f2027, #203a43, #2c5364);
+      color: white;
+      padding: 14px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    }
+
+    .app-header h2 {
+      margin: 0;
+      font-size: 20px;
+      font-weight: 600;
+    }
+
+    .header-btn {
+      background: rgba(255,255,255,0.15);
+      border: none;
+      color: white;
+      padding: 6px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    /* ===== PAGE ===== */
+    .container {
+      padding: 18px;
+    }
+
+    .search {
+      width: 100%;
+      padding: 12px;
+      font-size: 15px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      margin-bottom: 15px;
+    }
+
+    .job {
+      background: white;
+      padding: 15px;
+      margin-bottom: 12px;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+
+    .job h4 {
+      margin: 0 0 6px 0;
+      font-size: 16px;
+    }
+
+    .job p {
+      margin: 4px 0;
+      font-size: 14px;
+      color: #333;
+    }
+
+    .status {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: bold;
+      margin-top: 6px;
+    }
+
+    .OPEN { background: #f1c40f; color: #000; }
+    .IN_PROGRESS { background: #3498db; color: #fff; }
+    .READY { background: #2ecc71; color: #fff; }
+    .DELIVERED { background: #95a5a6; color: #fff; }
+
+    .empty {
+      text-align: center;
+      color: #777;
+      margin-top: 40px;
+    }
+  </style>
 </head>
 
 <body>
 
-<header class="top-header">
-  <h2>Jobs</h2>
+<header class="app-header">
+  <button class="header-btn" onclick="location.href='index.html'">⬅ Back</button>
+  <h2>Job Status Monitor</h2>
+  <span></span>
 </header>
 
-<ul id="jobs" style="padding:20px"></ul>
+<div class="container">
+  <input
+    id="search"
+    class="search"
+    placeholder="Search by device, customer name, phone, or status"
+  >
+
+  <div id="jobs"></div>
+</div>
 
 <script type="module">
   import { requireAuth } from "../auth/guard.js";
   import { DB } from "../db/fakeDB.js";
 
   const user = requireAuth(["SHOPKEEPER"]);
-  const ul = document.getElementById("jobs");
+  const jobsDiv = document.getElementById("jobs");
+  const searchInput = document.getElementById("search");
 
-  (DB.jobs || [])
-    .filter(j => j.shopId === user.shopId)
-    .forEach(j => {
-      const li = document.createElement("li");
-      li.textContent = `${j.type} | ${j.status} | ${j.device || ""}`;
-      ul.appendChild(li);
+  const allJobs = (DB.jobs || []).filter(j => j.shopId === user.shopId);
+
+  function render(filter = "") {
+    jobsDiv.innerHTML = "";
+
+    const f = filter.toLowerCase();
+
+    const filtered = allJobs.filter(j =>
+      (j.device || "").toLowerCase().includes(f) ||
+      (j.customerName || "").toLowerCase().includes(f) ||
+      (j.customerPhone || "").includes(f) ||
+      (j.status || "").toLowerCase().includes(f)
+    );
+
+    if (!filtered.length) {
+      jobsDiv.innerHTML = `<div class="empty">No jobs found</div>`;
+      return;
+    }
+
+    filtered.forEach(job => {
+      const worker = DB.users.find(u => u.id === job.assignedTo);
+
+      const div = document.createElement("div");
+      div.className = "job";
+      div.innerHTML = `
+        <h4>${job.device}</h4>
+        <p><b>Customer:</b> ${job.customerName} (${job.customerPhone})</p>
+        <p><b>Issue:</b> ${job.issue || "-"}</p>
+        <p><b>Expected Cost:</b> ₹${job.expectedCost || "-"}</p>
+        <p><b>Worker:</b> ${worker ? worker.name : "Not accepted yet"}</p>
+        <span class="status ${job.status}">${job.status}</span>
+      `;
+      jobsDiv.appendChild(div);
     });
+  }
+
+  searchInput.oninput = e => render(e.target.value);
+  render();
 </script>
 
 </body>

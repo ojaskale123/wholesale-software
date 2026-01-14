@@ -2,15 +2,62 @@
 <html>
 <head>
   <title>My Jobs</title>
-  <link rel="stylesheet" href="../css/style.css">
+
+  <style>
+    * { box-sizing: border-box; font-family: Arial, sans-serif; }
+    body { margin:0; background:#f4f6f8; }
+
+    .app-header {
+      background: linear-gradient(90deg,#0f2027,#203a43,#2c5364);
+      color:white;
+      padding:14px 18px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      box-shadow:0 4px 10px rgba(0,0,0,0.3);
+    }
+
+    .header-btn {
+      background:rgba(255,255,255,0.15);
+      border:none;
+      color:white;
+      padding:6px 12px;
+      border-radius:6px;
+      cursor:pointer;
+    }
+
+    .container { padding:18px; }
+
+    .job {
+      background:white;
+      padding:15px;
+      margin-bottom:12px;
+      border-radius:10px;
+      box-shadow:0 4px 12px rgba(0,0,0,0.15);
+    }
+
+    .btn {
+      margin-top:10px;
+      width:100%;
+      padding:10px;
+      background:#203a43;
+      color:white;
+      border:none;
+      border-radius:8px;
+      cursor:pointer;
+    }
+  </style>
 </head>
+
 <body>
 
-<header class="top-header">
-  <h2>My Repair Jobs</h2>
+<header class="app-header">
+  <button class="header-btn" onclick="location.href='index.html'">⬅ Back</button>
+  <h2>My Jobs</h2>
+  <span></span>
 </header>
 
-<ul id="list" style="padding:20px"></ul>
+<div class="container" id="jobs"></div>
 
 <script type="module">
   import { requireAuth } from "../auth/guard.js";
@@ -18,24 +65,33 @@
   import { logAction } from "../core/audit.js";
 
   const user = requireAuth(["WORKER"]);
-  const ul = document.getElementById("list");
+  const container = document.getElementById("jobs");
 
-  (DB.jobs || [])
-    .filter(j => j.assignedTo === user.id)
-    .forEach(job => {
-      const li = document.createElement("li");
-      li.innerHTML = `
-        ${job.device} | ${job.status}
-        <button onclick="markReady(${job.id})">Mark Ready</button>
-      `;
-      ul.appendChild(li);
-    });
+  const myJobs = (DB.jobs || []).filter(j =>
+    j.assignedTo === user.id
+  );
+
+  if (!myJobs.length) {
+    container.innerHTML = "<p>No jobs assigned yet</p>";
+  }
+
+  myJobs.forEach(job => {
+    const div = document.createElement("div");
+    div.className = "job";
+    div.innerHTML = `
+      <b>${job.device}</b><br>
+      Status: ${job.status}
+      <button class="btn" onclick="markReady(${job.id})">MARK READY</button>
+    `;
+    container.appendChild(div);
+  });
 
   window.markReady = id => {
     const job = DB.jobs.find(j => j.id === id);
     job.status = "READY";
+    job.completedAt = new Date().toISOString();
     saveDB();
-    logAction(`Worker marked job ${id} READY`);
+    logAction(`Worker completed job ${id}`);
     location.reload();
   };
 </script>

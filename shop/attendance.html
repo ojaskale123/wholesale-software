@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>All Shops Attendance</title>
+  <title>Attendance Monitor</title>
 
   <style>
     * {
@@ -99,7 +99,7 @@
 
 <header class="app-header">
   <button class="header-btn" onclick="location.href='index.html'">⬅ Back</button>
-  <h2>Attendance – All Shops</h2>
+  <h2>Attendance Monitor</h2>
   <span></span>
 </header>
 
@@ -107,7 +107,7 @@
   <input
     id="search"
     class="search"
-    placeholder="Search by shop, worker name, phone, or date (YYYY-MM-DD)"
+    placeholder="Search by worker name, phone, or date (YYYY-MM-DD)"
   >
 
   <div id="list"></div>
@@ -117,12 +117,14 @@
   import { requireAuth } from "../auth/guard.js";
   import { DB } from "../db/fakeDB.js";
 
-  requireAuth(["OWNER"]);
-
+  const user = requireAuth(["SHOPKEEPER"]);
   const list = document.getElementById("list");
   const searchInput = document.getElementById("search");
 
-  const records = DB.attendance || [];
+  // Attendance only for this shop
+  const records = (DB.attendance || []).filter(
+    a => a.shopId === user.shopId
+  );
 
   function getStatus(a) {
     if (a.checkIn && a.checkOut) return "PRESENT";
@@ -136,12 +138,9 @@
 
     const filtered = records.filter(a => {
       const worker = DB.users.find(u => u.id === a.workerId);
-      const shop = DB.shops.find(s => s.id === a.shopId);
-
       return (
         (worker?.name || "").toLowerCase().includes(f) ||
         (worker?.phone || "").includes(f) ||
-        (shop?.shopName || "").toLowerCase().includes(f) ||
         (a.checkIn || "").includes(f)
       );
     });
@@ -153,7 +152,6 @@
 
     filtered.forEach(a => {
       const worker = DB.users.find(u => u.id === a.workerId);
-      const shop = DB.shops.find(s => s.id === a.shopId);
       const status = getStatus(a);
 
       const div = document.createElement("div");
@@ -161,7 +159,6 @@
       div.innerHTML = `
         <h4>${worker ? worker.name : "Unknown Worker"}</h4>
         <p><b>Phone:</b> ${worker?.phone || "-"}</p>
-        <p><b>Shop:</b> ${shop?.shopName || "Unknown Shop"}</p>
         <p><b>Check-in:</b> ${a.checkIn || "-"}</p>
         <p><b>Check-out:</b> ${a.checkOut || "-"}</p>
         <span class="status ${status}">${status}</span>

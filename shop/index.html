@@ -1,64 +1,206 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Shop Dashboard</title>
-  <link rel="stylesheet" href="../css/style.css">
+  <title>Shopkeeper Dashboard</title>
+
   <style>
-    .container {
-      padding: 20px;
+    * {
+      box-sizing: border-box;
+      font-family: Arial, sans-serif;
     }
-    .card-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 20px;
+
+    body {
+      margin: 0;
+      background: #f4f6f8;
     }
-    .card {
-      background: white;
-      padding: 20px;
-      border-radius: 12px;
-      box-shadow: 0 6px 15px rgba(0,0,0,0.2);
+
+    /* ===== HEADER ===== */
+    .app-header {
+      background: linear-gradient(90deg, #0f2027, #203a43, #2c5364);
+      color: white;
+      padding: 16px 22px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.35);
+    }
+
+    .header-left h2 {
+      margin: 0;
+      font-size: 21px;
+      font-weight: 600;
+    }
+
+    .header-left span {
+      font-size: 13px;
+      opacity: 0.85;
+    }
+
+    .logout-btn {
+      background: crimson;
+      border: none;
+      padding: 8px 14px;
+      color: white;
+      border-radius: 6px;
       cursor: pointer;
-      transition: transform 0.2s;
+      font-size: 14px;
     }
+
+    /* ===== DASHBOARD GRID ===== */
+    .dashboard {
+      padding: 22px;
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      grid-template-rows: repeat(6, 120px);
+      gap: 18px;
+    }
+
+    /* ===== CARD BASE ===== */
+    .card {
+      position: relative;
+      border-radius: 16px;
+      padding: 22px;
+      cursor: pointer;
+      box-shadow: 0 10px 28px rgba(0,0,0,0.18);
+      transition: transform 0.25s ease, box-shadow 0.25s ease;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      color: white;
+      overflow: hidden;
+    }
+
     .card:hover {
-      transform: scale(1.05);
+      transform: translateY(-6px);
+      box-shadow: 0 16px 38px rgba(0,0,0,0.28);
+    }
+
+    .card h3 {
+      margin: 0;
+      font-size: 20px;
+      font-weight: 600;
+      z-index: 1;
+    }
+
+    .card p {
+      margin-top: 10px;
+      font-size: 14px;
+      max-width: 260px;
+      opacity: 0.95;
+      z-index: 1;
+    }
+
+    /* ===== IMAGE OVERLAY ===== */
+    .card::after {
+      content: "";
+      position: absolute;
+      right: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 130px;
+      height: 130px;
+      background-repeat: no-repeat;
+      background-size: contain;
+      opacity: 0.55; /* 🔥 increased opacity */
+      pointer-events: none;
+    }
+
+    /* ===== CARD POSITIONS + IMAGES ===== */
+    .stock {
+      grid-column: 1;
+      grid-row: 1 / span 2;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+    }
+    .stock::after {
+      background-image: url("https://cdn-icons-png.flaticon.com/512/679/679922.png");
+    }
+
+    .sell {
+      grid-column: 1;
+      grid-row: 3 / span 2;
+      background: linear-gradient(135deg, #11998e, #38ef7d);
+    }
+    .sell::after {
+      background-image: url("https://cdn-icons-png.flaticon.com/512/2331/2331941.png");
+    }
+
+    .repair {
+      grid-column: 1;
+      grid-row: 5 / span 2;
+      background: linear-gradient(135deg, #ff512f, #dd2476);
+    }
+    .repair::after {
+      background-image: url("https://cdn-icons-png.flaticon.com/512/3064/3064197.png");
+    }
+
+    .attendance {
+      grid-column: 2;
+      grid-row: 1 / span 3;
+      background: linear-gradient(135deg, #1e3c72, #2a5298);
+    }
+    .attendance::after {
+      background-image: url("https://cdn-icons-png.flaticon.com/512/3135/3135715.png");
+    }
+
+    .jobs {
+      grid-column: 2;
+      grid-row: 4 / span 3;
+      background: linear-gradient(135deg, #f7971e, #ffd200);
+      color: #222;
+    }
+    .jobs::after {
+      background-image: url("https://cdn-icons-png.flaticon.com/512/1828/1828919.png");
+      opacity: 0.6; /* 🔥 slightly higher for yellow */
     }
   </style>
 </head>
 
 <body>
 
-<header class="top-header">
-  <h2>Shopkeeper Dashboard</h2>
+<header class="app-header">
+  <div class="header-left">
+    <h2>Shopkeeper Panel</h2>
+    <span>Daily operations & monitoring</span>
+  </div>
+  <button class="logout-btn" onclick="logout()">Logout</button>
 </header>
 
-<div class="container">
-  <div class="card-grid">
-    <div class="card" onclick="location.href='stock.html'">
-      <h3>📦 Stock</h3>
-      <p>Manage products</p>
-    </div>
+<div class="dashboard">
 
-    <div class="card" onclick="location.href='sell.html'">
-      <h3>💰 Sell Item</h3>
-      <p>Sell from stock</p>
-    </div>
-
-    <div class="card" onclick="location.href='repair.html'">
-      <h3>🛠 Repair Job</h3>
-      <p>Create repair job</p>
-    </div>
-
-    <div class="card" onclick="location.href='jobs.html'">
-      <h3>📋 Jobs</h3>
-      <p>All shop jobs</p>
-    </div>
+  <!-- LEFT SIDE -->
+  <div class="card stock" onclick="location.href='stock.html'">
+    <h3>Stock</h3>
+    <p>Manage items, categories, and availability</p>
   </div>
+
+  <div class="card sell" onclick="location.href='sell.html'">
+    <h3>Sell</h3>
+    <p>Fast counter selling with cart system</p>
+  </div>
+
+  <div class="card repair" onclick="location.href='repair.html'">
+    <h3>Repair Jobs</h3>
+    <p>Create repair work for workers to accept</p>
+  </div>
+
+  <!-- RIGHT SIDE -->
+  <div class="card attendance" onclick="location.href='attendance.html'">
+    <h3>Attendance</h3>
+    <p>View worker attendance of your shop</p>
+  </div>
+
+  <div class="card jobs" onclick="location.href='jobs.html'">
+    <h3>Job Status</h3>
+    <p>Track open, in-progress & ready jobs</p>
+  </div>
+
 </div>
 
-<script type="module">
-  import { requireAuth } from "../auth/guard.js";
-  requireAuth(["SHOPKEEPER"]);
+<script>
+  function logout() {
+    localStorage.removeItem("currentUser");
+    location.href = "/login.html";
+  }
 </script>
 
 </body>
