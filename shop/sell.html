@@ -143,10 +143,9 @@
     location.href = "/login.html";
   }
 
-  let products = JSON.parse(localStorage.getItem("products")) || [];
   let cart = JSON.parse(localStorage.getItem("cart")) || { items: [] };
-
   let activeCategory = null;
+
   const list = document.getElementById("list");
   const search = document.getElementById("search");
 
@@ -155,8 +154,11 @@
     render();
   }
 
+  /* 🔥 IMPORTANT FIX: products are READ INSIDE render() */
   function render() {
+    const products = JSON.parse(localStorage.getItem("products")) || [];
     const filter = search.value.toLowerCase();
+
     list.innerHTML = "";
 
     products
@@ -190,6 +192,7 @@
   }
 
   function updateQty(id, delta) {
+    const products = JSON.parse(localStorage.getItem("products")) || [];
     const product = products.find(p => p.id === id);
     let item = cart.items.find(i => i.productId === id);
 
