@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Shopkeeper</title>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+
+<div class="container">
+  <h1>Shopkeeper Dashboard</h1>
+  <div class="card">
+    <p>Manage your shop workers and sales.</p>
+  </div>
+</div>
+
+<script type="module">
+  import { guard } from "../auth/guard.js";
+  guard("SHOPKEEPER");
+</script>
+
+</body>
+</html>

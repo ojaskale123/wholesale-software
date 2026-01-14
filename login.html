@@ -1,26 +1,32 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <title>Login</title>
-    <link rel="stylesheet" href="css/style.css">
+  <title>Login</title>
+  <link rel="stylesheet" href="./css/style.css">
 </head>
-<body class="login-body">
+<body>
 
-<div class="login-box">
-    <h2>Wholesale Manager</h2>
+<h2>Login</h2>
 
-    <input id="username" type="text" placeholder="Username">
-    <input id="password" type="password" placeholder="Password">
+<input id="phone" placeholder="Phone">
+<br><br>
+<input id="password" type="password" placeholder="Password">
+<br><br>
+<button id="loginBtn">Login</button>
 
-    <button onclick="login()">Login</button>
+<!-- RUN SEED ONLY ONCE -->
+<script type="module" src="./demo/seed.js"></script>
 
-    <p class="hint">
-        Owner → admin / 1234<br>
-        Worker → worker / 1234
-    </p>
-</div>
+<script type="module">
+  import { login } from "./auth/login.js";
 
-<script src="js/login.js"></script>
+  document.getElementById("loginBtn").onclick = () => {
+    login(
+      document.getElementById("phone").value,
+      document.getElementById("password").value
+    );
+  };
+</script>
+
 </body>
 </html>

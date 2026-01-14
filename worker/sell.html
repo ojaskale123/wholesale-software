@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Sell</title>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+
+<div class="container card">
+  <h2>Sell Product</h2>
+
+  <input id="product" placeholder="Product">
+  <input id="qty" type="number" placeholder="Qty">
+  <input id="amount" type="number" placeholder="Amount">
+  <button id="sellBtn">Sell</button>
+</div>
+
+<script type="module">
+  import { guard } from "../auth/guard.js";
+  import { DB, saveDB } from "../db/fakeDB.js";
+  guard("WORKER");
+
+  sellBtn.onclick = () => {
+    const user = JSON.parse(localStorage.getItem("currentUser"));
+
+    DB.sales.push({
+      id: Date.now(),
+      shopId: user.shopId,
+      product: product.value,
+      quantity: qty.value,
+      amount: amount.value,
+      soldBy: user.id,
+      createdAt: new Date()
+    });
+
+    DB.auditLogs.push({
+      id: Date.now(),
+      shopId: user.shopId,
+      userId: user.id,
+      action: "SALE_CREATED",
+      timestamp: new Date()
+    });
+
+    saveDB();
+    alert("Sale recorded");
+  };
+</script>
+
+</body>
+</html>

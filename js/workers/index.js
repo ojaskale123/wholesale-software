@@ -1,28 +1,28 @@
 // ==========================
-// TEMP DEV LOGIN (REMOVE LATER)
+// TEMP DEV USER (WORKER)
 // ==========================
-if (!localStorage.getItem("currentUser")) {
-    localStorage.setItem("currentUser", JSON.stringify({
+let user = JSON.parse(localStorage.getItem("currentUser"));
+
+if (!user) {
+    user = {
         role: "worker",
         id: "TEMP_WORKER_1",
         name: "Temporary Worker"
-    }));
-}
-// ==========================
-// AUTH CHECK (WORKER ONLY)
-// ==========================
-const user = JSON.parse(localStorage.getItem("currentUser"));
-
-if (!user || user.role !== "worker") {
-    location.href = "../../login.html";
+    };
+    localStorage.setItem("currentUser", JSON.stringify(user));
 }
 
 // ==========================
-// LOGOUT
+// AUTH CHECK REMOVED (DEMO MODE)
+// ==========================
+// NO redirect to login
+// NO role blocking
+
+// ==========================
+// LOGOUT DISABLED (DEMO MODE)
 // ==========================
 function logout() {
-    localStorage.removeItem("currentUser");
-    location.href = "../../login.html";
+    alert("Login disabled for demo");
 }
 
 // ==========================
@@ -52,10 +52,11 @@ function renderTasks(tasks) {
     taskList.innerHTML = "";
 
     if (tasks.length === 0) {
-        taskList.innerHTML =
-            `<p style="text-align:center; opacity:0.6;">
+        taskList.innerHTML = `
+            <p style="text-align:center; opacity:0.6;">
                 No tasks assigned
-             </p>`;
+            </p>
+        `;
         return;
     }
 
@@ -91,17 +92,11 @@ filterButtons.forEach(btn => {
 
         if (label === "All") {
             renderTasks(myTasks);
-        }
-
-        else if (label === "New") {
+        } else if (label === "New") {
             renderTasks(myTasks.filter(t => t.assignedDate === today));
-        }
-
-        else if (label === "About to End") {
+        } else if (label === "About to End") {
             renderTasks(myTasks.filter(t => t.dueDate === today));
-        }
-
-        else if (label === "Old") {
+        } else if (label === "Old") {
             renderTasks(myTasks.filter(t => t.dueDate < today));
         }
     });

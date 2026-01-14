@@ -1,27 +1,37 @@
 // ==========================
-// GET LOGGED-IN USER
+// GET / SET CURRENT USER (DEMO)
 // ==========================
-const user = JSON.parse(localStorage.getItem("currentUser"));
+let user = JSON.parse(localStorage.getItem("currentUser"));
+
 if (!user) {
-    location.href = "login.html";
+    // Default to OWNER for demo
+    user = {
+        role: "owner",
+        id: "OWNER_001",
+        name: "Owner"
+    };
+    localStorage.setItem("currentUser", JSON.stringify(user));
 }
 
 // ==========================
 // ROLE-BASED VISIBILITY
 // ==========================
+document.querySelectorAll(".owner-only").forEach(el => el.style.display = "none");
+document.querySelectorAll(".worker-only").forEach(el => el.style.display = "none");
+
 if (user.role === "owner") {
     document.querySelectorAll(".owner-only").forEach(el => el.style.display = "grid");
 }
+
 if (user.role === "worker") {
     document.querySelectorAll(".worker-only").forEach(el => el.style.display = "grid");
 }
 
 // ==========================
-// LOGOUT
+// LOGOUT DISABLED (DEMO MODE)
 // ==========================
 function logout() {
-    localStorage.removeItem("currentUser");
-    location.href = "login.html";
+    alert("Login disabled for demo");
 }
 
 // ==========================
@@ -60,12 +70,11 @@ function updateDashboardCards() {
     document.getElementById("totalCustomers").textContent = customers.length;
 
     // --------------------------
-    // TOTAL REVENUE = TOTAL PROFIT
+    // TOTAL REVENUE
     // --------------------------
     let totalRevenue = history.reduce((sum, entry) => {
         return sum + Number(entry.profit || 0);
     }, 0);
-
     document.getElementById("totalRevenue").textContent = "₹" + totalRevenue;
 
     // --------------------------
@@ -75,7 +84,6 @@ function updateDashboardCards() {
     let presentWorkers = workers.filter(
         w => Array.isArray(w.attendance) && w.attendance.includes(today)
     ).length;
-
     document.getElementById("presentWorkers").textContent = presentWorkers;
 
     // --------------------------

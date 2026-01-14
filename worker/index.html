@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Worker</title>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+
+<div class="container">
+  <h1>Worker Dashboard</h1>
+  <button onclick="location.href='sell.html'">Sell Product</button>
+</div>
+
+<script type="module">
+  import { guard } from "../auth/guard.js";
+  guard("WORKER");
+</script>
+
+</body>
+</html>

@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Owner</title>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+
+<div class="container">
+  <h1>Owner Dashboard</h1>
+
+  <div class="stats" id="stats"></div>
+</div>
+
+<script type="module">
+  import { guard } from "../auth/guard.js";
+  import { DB } from "../db/fakeDB.js";
+  guard("OWNER");
+
+  stats.innerHTML = `
+    <div class="stat-box">Shops: ${DB.shops.length}</div>
+    <div class="stat-box">Workers: ${DB.users.filter(u=>u.role==="WORKER").length}</div>
+    <div class="stat-box">Sales: ${DB.sales.length}</div>
+  `;
+</script>
+
+</body>
+</html>
