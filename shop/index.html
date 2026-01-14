@@ -1,21 +1,64 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Shopkeeper</title>
+  <title>Shop Dashboard</title>
   <link rel="stylesheet" href="../css/style.css">
+  <style>
+    .container {
+      padding: 20px;
+    }
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 20px;
+    }
+    .card {
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 6px 15px rgba(0,0,0,0.2);
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+    .card:hover {
+      transform: scale(1.05);
+    }
+  </style>
 </head>
+
 <body>
 
+<header class="top-header">
+  <h2>Shopkeeper Dashboard</h2>
+</header>
+
 <div class="container">
-  <h1>Shopkeeper Dashboard</h1>
-  <div class="card">
-    <p>Manage your shop workers and sales.</p>
+  <div class="card-grid">
+    <div class="card" onclick="location.href='stock.html'">
+      <h3>📦 Stock</h3>
+      <p>Manage products</p>
+    </div>
+
+    <div class="card" onclick="location.href='sell.html'">
+      <h3>💰 Sell Item</h3>
+      <p>Sell from stock</p>
+    </div>
+
+    <div class="card" onclick="location.href='repair.html'">
+      <h3>🛠 Repair Job</h3>
+      <p>Create repair job</p>
+    </div>
+
+    <div class="card" onclick="location.href='jobs.html'">
+      <h3>📋 Jobs</h3>
+      <p>All shop jobs</p>
+    </div>
   </div>
 </div>
 
 <script type="module">
-  import { guard } from "../auth/guard.js";
-  guard("SHOPKEEPER");
+  import { requireAuth } from "../auth/guard.js";
+  requireAuth(["SHOPKEEPER"]);
 </script>
 
 </body>

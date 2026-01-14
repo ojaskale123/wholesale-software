@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Sell Item</title>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+
+<body>
+
+<header class="top-header">
+  <h2>Sell Item</h2>
+</header>
+
+<div style="padding:20px">
+  <input id="phone" placeholder="Customer Phone">
+  <select id="product"></select>
+  <input id="qty" type="number" placeholder="Quantity">
+  <button onclick="sell()">Sell</button>
+</div>
+
+<script type="module">
+  import { requireAuth } from "../auth/guard.js";
+  import { DB, saveDB } from "../db/fakeDB.js";
+  import { logAction } from "../core/audit.js";
+
+  const user = requireAuth(["SHOPKEEPER"]);
+  const productSelect = document.getElementById("product");
+
+  DB.products
+    .filter(p => p.shopId === user.shopId)
+    .forEach(p => {
+      const o = document.createElement("option");
+      o.value = p.id;
+      o.textContent = `${p.name} (₹${p.price})`;
+      productSelect.appendChild(o);
+    });
+
+  window.sell = () => {
+    const prod = DB.products.find(p => p.id == product.value);
+    const quantity = Number(qty.value);
+
+    if (prod.quantity < quantity) {
+      alert("Not enough stock");
+      return;
+    }
+
+    prod.quantity -= quantity;
+
+    const jobId = Date.now();
+
+    DB.sales.push({
+      id: Date.now(),
+      jobId,
+      shopId: user.shopId,
+      amount: prod.price * quantity,
+      soldBy: user.id,
+      createdAt: new Date().toISOString()
+    });
+
+    DB.jobs = DB.jobs || [];
+    DB.jobs.push({
+      id: jobId,
+      shopId: user.shopId,
+      type: "SELL",
+      status: "DELIVERED",
+      createdAt: new Date().toISOString()
+    });
+
+    saveDB();
+    logAction(`Sold ${prod.name} qty ${quantity}`);
+
+    alert("Sold successfully");
+  };
+</script>
+
+</body>
+</html>

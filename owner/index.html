@@ -1,27 +1,163 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Owner</title>
+  <meta charset="UTF-8">
+  <title>Owner Dashboard</title>
   <link rel="stylesheet" href="../css/style.css">
+  <style>
+    body {
+      background: #aec6eb;
+      font-family: Arial, sans-serif;
+    }
+
+    .dashboard {
+      padding: 20px;
+    }
+
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+
+    .card {
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+      cursor: pointer;
+      transition: transform 0.2s ease;
+    }
+
+    .card:hover {
+      transform: scale(1.05);
+    }
+
+    .card h2 {
+      margin: 0;
+      font-size: 28px;
+      color: #203a43;
+    }
+
+    .card p {
+      margin-top: 8px;
+      font-size: 14px;
+      color: #555;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: white;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    th, td {
+      padding: 10px;
+      border-bottom: 1px solid #ddd;
+      text-align: left;
+      font-size: 14px;
+    }
+
+    th {
+      background: #203a43;
+      color: white;
+    }
+
+    .section {
+      margin-bottom: 40px;
+    }
+  </style>
 </head>
+
 <body>
 
-<div class="container">
-  <h1>Owner Dashboard</h1>
+<header class="top-header">
+  <h2>Owner Dashboard</h2>
+  <button onclick="logout()" class="logout-btn">Logout</button>
+</header>
 
-  <div class="stats" id="stats"></div>
+<div class="dashboard">
+
+  <!-- SUMMARY CARDS -->
+  <div class="card-grid">
+    <div class="card">
+      <h2 id="shopCount">0</h2>
+      <p>Total Shops</p>
+    </div>
+    <div class="card">
+      <h2 id="shopkeeperCount">0</h2>
+      <p>Shopkeepers</p>
+    </div>
+    <div class="card">
+      <h2 id="workerCount">0</h2>
+      <p>Workers</p>
+    </div>
+    <div class="card">
+      <h2 id="jobCount">0</h2>
+      <p>Total Jobs</p>
+    </div>
+    <div class="card">
+      <h2 id="customerCount">0</h2>
+      <p>Customers</p>
+    </div>
+    <div class="card" onclick="location.href='create-shop.html'">
+  <h2>➕</h2>
+  <p>Create New Shop</p>
+</div>
+
+  </div>
+
+  <!-- AUDIT LOGS -->
+  <div class="section">
+    <h3>Full Activity History</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>User</th>
+          <th>Role</th>
+          <th>Action</th>
+          <th>Time</th>
+        </tr>
+      </thead>
+      <tbody id="auditTable"></tbody>
+    </table>
+  </div>
+
 </div>
 
 <script type="module">
-  import { guard } from "../auth/guard.js";
+  import { requireAuth } from "../auth/guard.js";
+  import { logout } from "../auth/logout.js";
   import { DB } from "../db/fakeDB.js";
-  guard("OWNER");
 
-  stats.innerHTML = `
-    <div class="stat-box">Shops: ${DB.shops.length}</div>
-    <div class="stat-box">Workers: ${DB.users.filter(u=>u.role==="WORKER").length}</div>
-    <div class="stat-box">Sales: ${DB.sales.length}</div>
-  `;
+  const user = requireAuth(["OWNER"]);
+
+  // COUNTS
+  document.getElementById("shopCount").innerText = DB.shops.length;
+  document.getElementById("shopkeeperCount").innerText =
+    DB.users.filter(u => u.role === "SHOPKEEPER").length;
+  document.getElementById("workerCount").innerText =
+    DB.users.filter(u => u.role === "WORKER").length;
+  document.getElementById("jobCount").innerText = DB.sales.length;
+  document.getElementById("customerCount").innerText =
+    DB.customers ? DB.customers.length : 0;
+
+  // AUDIT LOGS
+  const auditTable = document.getElementById("auditTable");
+  DB.auditLogs.slice().reverse().forEach(log => {
+    const userObj = DB.users.find(u => u.id === log.userId);
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${userObj ? userObj.name : "Unknown"}</td>
+      <td>${log.role}</td>
+      <td>${log.action}</td>
+      <td>${new Date(log.timestamp).toLocaleString()}</td>
+    `;
+    auditTable.appendChild(tr);
+  });
 </script>
 
 </body>

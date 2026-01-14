@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Jobs</title>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+
+<body>
+
+<header class="top-header">
+  <h2>Jobs</h2>
+</header>
+
+<ul id="jobs" style="padding:20px"></ul>
+
+<script type="module">
+  import { requireAuth } from "../auth/guard.js";
+  import { DB } from "../db/fakeDB.js";
+
+  const user = requireAuth(["SHOPKEEPER"]);
+  const ul = document.getElementById("jobs");
+
+  (DB.jobs || [])
+    .filter(j => j.shopId === user.shopId)
+    .forEach(j => {
+      const li = document.createElement("li");
+      li.textContent = `${j.type} | ${j.status} | ${j.device || ""}`;
+      ul.appendChild(li);
+    });
+</script>
+
+</body>
+</html>

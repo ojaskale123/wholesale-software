@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Stock</title>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+
+<body>
+
+<header class="top-header">
+  <h2>Stock</h2>
+</header>
+
+<div style="padding:20px">
+  <input id="name" placeholder="Product name">
+  <input id="qty" type="number" placeholder="Quantity">
+  <input id="price" type="number" placeholder="Price">
+  <button onclick="addProduct()">Add</button>
+
+  <hr>
+  <ul id="list"></ul>
+</div>
+
+<script type="module">
+  import { requireAuth } from "../auth/guard.js";
+  import { DB, saveDB } from "../db/fakeDB.js";
+  import { logAction } from "../core/audit.js";
+
+  const user = requireAuth(["SHOPKEEPER"]);
+
+  const list = document.getElementById("list");
+
+  function render() {
+    list.innerHTML = "";
+    DB.products
+      .filter(p => p.shopId === user.shopId)
+      .forEach(p => {
+        const li = document.createElement("li");
+        li.textContent = `${p.name} | Qty: ${p.quantity} | ₹${p.price}`;
+        list.appendChild(li);
+      });
+  }
+
+  window.addProduct = () => {
+    DB.products.push({
+      id: Date.now(),
+      shopId: user.shopId,
+      name: name.value,
+      quantity: Number(qty.value),
+      price: Number(price.value)
+    });
+
+    saveDB();
+    logAction(`Added stock item ${name.value}`);
+    render();
+  };
+
+  render();
+</script>
+
+</body>
+</html>

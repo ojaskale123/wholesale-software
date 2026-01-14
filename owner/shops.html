@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>All Shops</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    .container {
+      padding: 20px;
+    }
+    .card {
+      background: white;
+      padding: 15px;
+      margin-bottom: 10px;
+      border-radius: 8px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+    }
+  </style>
+</head>
+
+<body>
+
+<header class="top-header">
+  <h2>All Shops</h2>
+</header>
+
+<div class="container" id="shopList"></div>
+
+<script type="module">
+  import { requireAuth } from "../auth/guard.js";
+  import { DB } from "../db/fakeDB.js";
+
+  requireAuth(["OWNER"]);
+
+  const container = document.getElementById("shopList");
+
+  DB.shops.forEach(shop => {
+    const keeper = DB.users.find(u => u.id === shop.shopkeeperId);
+
+    const div = document.createElement("div");
+    div.className = "card";
+    div.innerHTML = `
+      <h3>${shop.shopName}</h3>
+      <p>Shopkeeper: ${keeper ? keeper.name : "N/A"}</p>
+      <p>Status: ${shop.isActive ? "Active" : "Inactive"}</p>
+    `;
+    container.appendChild(div);
+  });
+</script>
+
+</body>
+</html>

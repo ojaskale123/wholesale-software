@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Create Repair Job</title>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+
+<body>
+
+<header class="top-header">
+  <h2>Repair Job</h2>
+</header>
+
+<div style="padding:20px">
+  <input id="phone" placeholder="Customer Phone">
+  <input id="device" placeholder="Device Name">
+  <input id="issue" placeholder="Issue">
+  <input id="cost" placeholder="Expected Cost">
+  <button onclick="createJob()">Create Job</button>
+</div>
+
+<script type="module">
+  import { requireAuth } from "../auth/guard.js";
+  import { DB, saveDB } from "../db/fakeDB.js";
+  import { logAction } from "../core/audit.js";
+
+  const user = requireAuth(["SHOPKEEPER"]);
+
+  window.createJob = () => {
+    DB.jobs = DB.jobs || [];
+
+    DB.jobs.push({
+      id: Date.now(),
+      shopId: user.shopId,
+      type: "REPAIR",
+      device: device.value,
+      issue: issue.value,
+      expectedCost: cost.value,
+      status: "IN_PROGRESS",
+      createdAt: new Date().toISOString()
+    });
+
+    saveDB();
+    logAction(`Created repair job for ${device.value}`);
+    alert("Job created");
+  };
+</script>
+
+</body>
+</html>
