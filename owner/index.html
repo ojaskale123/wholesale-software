@@ -84,6 +84,7 @@ td {
   padding:12px;
   font-size:13px;
   border-bottom:1px solid #eee;
+  vertical-align:top;
 }
 
 /* POPUPS */
@@ -131,8 +132,8 @@ td {
   </div>
 
   <div class="card" onclick="location.href='revenue.html'">
-    <div class="count">₹</div>
-    <div class="label">Revenue</div>
+    <div class="count" id="totalRevenue">0</div>
+    <div class="label">Total Revenue</div>
   </div>
 
   <div class="card" onclick="openSmallPopup('shopkeepersPopup')">
@@ -160,7 +161,12 @@ td {
 <h3>Recent Activity</h3>
 <table>
 <thead>
-<tr><th>User</th><th>Role</th><th>Action</th><th>Time</th></tr>
+<tr>
+  <th>User</th>
+  <th>Role</th>
+  <th>Activity</th>
+  <th>Time</th>
+</tr>
 </thead>
 <tbody id="auditTable"></tbody>
 </table>
@@ -181,18 +187,6 @@ td {
   <div id="workersList"></div>
 </div>
 
-<!-- SHOP POPUP -->
-<div class="popup" id="shopPopup">
-  <h2 id="shopTitle"></h2>
-
-  <div class="card-grid" style="margin-top:20px;">
-    <div class="card"><div class="count" id="popupRevenue">₹0</div><div class="label">Revenue</div></div>
-    <div class="card"><div class="count" id="popupJobs">0</div><div class="label">Jobs</div></div>
-    <div class="card"><div class="count" id="popupDone">0</div><div class="label">Done</div></div>
-    <div class="card"><div class="count" id="popupProgress">0</div><div class="label">In Progress</div></div>
-  </div>
-</div>
-
 <script type="module">
 import { DB } from "../db/fakeDB.js";
 
@@ -200,6 +194,14 @@ import { DB } from "../db/fakeDB.js";
 shopkeeperCount.innerText = DB.users.filter(u=>u.role==="SHOPKEEPER").length;
 workerCount.innerText = DB.users.filter(u=>u.role==="WORKER").length;
 jobCount.innerText = DB.tasks?.length || 0;
+
+/* TOTAL REVENUE = SELL + DELIVERED JOBS */
+const sellRevenue = (DB.sales || []).reduce((s,x)=>s+(x.total||0),0);
+const jobRevenue = (DB.tasks || [])
+  .filter(t=>t.status==="DONE_DELIVERED")
+  .reduce((s,x)=>s+(Number(x.expectedCost)||0),0);
+
+totalRevenue.innerText = sellRevenue + jobRevenue;
 
 /* SHOPS */
 DB.shops.forEach(shop=>{
@@ -221,19 +223,45 @@ workersList.innerHTML = DB.users
   .map(u=>`<p><b>${u.name}</b> (${u.phone})</p>`)
   .join("") || "<p>No workers</p>";
 
-/* ACTIVITY */
+/* RECENT ACTIVITY */
 DB.auditLogs.slice().reverse().forEach(log=>{
-  const u=DB.users.find(x=>x.id===log.userId);
-  auditTable.innerHTML+=`
+  const user = DB.users.find(u=>u.id===log.userId);
+  const shop = DB.shops.find(s=>s.id===log.shopId);
+
+  let amountHTML = "";
+
+  if (log.actionType === "SELL") {
+    const sale = DB.sales.find(s=>s.timestamp===log.timestamp);
+    if (sale) amountHTML = `<div><b>Amount:</b> ₹${sale.total}</div>`;
+  }
+
+  if (log.actionType === "WORK_DONE_DELIVERED") {
+    const job = DB.tasks.find(
+      t=>t.shopId===log.shopId && log.action.includes(t.device)
+    );
+    if (job?.expectedCost)
+      amountHTML = `<div><b>Job Amount:</b> ₹${job.expectedCost}</div>`;
+  }
+
+  auditTable.innerHTML += `
     <tr>
-      <td>${u?.name||"Unknown"}</td>
-      <td>${log.role}</td>
-      <td>${log.action}</td>
+      <td>
+        <b>${user?.name || "System"}</b>
+        <div style="font-size:12px;color:#666;">
+          ${shop?.name || "-"}
+        </div>
+      </td>
+      <td>${log.role || "-"}</td>
+      <td>
+        ${log.action}
+        ${amountHTML}
+      </td>
       <td>${new Date(log.timestamp).toLocaleString()}</td>
-    </tr>`;
+    </tr>
+  `;
 });
 
-/* POPUP HANDLERS */
+/* POPUPS */
 window.openSmallPopup=id=>{
   overlay.style.display="block";
   document.getElementById(id).style.display="block";
@@ -244,20 +272,8 @@ overlay.onclick=()=>{
   document.querySelectorAll(".popup").forEach(p=>p.style.display="none");
 };
 
-/* SHOP POPUP */
 window.openShopPopup=shopId=>{
-  const jobs=(DB.tasks||[]).filter(j=>j.shopId===shopId);
-  popupJobs.innerText=jobs.length;
-  popupDone.innerText=jobs.filter(j=>j.status==="DONE").length;
-  popupProgress.innerText=jobs.filter(j=>j.status==="IN_PROGRESS").length;
-  popupRevenue.innerText="₹"+(DB.sales||[])
-    .filter(s=>s.shopId===shopId)
-    .reduce((a,b)=>a+(b.total||0),0);
-
-  shopTitle.innerText=DB.shops.find(s=>s.id===shopId)?.name || "Shop";
-
-  overlay.style.display="block";
-  shopPopup.style.display="block";
+  alert("Shop popup can be extended later");
 };
 </script>
 

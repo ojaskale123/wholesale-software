@@ -7,48 +7,82 @@
 <style>
 body {
   margin: 0;
-  font-family: Arial, sans-serif;
+  font-family: Segoe UI, Arial, sans-serif;
   background: #f4f6f8;
   padding: 20px;
 }
 
 h2 {
   margin-bottom: 20px;
+  color: #203a43;
 }
 
+/* FILTERS */
+.filters {
+  margin-bottom: 20px;
+}
 select {
-  padding: 8px;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
   margin-right: 10px;
 }
 
+/* JOB CARD */
 .job {
   background: white;
-  padding: 14px;
-  border-radius: 12px;
-  margin-bottom: 12px;
+  padding: 16px;
+  border-radius: 14px;
+  margin-bottom: 14px;
   box-shadow: 0 6px 16px rgba(0,0,0,0.15);
 }
 
+.job b {
+  font-size: 16px;
+}
+
 .status {
+  display: inline-block;
+  margin-top: 8px;
+  padding: 4px 10px;
+  border-radius: 12px;
   font-size: 12px;
   font-weight: bold;
-  margin-top: 6px;
+  color: white;
+}
+
+/* STATUS COLORS */
+.OPEN { background:#f1c40f; color:#000; }
+.IN_PROGRESS { background:#3498db; }
+.DONE_NOT_DELIVERED { background:#8e44ad; }
+.DONE_DELIVERED { background:#2ecc71; }
+
+.empty {
+  margin-top: 40px;
+  color: #777;
+  text-align: center;
 }
 </style>
 </head>
+
 <body>
 
 <h2>All Jobs</h2>
 
 <!-- FILTERS -->
-<select id="statusFilter">
-  <option value="">All Status</option>
-  <option value="IN_PROGRESS">In Progress</option>
-  <option value="DONE">Done</option>
-  <option value="NOT_ASSIGNED">Not Assigned</option>
-</select>
+<div class="filters">
+  <select id="statusFilter">
+    <option value="">All Status</option>
+    <option value="OPEN">Not Assigned</option>
+    <option value="IN_PROGRESS">In Progress</option>
+    <option value="DONE_NOT_DELIVERED">Done (Not Delivered)</option>
+    <option value="DONE_DELIVERED">Done & Delivered</option>
+  </select>
 
-<select id="shopFilter"></select>
+  <select id="shopFilter">
+    <option value="">All Shops</option>
+  </select>
+</div>
 
 <div id="jobsList"></div>
 
@@ -59,35 +93,47 @@ const statusFilter = document.getElementById("statusFilter");
 const shopFilter = document.getElementById("shopFilter");
 const jobsList = document.getElementById("jobsList");
 
-// Load shops
-shopFilter.innerHTML =
-  `<option value="">All Shops</option>` +
-  DB.shops.map(s => `<option value="${s.id}">${s.name}</option>`).join("");
+/* LOAD SHOPS */
+shopFilter.innerHTML += DB.shops
+  .map(s => `<option value="${s.id}">${s.name}</option>`)
+  .join("");
 
 function renderJobs() {
   jobsList.innerHTML = "";
 
-  DB.tasks
-    .filter(job => {
-      if (statusFilter.value && job.status !== statusFilter.value) return false;
-      if (shopFilter.value && job.shopId !== shopFilter.value) return false;
-      return true;
-    })
-    .forEach(job => {
-      const shop = DB.shops.find(s => s.id === job.shopId);
+  const filtered = DB.tasks.filter(job => {
+    if (job.type !== "REPAIR") return false;
+    if (statusFilter.value && job.status !== statusFilter.value) return false;
+    if (shopFilter.value && job.shopId !== shopFilter.value) return false;
+    return true;
+  });
 
-      jobsList.innerHTML += `
-        <div class="job">
-          <b>${job.title || "Job"}</b><br>
-          Shop: ${shop?.name || "-"}<br>
-          <span class="status">Status: ${job.status}</span>
-        </div>
-      `;
-    });
+  if (!filtered.length) {
+    jobsList.innerHTML = `<div class="empty">No jobs found</div>`;
+    return;
+  }
+
+  filtered.forEach(job => {
+    const shop = DB.shops.find(s => s.id === job.shopId);
+    const worker = DB.users.find(u => u.id === job.assignedTo);
+
+    jobsList.innerHTML += `
+      <div class="job">
+        <b>${job.device}</b><br>
+        Customer: ${job.customerName} (${job.customerPhone})<br>
+        Shop: ${shop?.name || "-"}<br>
+        Worker: ${worker?.name || "Not Assigned"}<br>
+
+        <span class="status ${job.status}">
+          ${job.status.replaceAll("_"," ")}
+        </span>
+      </div>
+    `;
+  });
 }
 
-statusFilter.addEventListener("change", renderJobs);
-shopFilter.addEventListener("change", renderJobs);
+statusFilter.onchange = renderJobs;
+shopFilter.onchange = renderJobs;
 
 renderJobs();
 </script>

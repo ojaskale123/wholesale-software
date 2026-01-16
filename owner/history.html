@@ -47,7 +47,6 @@ select, input {
   padding:16px 18px;
   border-radius:14px;
   box-shadow:0 8px 20px rgba(0,0,0,.12);
-  position:relative;
 }
 
 .log b {
@@ -77,7 +76,6 @@ select, input {
 .SELL { background:#27ae60; }
 
 .WORK_CREATED { background:#7f8c8d; }
-.WORK_ACCEPTED,
 .WORK_IN_PROGRESS { background:#f39c12; }
 .WORK_DONE_NOT_DELIVERED { background:#8e44ad; }
 .WORK_DONE_DELIVERED { background:#2ecc71; }
@@ -85,6 +83,7 @@ select, input {
 .SHOP_CREATED,
 .SHOPKEEPER_CREATED,
 .WORKER_CREATED { background:#34495e; }
+.SYSTEM { background:#95a5a6; }
 </style>
 </head>
 
@@ -99,7 +98,6 @@ select, input {
 
   <select id="roleFilter">
     <option value="">All Roles</option>
-    <option value="OWNER">Owner</option>
     <option value="SHOPKEEPER">Shopkeeper</option>
     <option value="WORKER">Worker</option>
   </select>
@@ -117,8 +115,8 @@ select, input {
     <option value="WORKER_CREATED">Worker Created</option>
   </select>
 
-  <input type="date" id="fromDate">
-  <input type="date" id="toDate">
+  <!-- ✅ SINGLE DATE -->
+  <input type="date" id="dateFilter">
 </div>
 
 <div class="timeline" id="historyList"></div>
@@ -131,17 +129,37 @@ shopFilter.innerHTML += DB.shops
   .map(s => `<option value="${s.id}">${s.name}</option>`)
   .join("");
 
+function inferType(log) {
+  if (log.actionType) return log.actionType;
+
+  const a = log.action.toLowerCase();
+  if (a.includes("sell")) return "SELL";
+  if (a.includes("buy")) return "BUY";
+  if (a.includes("repair job created")) return "WORK_CREATED";
+  if (a.includes("accepted")) return "WORK_IN_PROGRESS";
+  if (a.includes("delivered")) return "WORK_DONE_DELIVERED";
+  if (a.includes("completed")) return "WORK_DONE_NOT_DELIVERED";
+  if (a.includes("shop created")) return "SHOP_CREATED";
+  if (a.includes("shopkeeper")) return "SHOPKEEPER_CREATED";
+  if (a.includes("worker")) return "WORKER_CREATED";
+  return "SYSTEM";
+}
+
 function renderHistory() {
   historyList.innerHTML = "";
 
   DB.auditLogs
     .filter(log => {
-      if (shopFilter.value && log.shopId !== shopFilter.value) return false;
-      if (roleFilter.value && log.role !== roleFilter.value) return false;
-      if (typeFilter.value && log.actionType !== typeFilter.value) return false;
+      const type = inferType(log);
 
-      if (fromDate.value && new Date(log.timestamp) < new Date(fromDate.value)) return false;
-      if (toDate.value && new Date(log.timestamp) > new Date(toDate.value + "T23:59:59")) return false;
+      if (shopFilter.value && log.shopId && log.shopId !== shopFilter.value) return false;
+      if (roleFilter.value && log.role !== roleFilter.value) return false;
+      if (typeFilter.value && type !== typeFilter.value) return false;
+
+      if (dateFilter.value) {
+        const logDate = new Date(log.timestamp).toISOString().slice(0,10);
+        if (logDate !== dateFilter.value) return false;
+      }
 
       return true;
     })
@@ -150,14 +168,15 @@ function renderHistory() {
     .forEach(log => {
       const user = DB.users.find(u => u.id === log.userId);
       const shop = DB.shops.find(s => s.id === log.shopId);
+      const type = inferType(log);
 
       historyList.innerHTML += `
         <div class="log">
           <b>${user?.name || "System"}</b>
-          <span class="badge ${log.actionType}">${log.actionType.replaceAll("_"," ")}</span>
+          <span class="badge ${type}">${type.replaceAll("_"," ")}</span>
           <div>${log.action}</div>
           <small>
-            Role: ${log.role} |
+            Role: ${log.role || "-"} |
             Shop: ${shop?.name || "-"} |
             ${new Date(log.timestamp).toLocaleString()}
           </small>
@@ -169,8 +188,7 @@ function renderHistory() {
 shopFilter.onchange =
 roleFilter.onchange =
 typeFilter.onchange =
-fromDate.onchange =
-toDate.onchange = renderHistory;
+dateFilter.onchange = renderHistory;
 
 renderHistory();
 </script>

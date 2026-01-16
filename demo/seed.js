@@ -1,5 +1,11 @@
 import { DB, saveDB } from "../db/fakeDB.js";
 
+/* 🛑 RUN ONLY ONCE */
+if (localStorage.getItem("seeded")) {
+  console.log("⚠️ Seed already applied. Skipping...");
+  return;
+}
+
 DB.users = [
   {
     id: 1,
@@ -30,5 +36,7 @@ DB.users = [
   }
 ];
 
+localStorage.setItem("seeded", "true");
 saveDB();
-console.log("✅ Users seeded successfully");
+
+console.log("✅ Users seeded successfully (ONE TIME)");

@@ -52,6 +52,7 @@
       border: none;
       border-radius: 8px;
       cursor: pointer;
+      font-size: 15px;
     }
   </style>
 </head>
@@ -74,7 +75,8 @@
     <input id="expectedCost" type="number" placeholder="Expected Cost">
     <input id="expectedDate" type="date">
 
-    <button class="btn" onclick="createJob()">CREATE JOB</button>
+    <!-- ✅ FIXED BUTTON -->
+    <button class="btn" id="createJobBtn">CREATE JOB</button>
 
   </div>
 </div>
@@ -87,7 +89,17 @@ if (!currentUser || !["SHOPKEEPER","WORKER"].includes(currentUser.role)) {
   location.href = "/login.html";
 }
 
-function createJob() {
+/* ELEMENTS */
+const custNameEl = document.getElementById("custName");
+const custPhoneEl = document.getElementById("custPhone");
+const deviceEl = document.getElementById("device");
+const issueEl = document.getElementById("issue");
+const expectedCostEl = document.getElementById("expectedCost");
+const expectedDateEl = document.getElementById("expectedDate");
+const btn = document.getElementById("createJobBtn");
+
+/* CLICK HANDLER */
+btn.addEventListener("click", () => {
   const custName = custNameEl.value.trim();
   const custPhone = custPhoneEl.value.trim();
   const device = deviceEl.value.trim();
@@ -118,7 +130,7 @@ function createJob() {
     createdAt: Date.now()
   });
 
-  // 🔴 AUDIT LOG (IMPORTANT)
+  /* ✅ AUDIT LOG */
   DB.auditLogs.push({
     id: "LOG_" + Date.now(),
     userId: currentUser.id,
@@ -130,17 +142,9 @@ function createJob() {
   });
 
   saveDB();
-
   alert("Repair job created successfully");
   location.href = "index.html";
-}
-
-const custNameEl = document.getElementById("custName");
-const custPhoneEl = document.getElementById("custPhone");
-const deviceEl = document.getElementById("device");
-const issueEl = document.getElementById("issue");
-const expectedCostEl = document.getElementById("expectedCost");
-const expectedDateEl = document.getElementById("expectedDate");
+});
 </script>
 
 </body>
