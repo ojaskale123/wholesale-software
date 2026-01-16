@@ -8,7 +8,7 @@
     body { margin: 0; background: #f4f6f8; }
 
     .app-header {
-      background: linear-gradient(90deg, #0f2027, #203a43, #2c5364);
+      background: linear-gradient(90deg,#0f2027,#203a43,#2c5364);
       color: white;
       padding: 14px 18px;
       display: flex;
@@ -39,9 +39,9 @@
 
     .job {
       background: white;
-      padding: 15px;
-      margin-bottom: 12px;
-      border-radius: 10px;
+      padding: 16px;
+      margin-bottom: 14px;
+      border-radius: 12px;
       box-shadow: 0 4px 12px rgba(0,0,0,0.15);
     }
 
@@ -51,16 +51,17 @@
 
     .status {
       display: inline-block;
-      padding: 4px 10px;
-      border-radius: 12px;
+      padding: 6px 12px;
+      border-radius: 14px;
       font-size: 12px;
       font-weight: bold;
-      margin-top: 6px;
+      margin-top: 8px;
     }
 
-    .OPEN { background: #f1c40f; color: #000; }
-    .IN_PROGRESS { background: #3498db; color: #fff; }
-    .READY { background: #2ecc71; color: #fff; }
+    .OPEN { background:#f1c40f; color:#000; }
+    .IN_PROGRESS { background:#3498db; color:#fff; }
+    .DONE_NOT_DELIVERED { background:#9b59b6; color:#fff; }
+    .DONE_DELIVERED { background:#2ecc71; color:#fff; }
 
     .empty {
       text-align: center;
@@ -82,55 +83,64 @@
   <input
     id="search"
     class="search"
-    placeholder="Search by device, customer name, phone, or status"
+    placeholder="Search by device, customer, phone, or status"
   >
 
   <div id="jobs"></div>
 </div>
 
-<script>
-  const jobsDiv = document.getElementById("jobs");
-  const searchInput = document.getElementById("search");
+<script type="module">
+import { DB } from "../db/fakeDB.js";
 
-  // ✅ READ FROM CORRECT STORAGE
-  const tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+const jobsDiv = document.getElementById("jobs");
+const searchInput = document.getElementById("search");
+const currentUser = JSON.parse(localStorage.getItem("currentUser"));
 
-  function render(filter = "") {
-    jobsDiv.innerHTML = "";
-    const f = filter.toLowerCase();
+function render(filter = "") {
+  jobsDiv.innerHTML = "";
+  const f = filter.toLowerCase();
 
-    const filtered = tasks.filter(j =>
-      j.type === "REPAIR" &&
-      (
-        (j.device || "").toLowerCase().includes(f) ||
-        (j.customerName || "").toLowerCase().includes(f) ||
-        (j.customerPhone || "").includes(f) ||
-        (j.status || "").toLowerCase().includes(f)
-      )
-    );
+  let tasks = DB.tasks || [];
 
-    if (!filtered.length) {
-      jobsDiv.innerHTML = `<div class="empty">No jobs found</div>`;
-      return;
-    }
-
-    filtered.forEach(job => {
-      const div = document.createElement("div");
-      div.className = "job";
-      div.innerHTML = `
-        <h4>${job.device}</h4>
-        <p><b>Customer:</b> ${job.customerName} (${job.customerPhone})</p>
-        <p><b>Issue:</b> ${job.issue || "-"}</p>
-        <p><b>Expected Cost:</b> ₹${job.expectedCost || "-"}</p>
-        <p><b>Worker:</b> ${job.assignedTo || "Not accepted yet"}</p>
-        <span class="status ${job.status}">${job.status}</span>
-      `;
-      jobsDiv.appendChild(div);
-    });
+  // 🔐 Role-based visibility
+  if (currentUser.role !== "OWNER") {
+    tasks = tasks.filter(t => t.shopId === currentUser.shopId);
   }
 
-  searchInput.oninput = e => render(e.target.value);
-  render();
+  const filtered = tasks.filter(j =>
+    j.type === "REPAIR" &&
+    (
+      (j.device || "").toLowerCase().includes(f) ||
+      (j.customerName || "").toLowerCase().includes(f) ||
+      (j.customerPhone || "").includes(f) ||
+      (j.status || "").toLowerCase().includes(f)
+    )
+  );
+
+  if (!filtered.length) {
+    jobsDiv.innerHTML = `<div class="empty">No jobs found</div>`;
+    return;
+  }
+
+  filtered.forEach(job => {
+    const worker = DB.users.find(u => u.id === job.assignedTo);
+
+    const div = document.createElement("div");
+    div.className = "job";
+    div.innerHTML = `
+      <h4>${job.device}</h4>
+      <p><b>Customer:</b> ${job.customerName} (${job.customerPhone})</p>
+      <p><b>Issue:</b> ${job.issue || "-"}</p>
+      <p><b>Expected Cost:</b> ₹${job.expectedCost || "-"}</p>
+      <p><b>Worker:</b> ${worker?.name || "Not accepted yet"}</p>
+      <span class="status ${job.status}">${job.status.replaceAll("_"," ")}</span>
+    `;
+    jobsDiv.appendChild(div);
+  });
+}
+
+searchInput.oninput = e => render(e.target.value);
+render();
 </script>
 
 </body>

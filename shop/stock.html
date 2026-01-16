@@ -20,7 +20,6 @@
       padding: 20px;
     }
 
-    /* CATEGORY CARDS */
     .categories {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(180px,1fr));
@@ -39,9 +38,7 @@
       transition: transform 0.2s ease;
     }
 
-    .cat-card:hover {
-      transform: translateY(-4px);
-    }
+    .cat-card:hover { transform: translateY(-4px); }
 
     .spare { background: linear-gradient(135deg,#667eea,#764ba2); }
     .electronics { background: linear-gradient(135deg,#38ef7d,#11998e); }
@@ -71,7 +68,6 @@
       border-radius: 6px;
     }
 
-    /* ===== POPUP ===== */
     .overlay {
       position: fixed;
       inset: 0;
@@ -89,12 +85,6 @@
       border-radius: 16px;
       box-shadow: 0 15px 40px rgba(0,0,0,0.35);
       overflow: hidden;
-      animation: scaleIn 0.2s ease;
-    }
-
-    @keyframes scaleIn {
-      from { transform: scale(0.95); opacity: 0; }
-      to { transform: scale(1); opacity: 1; }
     }
 
     .popup-header {
@@ -104,20 +94,6 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-    }
-
-    .popup-header h3 {
-      margin: 0;
-      font-size: 18px;
-    }
-
-    .close-btn {
-      background: crimson;
-      color: white;
-      border: none;
-      padding: 6px 12px;
-      border-radius: 6px;
-      cursor: pointer;
     }
 
     .popup-body {
@@ -135,14 +111,7 @@
       font-size: 14px;
     }
 
-    .item b {
-      font-size: 15px;
-    }
-
-    .profit {
-      color: #1e8e3e;
-      font-weight: bold;
-    }
+    .profit { color: #1e8e3e; font-weight: bold; }
   </style>
 </head>
 
@@ -154,7 +123,6 @@
 
 <div class="container">
 
-  <!-- CATEGORY CARDS -->
   <div class="categories">
     <div class="cat-card spare" onclick="openCategory('SPARE')">Spare Parts</div>
     <div class="cat-card electronics" onclick="openCategory('ELECTRONICS')">Electronics</div>
@@ -162,7 +130,6 @@
     <div class="cat-card phone" onclick="openCategory('SECOND_HAND')">Second-hand Phones</div>
   </div>
 
-  <!-- ADD PRODUCT -->
   <div class="card">
     <h3>Add Product</h3>
 
@@ -182,106 +149,111 @@
     <input id="quantity" type="number" placeholder="Quantity">
     <input id="location" placeholder="Location (optional)">
 
-    <button type="button" onclick="addProduct()">ADD PRODUCT</button>
+    <button onclick="addProduct()">ADD PRODUCT</button>
   </div>
 
 </div>
 
-<!-- POPUP -->
 <div class="overlay" id="overlay">
   <div class="popup">
     <div class="popup-header">
       <h3 id="popupTitle"></h3>
-      <button class="close-btn" onclick="closePopup()">Back</button>
+      <button onclick="closePopup()">Back</button>
     </div>
     <div class="popup-body" id="popupList"></div>
   </div>
 </div>
 
-<script>
-  function getProducts() {
-    return JSON.parse(localStorage.getItem("products")) || [];
+<script type="module">
+import { DB, saveDB } from "../db/fakeDB.js";
+
+const user = JSON.parse(localStorage.getItem("currentUser"));
+if (!user || !["SHOPKEEPER","OWNER"].includes(user.role)) {
+  location.href = "/login.html";
+}
+
+function addProduct() {
+  const name = nameEl.value.trim();
+  const barcode = barcodeEl.value.trim();
+  const category = categoryEl.value;
+  const buyPrice = Number(buyPriceEl.value);
+  const sellPrice = Number(sellPriceEl.value);
+  const quantity = Number(quantityEl.value);
+  const location = locationEl.value.trim();
+
+  if (!name || !category || !buyPrice || !sellPrice || !quantity) {
+    alert("Fill all required fields");
+    return;
   }
 
-  function saveProducts(products) {
-    localStorage.setItem("products", JSON.stringify(products));
+  DB.products.push({
+    id: "PROD_" + Date.now(),
+    shopId: user.shopId,
+    name,
+    barcode,
+    category,
+    buyPrice,
+    sellPrice,
+    quantity,
+    location,
+    createdAt: Date.now()
+  });
+
+  DB.auditLogs.push({
+    id: "LOG_" + Date.now(),
+    userId: user.id,
+    role: user.role,
+    shopId: user.shopId,
+    actionType: "BUY",
+    action: `Added stock: ${name} (${quantity})`,
+    timestamp: Date.now()
+  });
+
+  saveDB();
+  alert("Product added");
+
+  nameEl.value = barcodeEl.value = categoryEl.value =
+  buyPriceEl.value = sellPriceEl.value = quantityEl.value =
+  locationEl.value = "";
+}
+
+function openCategory(cat) {
+  const products = DB.products.filter(
+    p => p.shopId === user.shopId && p.category === cat
+  );
+
+  popupTitle.innerText = cat.replace("_"," ");
+  popupList.innerHTML = "";
+
+  if (products.length === 0) {
+    popupList.innerHTML = "<p>No items in this category</p>";
   }
 
-  function addProduct() {
-    const name = document.getElementById("name").value.trim();
-    const barcode = document.getElementById("barcode").value.trim();
-    const category = document.getElementById("category").value;
-    const buyPrice = document.getElementById("buyPrice").value;
-    const sellPrice = document.getElementById("sellPrice").value;
-    const quantity = document.getElementById("quantity").value;
-    const location = document.getElementById("location").value.trim();
+  products.forEach(p => {
+    popupList.innerHTML += `
+      <div class="item">
+        <b>${p.name}</b><br>
+        Sell: ₹${p.sellPrice} | Buy: ₹${p.buyPrice}<br>
+        Qty: ${p.quantity} |
+        <span class="profit">Profit: ₹${p.sellPrice - p.buyPrice}</span>
+      </div>
+    `;
+  });
 
-    if (!name || !category || !buyPrice || !sellPrice || !quantity) {
-      alert("Please fill all required fields");
-      return;
-    }
+  overlay.style.display = "flex";
+}
 
-    const products = getProducts();
+function closePopup() {
+  overlay.style.display = "none";
+}
 
-    products.push({
-      id: Date.now(),
-      name,
-      barcode,
-      category,
-      buyPrice: Number(buyPrice),
-      sellPrice: Number(sellPrice),
-      quantity: Number(quantity),
-      location
-    });
-
-    saveProducts(products);
-
-    alert("Product added successfully");
-
-    document.getElementById("name").value = "";
-    document.getElementById("barcode").value = "";
-    document.getElementById("category").value = "";
-    document.getElementById("buyPrice").value = "";
-    document.getElementById("sellPrice").value = "";
-    document.getElementById("quantity").value = "";
-    document.getElementById("location").value = "";
-  }
-
-  function openCategory(cat) {
-    const products = getProducts().filter(p => p.category === cat);
-    const titleMap = {
-      SPARE: "Spare Parts",
-      ELECTRONICS: "Electronics",
-      BATTERY: "Batteries",
-      SECOND_HAND: "Second-hand Phones"
-    };
-
-    document.getElementById("popupTitle").innerText = titleMap[cat];
-    const list = document.getElementById("popupList");
-    list.innerHTML = "";
-
-    if (products.length === 0) {
-      list.innerHTML = "<p>No items in this category</p>";
-    }
-
-    products.forEach(p => {
-      const profit = p.sellPrice - p.buyPrice;
-      list.innerHTML += `
-        <div class="item">
-          <b>${p.name}</b><br>
-          Sell: ₹${p.sellPrice} | Buy: ₹${p.buyPrice}<br>
-          Qty: ${p.quantity} |
-          <span class="profit">Profit: ₹${profit}</span>
-        </div>
-      `;
-    });
-
-    document.getElementById("overlay").style.display = "flex";
-  }
-
-  function closePopup() {
-    document.getElementById("overlay").style.display = "none";
-  }
+const nameEl = document.getElementById("name");
+const barcodeEl = document.getElementById("barcode");
+const categoryEl = document.getElementById("category");
+const buyPriceEl = document.getElementById("buyPrice");
+const sellPriceEl = document.getElementById("sellPrice");
+const quantityEl = document.getElementById("quantity");
+const locationEl = document.getElementById("location");
 </script>
 
 </body>

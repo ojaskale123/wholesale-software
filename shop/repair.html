@@ -79,41 +79,68 @@
   </div>
 </div>
 
-<script>
-  function createJob() {
-    const custName = document.getElementById("custName").value.trim();
-    const custPhone = document.getElementById("custPhone").value.trim();
-    const device = document.getElementById("device").value.trim();
-    const issue = document.getElementById("issue").value.trim();
-    const expectedCost = document.getElementById("expectedCost").value;
-    const expectedDate = document.getElementById("expectedDate").value;
+<script type="module">
+import { DB, saveDB } from "../db/fakeDB.js";
 
-    if (!custName || !custPhone || !device) {
-      alert("Please fill required fields");
-      return;
-    }
+const currentUser = JSON.parse(localStorage.getItem("currentUser"));
+if (!currentUser || !["SHOPKEEPER","WORKER"].includes(currentUser.role)) {
+  location.href = "/login.html";
+}
 
-    const jobs = JSON.parse(localStorage.getItem("tasks")) || [];
+function createJob() {
+  const custName = custNameEl.value.trim();
+  const custPhone = custPhoneEl.value.trim();
+  const device = deviceEl.value.trim();
+  const issue = issueEl.value.trim();
+  const expectedCost = Number(expectedCostEl.value);
+  const expectedDate = expectedDateEl.value;
 
-    jobs.push({
-      id: Date.now(),
-      type: "REPAIR",
-      customerName: custName,
-      customerPhone: custPhone,
-      device,
-      issue,
-      expectedCost,
-      expectedDate,
-      status: "OPEN",
-      assignedTo: null,
-      createdAt: new Date().toLocaleString()
-    });
-
-    localStorage.setItem("tasks", JSON.stringify(jobs));
-
-    alert("Repair job created successfully");
-    location.href = "index.html";
+  if (!custName || !custPhone || !device) {
+    alert("Please fill required fields");
+    return;
   }
+
+  const jobId = "JOB_" + Date.now();
+
+  DB.tasks.push({
+    id: jobId,
+    type: "REPAIR",
+    shopId: currentUser.shopId,
+    customerName: custName,
+    customerPhone: custPhone,
+    device,
+    issue,
+    expectedCost,
+    expectedDate,
+    status: "OPEN",
+    assignedTo: null,
+    createdBy: currentUser.id,
+    createdAt: Date.now()
+  });
+
+  // 🔴 AUDIT LOG (IMPORTANT)
+  DB.auditLogs.push({
+    id: "LOG_" + Date.now(),
+    userId: currentUser.id,
+    role: currentUser.role,
+    shopId: currentUser.shopId,
+    actionType: "WORK_CREATED",
+    action: `Created repair job (${device})`,
+    timestamp: Date.now()
+  });
+
+  saveDB();
+
+  alert("Repair job created successfully");
+  location.href = "index.html";
+}
+
+const custNameEl = document.getElementById("custName");
+const custPhoneEl = document.getElementById("custPhone");
+const deviceEl = document.getElementById("device");
+const issueEl = document.getElementById("issue");
+const expectedCostEl = document.getElementById("expectedCost");
+const expectedDateEl = document.getElementById("expectedDate");
 </script>
 
 </body>

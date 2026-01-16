@@ -1,30 +1,130 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="UTF-8">
   <title>Revenue</title>
-  <link rel="stylesheet" href="../css/style.css">
+
+  <style>
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Arial, sans-serif;
+      background: #f4f6f8;
+    }
+
+    header {
+      background: linear-gradient(90deg,#0f2027,#203a43,#2c5364);
+      color: white;
+      padding: 18px 22px;
+    }
+
+    .container {
+      padding: 22px;
+    }
+
+    .summary {
+      background: white;
+      padding: 22px;
+      border-radius: 16px;
+      box-shadow: 0 10px 28px rgba(0,0,0,0.15);
+      margin-bottom: 26px;
+      text-align: center;
+    }
+
+    .summary h1 {
+      margin: 0;
+      font-size: 36px;
+      color: #203a43;
+    }
+
+    .summary p {
+      margin-top: 6px;
+      color: #666;
+      font-size: 14px;
+    }
+
+    .shop {
+      background: white;
+      padding: 18px;
+      border-radius: 14px;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.12);
+      margin-bottom: 16px;
+    }
+
+    .shop h3 {
+      margin: 0;
+      color: #203a43;
+    }
+
+    .amount {
+      margin-top: 6px;
+      font-size: 20px;
+      font-weight: bold;
+      color: #2ecc71;
+    }
+
+    .empty {
+      text-align: center;
+      color: #777;
+      margin-top: 40px;
+    }
+  </style>
 </head>
+
 <body>
 
-<header class="top-header">
-  <h2>Total Revenue</h2>
+<header>
+  <h2>Total Profit (Revenue)</h2>
 </header>
 
-<ul id="rev" style="padding:20px"></ul>
+<div class="container">
+
+  <div class="summary">
+    <h1 id="totalProfit">₹0</h1>
+    <p>Total profit across all shops</p>
+  </div>
+
+  <div id="shopWise"></div>
+
+</div>
 
 <script type="module">
   import { requireAuth } from "../auth/guard.js";
   import { DB } from "../db/fakeDB.js";
 
   requireAuth(["OWNER"]);
-  const ul = document.getElementById("rev");
 
-  let total = 0;
-  DB.sales.forEach(s => total += s.amount);
+  let totalProfit = 0;
+  const shopMap = {};
 
-  const li = document.createElement("li");
-  li.textContent = `Total Revenue: ₹${total}`;
-  ul.appendChild(li);
+  DB.sales.forEach(sale => {
+    const amount = Number(sale.total || 0);
+    totalProfit += amount;
+
+    if (!shopMap[sale.shopId]) {
+      shopMap[sale.shopId] = 0;
+    }
+    shopMap[sale.shopId] += amount;
+  });
+
+  document.getElementById("totalProfit").innerText = `₹${totalProfit}`;
+
+  const container = document.getElementById("shopWise");
+
+  if (!Object.keys(shopMap).length) {
+    container.innerHTML = `<div class="empty">No sales recorded yet</div>`;
+  }
+
+  DB.shops.forEach(shop => {
+    const amount = shopMap[shop.id] || 0;
+
+    const div = document.createElement("div");
+    div.className = "shop";
+    div.innerHTML = `
+      <h3>${shop.name}</h3>
+      <div class="amount">₹${amount}</div>
+    `;
+    container.appendChild(div);
+  });
 </script>
 
 </body>

@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Jobs</title>
+
+<style>
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #f4f6f8;
+  padding: 20px;
+}
+
+h2 {
+  margin-bottom: 20px;
+}
+
+select {
+  padding: 8px;
+  margin-right: 10px;
+}
+
+.job {
+  background: white;
+  padding: 14px;
+  border-radius: 12px;
+  margin-bottom: 12px;
+  box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+}
+
+.status {
+  font-size: 12px;
+  font-weight: bold;
+  margin-top: 6px;
+}
+</style>
+</head>
+<body>
+
+<h2>All Jobs</h2>
+
+<!-- FILTERS -->
+<select id="statusFilter">
+  <option value="">All Status</option>
+  <option value="IN_PROGRESS">In Progress</option>
+  <option value="DONE">Done</option>
+  <option value="NOT_ASSIGNED">Not Assigned</option>
+</select>
+
+<select id="shopFilter"></select>
+
+<div id="jobsList"></div>
+
+<script type="module">
+import { DB } from "../db/fakeDB.js";
+
+const statusFilter = document.getElementById("statusFilter");
+const shopFilter = document.getElementById("shopFilter");
+const jobsList = document.getElementById("jobsList");
+
+// Load shops
+shopFilter.innerHTML =
+  `<option value="">All Shops</option>` +
+  DB.shops.map(s => `<option value="${s.id}">${s.name}</option>`).join("");
+
+function renderJobs() {
+  jobsList.innerHTML = "";
+
+  DB.tasks
+    .filter(job => {
+      if (statusFilter.value && job.status !== statusFilter.value) return false;
+      if (shopFilter.value && job.shopId !== shopFilter.value) return false;
+      return true;
+    })
+    .forEach(job => {
+      const shop = DB.shops.find(s => s.id === job.shopId);
+
+      jobsList.innerHTML += `
+        <div class="job">
+          <b>${job.title || "Job"}</b><br>
+          Shop: ${shop?.name || "-"}<br>
+          <span class="status">Status: ${job.status}</span>
+        </div>
+      `;
+    });
+}
+
+statusFilter.addEventListener("change", renderJobs);
+shopFilter.addEventListener("change", renderJobs);
+
+renderJobs();
+</script>
+
+</body>
+</html>

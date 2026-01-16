@@ -37,7 +37,6 @@
     }
 
     .job h4 { margin:0 0 6px 0; }
-
     .job p { margin:4px 0; font-size:14px; }
 
     .accept-btn {
@@ -70,52 +69,72 @@
 
 <div class="container" id="jobs"></div>
 
-<script>
-  const container = document.getElementById("jobs");
+<script type="module">
+import { DB, saveDB } from "../db/fakeDB.js";
 
-  // ✅ READ FROM CORRECT STORAGE
-  const tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+const container = document.getElementById("jobs");
+const currentUser = JSON.parse(localStorage.getItem("currentUser"));
 
-  // ✅ OPEN REPAIR JOBS
-  const openJobs = tasks.filter(
-    t => t.type === "REPAIR" && t.status === "OPEN"
-  );
+if (!currentUser || currentUser.role !== "WORKER") {
+  location.href = "/login.html";
+}
 
-  if (!openJobs.length) {
-    container.innerHTML = `<div class="empty">No available jobs right now</div>`;
+// ✅ OPEN REPAIR JOBS (same shop only)
+const openJobs = DB.tasks.filter(
+  t =>
+    t.type === "REPAIR" &&
+    t.status === "OPEN" &&
+    t.shopId === currentUser.shopId
+);
+
+if (!openJobs.length) {
+  container.innerHTML = `<div class="empty">No available jobs right now</div>`;
+}
+
+openJobs.forEach(job => {
+  const div = document.createElement("div");
+  div.className = "job";
+  div.innerHTML = `
+    <h4>${job.device}</h4>
+    <p><b>Issue:</b> ${job.issue || "-"}</p>
+    <p><b>Expected Cost:</b> ₹${job.expectedCost || "-"}</p>
+    <p><b>Customer:</b> ${job.customerName}</p>
+    <button class="accept-btn" onclick="acceptJob('${job.id}')">
+      ACCEPT JOB
+    </button>
+  `;
+  container.appendChild(div);
+});
+
+window.acceptJob = function (id) {
+  const job = DB.tasks.find(t => t.id === id);
+
+  if (!job || job.status !== "OPEN") {
+    alert("Job already taken");
+    location.reload();
+    return;
   }
 
-  openJobs.forEach(job => {
-    const div = document.createElement("div");
-    div.className = "job";
-    div.innerHTML = `
-      <h4>${job.device}</h4>
-      <p><b>Issue:</b> ${job.issue || "-"}</p>
-      <p><b>Expected Cost:</b> ₹${job.expectedCost || "-"}</p>
-      <p><b>Customer:</b> ${job.customerName}</p>
-      <button class="accept-btn" onclick="acceptJob(${job.id})">
-        ACCEPT JOB
-      </button>
-    `;
-    container.appendChild(div);
+  job.status = "IN_PROGRESS";
+  job.assignedTo = currentUser.id;
+  job.acceptedAt = Date.now();
+
+  // 🔴 AUDIT LOG (IMPORTANT)
+  DB.auditLogs.push({
+    id: "LOG_" + Date.now(),
+    userId: currentUser.id,
+    role: "WORKER",
+    shopId: currentUser.shopId,
+    actionType: "WORK_ACCEPTED",
+    action: `Accepted repair job (${job.device})`,
+    timestamp: Date.now()
   });
 
-  function acceptJob(id) {
-    const index = tasks.findIndex(t => t.id === id);
-    if (index === -1 || tasks[index].status !== "OPEN") {
-      alert("Job already taken");
-      location.reload();
-      return;
-    }
+  saveDB();
 
-    tasks[index].status = "IN_PROGRESS";
-    tasks[index].assignedTo = "WORKER"; // placeholder
-
-    localStorage.setItem("tasks", JSON.stringify(tasks));
-
-    alert("Job accepted");
-    location.href = "jobs.html";
-  }
+  alert("Job accepted");
+  location.href = "jobs.html";
+};
 </script>
 
 </body>

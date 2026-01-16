@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>System History</title>
+
+<style>
+:root {
+  --primary:#203a43;
+  --bg:#f4f6f8;
+}
+body {
+  margin:0;
+  font-family:Segoe UI, Arial, sans-serif;
+  background:var(--bg);
+  padding:30px;
+}
+
+h2 {
+  margin-bottom:20px;
+  color:var(--primary);
+}
+
+/* FILTER BAR */
+.filters {
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+  gap:12px;
+  margin-bottom:25px;
+}
+select, input {
+  padding:10px;
+  border-radius:10px;
+  border:1px solid #ccc;
+  font-size:14px;
+}
+
+/* TIMELINE */
+.timeline {
+  display:flex;
+  flex-direction:column;
+  gap:14px;
+}
+
+.log {
+  background:white;
+  padding:16px 18px;
+  border-radius:14px;
+  box-shadow:0 8px 20px rgba(0,0,0,.12);
+  position:relative;
+}
+
+.log b {
+  font-size:15px;
+  color:#111;
+}
+
+.log small {
+  display:block;
+  margin-top:6px;
+  color:#666;
+  font-size:12px;
+}
+
+/* BADGES */
+.badge {
+  display:inline-block;
+  padding:5px 10px;
+  border-radius:20px;
+  font-size:11px;
+  font-weight:700;
+  margin-left:8px;
+  color:white;
+}
+
+.BUY { background:#2980b9; }
+.SELL { background:#27ae60; }
+
+.WORK_CREATED { background:#7f8c8d; }
+.WORK_ACCEPTED,
+.WORK_IN_PROGRESS { background:#f39c12; }
+.WORK_DONE_NOT_DELIVERED { background:#8e44ad; }
+.WORK_DONE_DELIVERED { background:#2ecc71; }
+
+.SHOP_CREATED,
+.SHOPKEEPER_CREATED,
+.WORKER_CREATED { background:#34495e; }
+</style>
+</head>
+
+<body>
+
+<h2>System Activity History</h2>
+
+<div class="filters">
+  <select id="shopFilter">
+    <option value="">All Shops</option>
+  </select>
+
+  <select id="roleFilter">
+    <option value="">All Roles</option>
+    <option value="OWNER">Owner</option>
+    <option value="SHOPKEEPER">Shopkeeper</option>
+    <option value="WORKER">Worker</option>
+  </select>
+
+  <select id="typeFilter">
+    <option value="">All Activities</option>
+    <option value="BUY">Buy</option>
+    <option value="SELL">Sell</option>
+    <option value="WORK_CREATED">Floating Work</option>
+    <option value="WORK_IN_PROGRESS">In Progress</option>
+    <option value="WORK_DONE_NOT_DELIVERED">Done (Not Delivered)</option>
+    <option value="WORK_DONE_DELIVERED">Done & Delivered</option>
+    <option value="SHOP_CREATED">Shop Created</option>
+    <option value="SHOPKEEPER_CREATED">Shopkeeper Created</option>
+    <option value="WORKER_CREATED">Worker Created</option>
+  </select>
+
+  <input type="date" id="fromDate">
+  <input type="date" id="toDate">
+</div>
+
+<div class="timeline" id="historyList"></div>
+
+<script type="module">
+import { DB } from "../db/fakeDB.js";
+
+/* LOAD SHOPS */
+shopFilter.innerHTML += DB.shops
+  .map(s => `<option value="${s.id}">${s.name}</option>`)
+  .join("");
+
+function renderHistory() {
+  historyList.innerHTML = "";
+
+  DB.auditLogs
+    .filter(log => {
+      if (shopFilter.value && log.shopId !== shopFilter.value) return false;
+      if (roleFilter.value && log.role !== roleFilter.value) return false;
+      if (typeFilter.value && log.actionType !== typeFilter.value) return false;
+
+      if (fromDate.value && new Date(log.timestamp) < new Date(fromDate.value)) return false;
+      if (toDate.value && new Date(log.timestamp) > new Date(toDate.value + "T23:59:59")) return false;
+
+      return true;
+    })
+    .slice()
+    .reverse()
+    .forEach(log => {
+      const user = DB.users.find(u => u.id === log.userId);
+      const shop = DB.shops.find(s => s.id === log.shopId);
+
+      historyList.innerHTML += `
+        <div class="log">
+          <b>${user?.name || "System"}</b>
+          <span class="badge ${log.actionType}">${log.actionType.replaceAll("_"," ")}</span>
+          <div>${log.action}</div>
+          <small>
+            Role: ${log.role} |
+            Shop: ${shop?.name || "-"} |
+            ${new Date(log.timestamp).toLocaleString()}
+          </small>
+        </div>
+      `;
+    });
+}
+
+shopFilter.onchange =
+roleFilter.onchange =
+typeFilter.onchange =
+fromDate.onchange =
+toDate.onchange = renderHistory;
+
+renderHistory();
+</script>
+
+</body>
+</html>

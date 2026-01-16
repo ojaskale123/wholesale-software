@@ -7,41 +7,51 @@
   <style>
     body {
       margin: 0;
-      font-family: Arial, sans-serif;
+      font-family: Segoe UI, Arial, sans-serif;
       background: #eef3fb;
     }
 
     .card {
-      max-width: 420px;
-      margin: 60px auto;
+      max-width: 440px;
+      margin: 70px auto;
       background: white;
-      padding: 25px;
-      border-radius: 16px;
-      box-shadow: 0 15px 30px rgba(0,0,0,0.15);
+      padding: 28px;
+      border-radius: 18px;
+      box-shadow: 0 18px 35px rgba(0,0,0,0.15);
     }
 
     h2 {
       text-align: center;
-      margin-bottom: 20px;
+      margin-bottom: 24px;
+      color: #203a43;
+    }
+
+    label {
+      font-size: 13px;
+      color: #555;
+      display: block;
+      margin-bottom: 4px;
     }
 
     input, select {
       width: 100%;
-      padding: 10px;
-      margin-bottom: 12px;
-      border-radius: 8px;
+      padding: 11px;
+      margin-bottom: 14px;
+      border-radius: 10px;
       border: 1px solid #ccc;
+      font-size: 14px;
     }
 
     button {
       width: 100%;
-      padding: 12px;
-      background: #3498db;
+      padding: 13px;
+      background: linear-gradient(135deg,#3498db,#2980b9);
       color: white;
       border: none;
-      border-radius: 10px;
+      border-radius: 12px;
       font-size: 16px;
       cursor: pointer;
+      font-weight: 600;
     }
   </style>
 </head>
@@ -50,60 +60,90 @@
 <div class="card">
   <h2>Create Worker</h2>
 
-  <input id="workerName" placeholder="Worker Name">
-
+  <label>Select Shop</label>
   <select id="shopSelect"></select>
-  <select id="shopkeeperSelect"></select>
 
-  <button onclick="createWorker()">Create</button>
+  <label>Worker Name</label>
+  <input id="workerName" placeholder="Full name">
+
+  <label>Phone Number</label>
+  <input id="phone" placeholder="Mobile number">
+
+  <label>Password</label>
+  <input id="password" type="password" placeholder="Password">
+
+  <label>Confirm Password</label>
+  <input id="confirmPassword" type="password" placeholder="Confirm password">
+
+  <button id="createBtn">Create Worker</button>
 </div>
 
 <script type="module">
-  import { DB, saveDB } from "../db/fakeDB.js";
+import { DB, saveDB } from "../db/fakeDB.js";
 
-  const shopSelect = document.getElementById("shopSelect");
-  const shopkeeperSelect = document.getElementById("shopkeeperSelect");
+const shopSelect = document.getElementById("shopSelect");
+const workerNameEl = document.getElementById("workerName");
+const phoneEl = document.getElementById("phone");
+const passwordEl = document.getElementById("password");
+const confirmPasswordEl = document.getElementById("confirmPassword");
+const btn = document.getElementById("createBtn");
 
-  DB.shops.forEach(s => {
-    shopSelect.innerHTML += `<option value="${s.id}">${s.name}</option>`;
+/* Load shops */
+DB.shops.forEach(shop => {
+  shopSelect.innerHTML += `<option value="${shop.id}">${shop.name}</option>`;
+});
+
+btn.addEventListener("click", () => {
+  const shopId = shopSelect.value;
+  const name = workerNameEl.value.trim();
+  const phone = phoneEl.value.trim();
+  const password = passwordEl.value;
+  const confirmPassword = confirmPasswordEl.value;
+
+  if (!shopId || !name || !phone || !password || !confirmPassword) {
+    alert("All fields are required");
+    return;
+  }
+
+  if (password !== confirmPassword) {
+    alert("Passwords do not match");
+    return;
+  }
+
+  if (DB.users.find(u => u.phone === phone)) {
+    alert("User with this phone already exists");
+    return;
+  }
+
+  const workerId = "USER_" + Date.now();
+
+  /* Create worker */
+  DB.users.push({
+    id: workerId,
+    name,
+    phone,
+    password,
+    role: "WORKER",
+    shopId,
+    shopkeeperId: null,
+    createdAt: Date.now()
   });
 
-  function loadShopkeepers() {
-    shopkeeperSelect.innerHTML = "";
-    DB.users
-      .filter(u => u.role === "SHOPKEEPER" && u.shopId === shopSelect.value)
-      .forEach(sk => {
-        shopkeeperSelect.innerHTML += `<option value="${sk.id}">${sk.name}</option>`;
-      });
-  }
+  /* Audit log (IMPORTANT) */
+  DB.auditLogs.push({
+    id: "LOG_" + Date.now(),
+    userId: workerId,
+    role: "WORKER",
+    shopId,
+    actionType: "WORKER_CREATED",
+    action: "Worker created",
+    timestamp: Date.now()
+  });
 
-  shopSelect.addEventListener("change", loadShopkeepers);
-  loadShopkeepers();
-
-  function createWorker() {
-    const name = workerName.value.trim();
-    if (!name) return alert("Worker name required");
-
-    DB.users.push({
-      id: "USER_" + Date.now(),
-      name,
-      role: "WORKER",
-      shopId: shopSelect.value,
-      shopkeeperId: shopkeeperSelect.value,
-      createdAt: Date.now()
-    });
-
-    DB.auditLogs.push({
-      id: "LOG_" + Date.now(),
-      role: "WORKER",
-      action: "Worker created",
-      timestamp: Date.now()
-    });
-
-    saveDB();
-    alert("Worker created");
-    location.href = "index.html";
-  }
+  saveDB();
+  alert("Worker created successfully");
+  location.href = "index.html";
+});
 </script>
 
 </body>
