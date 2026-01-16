@@ -8,8 +8,15 @@ export const DB = {
   auditLogs: JSON.parse(localStorage.getItem("auditLogs")) || []
 };
 
+/**
+ * Save complete DB back to localStorage
+ */
 export function saveDB() {
-  Object.keys(DB).forEach(key => {
-    localStorage.setItem(key, JSON.stringify(DB[key]));
-  });
+  localStorage.setItem("users", JSON.stringify(DB.users));
+  localStorage.setItem("shops", JSON.stringify(DB.shops));
+  localStorage.setItem("products", JSON.stringify(DB.products));
+  localStorage.setItem("sales", JSON.stringify(DB.sales));
+  localStorage.setItem("attendance", JSON.stringify(DB.attendance));
+  localStorage.setItem("tasks", JSON.stringify(DB.tasks));
+  localStorage.setItem("auditLogs", JSON.stringify(DB.auditLogs));
 }

@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Create Worker</title>
+
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #eef3fb;
+    }
+
+    .card {
+      max-width: 420px;
+      margin: 60px auto;
+      background: white;
+      padding: 25px;
+      border-radius: 16px;
+      box-shadow: 0 15px 30px rgba(0,0,0,0.15);
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 12px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      background: #3498db;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+<div class="card">
+  <h2>Create Worker</h2>
+
+  <input id="workerName" placeholder="Worker Name">
+
+  <select id="shopSelect"></select>
+  <select id="shopkeeperSelect"></select>
+
+  <button onclick="createWorker()">Create</button>
+</div>
+
+<script type="module">
+  import { DB, saveDB } from "../db/fakeDB.js";
+
+  const shopSelect = document.getElementById("shopSelect");
+  const shopkeeperSelect = document.getElementById("shopkeeperSelect");
+
+  DB.shops.forEach(s => {
+    shopSelect.innerHTML += `<option value="${s.id}">${s.name}</option>`;
+  });
+
+  function loadShopkeepers() {
+    shopkeeperSelect.innerHTML = "";
+    DB.users
+      .filter(u => u.role === "SHOPKEEPER" && u.shopId === shopSelect.value)
+      .forEach(sk => {
+        shopkeeperSelect.innerHTML += `<option value="${sk.id}">${sk.name}</option>`;
+      });
+  }
+
+  shopSelect.addEventListener("change", loadShopkeepers);
+  loadShopkeepers();
+
+  function createWorker() {
+    const name = workerName.value.trim();
+    if (!name) return alert("Worker name required");
+
+    DB.users.push({
+      id: "USER_" + Date.now(),
+      name,
+      role: "WORKER",
+      shopId: shopSelect.value,
+      shopkeeperId: shopkeeperSelect.value,
+      createdAt: Date.now()
+    });
+
+    DB.auditLogs.push({
+      id: "LOG_" + Date.now(),
+      role: "WORKER",
+      action: "Worker created",
+      timestamp: Date.now()
+    });
+
+    saveDB();
+    alert("Worker created");
+    location.href = "index.html";
+  }
+</script>
+
+</body>
+</html>

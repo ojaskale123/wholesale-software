@@ -12,7 +12,6 @@
       background: linear-gradient(180deg,#0f2027,#203a43,#2c5364);
     }
 
-    /* ===== HEADER / HERO ===== */
     .hero {
       position: relative;
       padding: 28px 24px 36px;
@@ -30,7 +29,6 @@
       color: #d0d8dc;
     }
 
-    /* CREATE SHOP CARD */
     .create-shop-card {
       margin-top: 22px;
       max-width: 260px;
@@ -56,7 +54,6 @@
       color: #083d1f;
     }
 
-    /* ===== MAIN DASHBOARD ===== */
     .dashboard {
       background: #f4f6f8;
       border-radius: 28px 28px 0 0;
@@ -64,7 +61,6 @@
       min-height: 100vh;
     }
 
-    /* SHOP STRIP */
     .shop-strip {
       display: flex;
       gap: 16px;
@@ -101,7 +97,6 @@
       cursor: pointer;
     }
 
-    /* SUMMARY CARDS */
     .card-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(200px,1fr));
@@ -134,7 +129,6 @@
       color: #666;
     }
 
-    /* AUDIT */
     table {
       width: 100%;
       background: white;
@@ -160,18 +154,17 @@
 
 <body>
 
-<!-- HERO -->
 <div class="hero">
   <h1>Welcome, Owner</h1>
   <p>Monitor all shops, sales, staff, and activity from one place</p>
 
-  <div class="create-shop-card" onclick="location.href='create-shop.html'">
-    ➕ Create New Shop
-    <span>Add and manage a new business location</span>
+  <!-- UPDATED LINK -->
+  <div class="create-shop-card" onclick="location.href='create.html'">
+    ➕ Create
+    <span>Create shopkeeper or worker</span>
   </div>
 </div>
 
-<!-- DASHBOARD -->
 <div class="dashboard">
 
   <h3>Shops</h3>
@@ -231,25 +224,34 @@
   requireAuth(["OWNER"]);
 
   shopCount.innerText = DB.shops.length;
-  shopkeeperCount.innerText = DB.users.filter(u=>u.role==="SHOPKEEPER").length;
-  workerCount.innerText = DB.users.filter(u=>u.role==="WORKER").length;
+  shopkeeperCount.innerText = DB.users.filter(u => u.role === "SHOPKEEPER").length;
+  workerCount.innerText = DB.users.filter(u => u.role === "WORKER").length;
   jobCount.innerText = DB.sales.length;
-  customerCount.innerText = DB.customers?.length || 0;
+
+  const uniqueCustomers = new Set(DB.sales.map(s => s.customerPhone));
+  customerCount.innerText = uniqueCustomers.size;
 
   const strip = document.getElementById("shopStrip");
-  DB.shops.forEach(s=>{
+
+  DB.shops.forEach(shop => {
+    const shopkeeper = DB.users.find(u => u.id === shop.shopkeeperId);
+    const workers = DB.users.filter(
+      u => u.role === "WORKER" && u.shopId === shop.id
+    );
+
     const d = document.createElement("div");
     d.className = "shop-card";
     d.innerHTML = `
       <span class="menu">⋮</span>
-      <h4>${s.name}</h4>
-      <p>${s.city || ""}</p>
+      <h4>${shop.name}</h4>
+      <p>Shopkeeper: ${shopkeeper?.name || "-"}</p>
+      <p>Workers: ${workers.length}</p>
     `;
     strip.appendChild(d);
   });
 
-  DB.auditLogs.slice().reverse().forEach(log=>{
-    const u = DB.users.find(x=>x.id===log.userId);
+  DB.auditLogs.slice().reverse().forEach(log => {
+    const u = DB.users.find(x => x.id === log.userId);
     auditTable.innerHTML += `
       <tr>
         <td>${u?.name || "Unknown"}</td>

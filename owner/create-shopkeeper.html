@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Create Shopkeeper</title>
+
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #eef3fb;
+    }
+
+    .card {
+      max-width: 420px;
+      margin: 60px auto;
+      background: white;
+      padding: 25px;
+      border-radius: 16px;
+      box-shadow: 0 15px 30px rgba(0,0,0,0.15);
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    input {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 12px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      background: #2ecc71;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+<div class="card">
+  <h2>Create Shop + Shopkeeper</h2>
+
+  <input id="shopName" placeholder="Shop Name">
+  <input id="city" placeholder="City">
+
+  <input id="keeperName" placeholder="Shopkeeper Name">
+  <input id="phone" placeholder="Phone">
+  <input id="password" type="password" placeholder="Password">
+
+  <button onclick="createShopkeeper()">Create</button>
+</div>
+
+<script type="module">
+  import { DB, saveDB } from "../db/fakeDB.js";
+
+  function createShopkeeper() {
+    const shopName = shopName.value.trim();
+    const city = city.value.trim();
+    const name = keeperName.value.trim();
+    const phone = phone.value.trim();
+    const password = password.value.trim();
+
+    if (!shopName || !name || !phone || !password) {
+      alert("All fields required");
+      return;
+    }
+
+    const shopId = "SHOP_" + Date.now();
+    const userId = "USER_" + Date.now();
+
+    DB.shops.push({
+      id: shopId,
+      name: shopName,
+      city,
+      shopkeeperId: userId,
+      createdAt: Date.now()
+    });
+
+    DB.users.push({
+      id: userId,
+      name,
+      phone,
+      password,
+      role: "SHOPKEEPER",
+      shopId,
+      shopkeeperId: null,
+      createdAt: Date.now()
+    });
+
+    DB.auditLogs.push({
+      id: "LOG_" + Date.now(),
+      userId,
+      role: "SHOPKEEPER",
+      action: "Shop & shopkeeper created",
+      timestamp: Date.now()
+    });
+
+    saveDB();
+    alert("Shopkeeper created successfully");
+    location.href = "index.html";
+  }
+</script>
+
+</body>
+</html>
