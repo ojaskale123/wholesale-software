@@ -19,7 +19,7 @@ export function login(phone, password) {
     location.href = "/owner/index.html";
   } 
   else if (user.role === "SHOPKEEPER") {
-    location.href = "/shopkeeper/index.html";
+    location.href = "/shop/index.html";
   } 
   else if (user.role === "WORKER") {
     location.href = "/worker/index.html";

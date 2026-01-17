@@ -16,9 +16,7 @@
       padding: 15px 20px;
     }
 
-    .container {
-      padding: 20px;
-    }
+    .container { padding: 20px; }
 
     .categories {
       display: grid;
@@ -172,7 +170,20 @@ if (!user || !["SHOPKEEPER","OWNER"].includes(user.role)) {
   location.href = "/login.html";
 }
 
-function addProduct() {
+/* ✅ ENSURE ARRAYS EXIST */
+DB.products = DB.products || [];
+DB.auditLogs = DB.auditLogs || [];
+
+const nameEl = document.getElementById("name");
+const barcodeEl = document.getElementById("barcode");
+const categoryEl = document.getElementById("category");
+const buyPriceEl = document.getElementById("buyPrice");
+const sellPriceEl = document.getElementById("sellPrice");
+const quantityEl = document.getElementById("quantity");
+const locationEl = document.getElementById("location");
+
+/* ✅ FIX: EXPOSE TO WINDOW */
+window.addProduct = function () {
   const name = nameEl.value.trim();
   const barcode = barcodeEl.value.trim();
   const category = categoryEl.value;
@@ -210,14 +221,18 @@ function addProduct() {
   });
 
   saveDB();
-  alert("Product added");
+  alert("Product added successfully");
 
-  nameEl.value = barcodeEl.value = categoryEl.value =
-  buyPriceEl.value = sellPriceEl.value = quantityEl.value =
+  nameEl.value =
+  barcodeEl.value =
+  categoryEl.value =
+  buyPriceEl.value =
+  sellPriceEl.value =
+  quantityEl.value =
   locationEl.value = "";
-}
+};
 
-function openCategory(cat) {
+window.openCategory = function (cat) {
   const products = DB.products.filter(
     p => p.shopId === user.shopId && p.category === cat
   );
@@ -225,7 +240,7 @@ function openCategory(cat) {
   popupTitle.innerText = cat.replace("_"," ");
   popupList.innerHTML = "";
 
-  if (products.length === 0) {
+  if (!products.length) {
     popupList.innerHTML = "<p>No items in this category</p>";
   }
 
@@ -241,19 +256,11 @@ function openCategory(cat) {
   });
 
   overlay.style.display = "flex";
-}
+};
 
-function closePopup() {
+window.closePopup = function () {
   overlay.style.display = "none";
-}
-
-const nameEl = document.getElementById("name");
-const barcodeEl = document.getElementById("barcode");
-const categoryEl = document.getElementById("category");
-const buyPriceEl = document.getElementById("buyPrice");
-const sellPriceEl = document.getElementById("sellPrice");
-const quantityEl = document.getElementById("quantity");
-const locationEl = document.getElementById("location");
+};
 </script>
 
 </body>

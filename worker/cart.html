@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Worker Cart</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      margin: 0;
+      background: #f4f6f8;
+    }
+
+    .app-header {
+      background: linear-gradient(90deg,#0f2027,#203a43,#2c5364);
+      color: white;
+      padding: 14px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    }
+
+    .header-btn {
+      background: rgba(255,255,255,0.15);
+      border: none;
+      color: white;
+      padding: 6px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .container {
+      padding: 18px;
+    }
+
+    .item {
+      background: white;
+      padding: 14px;
+      margin-bottom: 12px;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+    }
+
+    .total {
+      font-size: 18px;
+      font-weight: bold;
+      margin: 16px 0;
+    }
+
+    input {
+      width: 100%;
+      padding: 10px;
+      margin-top: 10px;
+      font-size: 14px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 12px;
+      margin-top: 12px;
+      border: none;
+      border-radius: 8px;
+      font-size: 15px;
+      cursor: pointer;
+    }
+
+    .confirm {
+      background: #203a43;
+      color: white;
+    }
+
+    .cancel {
+      background: #ccc;
+    }
+  </style>
+</head>
+
+<body>
+
+<header class="app-header">
+  <button class="header-btn" onclick="location.href='sell.html'">⬅ Back</button>
+  <h2>Worker Cart</h2>
+  <span></span>
+</header>
+
+<div class="container">
+  <div id="cartItems"></div>
+
+  <div class="total">
+    Total: ₹<span id="total">0</span>
+  </div>
+
+  <input id="custName" placeholder="Customer Name">
+  <input id="custPhone" placeholder="Customer Phone">
+
+  <button class="btn confirm" onclick="confirmSell()">CONFIRM SELL</button>
+  <button class="btn cancel" onclick="cancelCart()">CANCEL</button>
+</div>
+
+<script type="module">
+import { DB, saveDB } from "../db/fakeDB.js";
+
+/* AUTH */
+const user = JSON.parse(localStorage.getItem("currentUser"));
+if (!user || user.role !== "WORKER") {
+  location.href = "/login.html";
+}
+
+/* CART */
+let cart = JSON.parse(localStorage.getItem("cart"));
+if (!cart || !cart.items || cart.items.length === 0) {
+  alert("Cart is empty");
+  location.href = "sell.html";
+}
+
+const cartDiv = document.getElementById("cartItems");
+let total = 0;
+
+/* RENDER CART */
+cart.items.forEach(item => {
+  total += item.sellPrice * item.quantity;
+
+  const div = document.createElement("div");
+  div.className = "item";
+  div.innerHTML = `
+    <b>${item.name}</b><br>
+    Qty: ${item.quantity} × ₹${item.sellPrice}
+  `;
+  cartDiv.appendChild(div);
+});
+
+document.getElementById("total").innerText = total;
+
+/* CONFIRM SELL */
+window.confirmSell = () => {
+  if (!custName.value.trim() || !custPhone.value.trim()) {
+    alert("Enter customer details");
+    return;
+  }
+
+  /* REDUCE STOCK */
+  cart.items.forEach(i => {
+    const product = DB.products.find(p => p.id === i.productId);
+    if (product) {
+      product.quantity -= i.quantity;
+    }
+  });
+
+  /* SAVE SALE */
+  DB.sales.push({
+    id: "SALE_" + Date.now(),
+    shopId: user.shopId,
+    amount: total,
+    soldBy: user.id,
+    createdAt: Date.now()
+  });
+
+  /* AUDIT LOG */
+  DB.auditLogs.push({
+    id: "LOG_" + Date.now(),
+    userId: user.id,
+    role: "WORKER",
+    shopId: user.shopId,
+    actionType: "SELL",
+    action: `Sold items worth ₹${total}`,
+    timestamp: Date.now()
+  });
+
+  /* CUSTOMER RECORD */
+  DB.customers = DB.customers || [];
+  DB.customers.push({
+    id: "CUST_" + Date.now(),
+    name: custName.value.trim(),
+    phone: custPhone.value.trim(),
+    shopId: user.shopId
+  });
+
+  saveDB();
+  localStorage.removeItem("cart");
+
+  alert("Sale completed successfully");
+  location.href = "sell.html";
+};
+
+/* CANCEL */
+window.cancelCart = () => {
+  localStorage.removeItem("cart");
+  location.href = "sell.html";
+};
+</script>
+
+</body>
+</html>
