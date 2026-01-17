@@ -41,7 +41,6 @@
       font-size: 14px;
     }
 
-    /* ===== PAGE ===== */
     .container {
       padding: 18px;
     }
@@ -59,8 +58,8 @@
       background: white;
       padding: 15px;
       margin-bottom: 12px;
-      border-radius: 10px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      border-radius: 12px;
+      box-shadow: 0 6px 14px rgba(0,0,0,0.15);
     }
 
     .card h4 {
@@ -76,16 +75,17 @@
 
     .status {
       display: inline-block;
-      margin-top: 6px;
-      padding: 4px 10px;
-      border-radius: 12px;
+      margin-top: 8px;
+      padding: 6px 14px;
+      border-radius: 20px;
       font-size: 12px;
       font-weight: bold;
+      color: white;
     }
 
-    .PRESENT { background: #2ecc71; color: #fff; }
-    .WORKING { background: #3498db; color: #fff; }
-    .ABSENT { background: #e74c3c; color: #fff; }
+    .WORKING { background:#3498db; }
+    .PRESENT { background:#2ecc71; }
+    .ABSENT { background:#e74c3c; }
 
     .empty {
       text-align: center;
@@ -107,71 +107,85 @@
   <input
     id="search"
     class="search"
-    placeholder="Search by shop, worker name, phone, or date (YYYY-MM-DD)"
+    placeholder="Search by shop, worker name, phone or date (YYYY-MM-DD)"
   >
-
   <div id="list"></div>
 </div>
 
 <script type="module">
-  import { requireAuth } from "../auth/guard.js";
-  import { DB } from "../db/fakeDB.js";
+import { requireAuth } from "../auth/guard.js";
+import { DB } from "../db/fakeDB.js";
 
-  requireAuth(["OWNER"]);
+/* AUTH */
+requireAuth(["OWNER"]);
 
-  const list = document.getElementById("list");
-  const searchInput = document.getElementById("search");
+/* SAFETY */
+DB.attendance = DB.attendance || [];
 
-  const records = DB.attendance || [];
+const list = document.getElementById("list");
+const searchInput = document.getElementById("search");
 
-  function getStatus(a) {
-    if (a.checkIn && a.checkOut) return "PRESENT";
-    if (a.checkIn && !a.checkOut) return "WORKING";
-    return "ABSENT";
+/* FORMAT TIME */
+function fmt(t) {
+  return t ? new Date(t).toLocaleString() : "-";
+}
+
+/* STATUS LOGIC (SAME AS SHOPKEEPER) */
+function getStatus(a) {
+  if (a.checkIn && !a.checkOut) return "WORKING";
+  if (a.checkIn && a.checkOut) return "PRESENT";
+  return "ABSENT";
+}
+
+/* RENDER */
+function render(filter = "") {
+  list.innerHTML = "";
+  const f = filter.toLowerCase();
+
+  /* ✅ ALWAYS READ LATEST DATA */
+  const records = DB.attendance.slice().reverse();
+
+  const filtered = records.filter(a => {
+    const worker = DB.users.find(u => u.id === a.workerId);
+    const shop = DB.shops.find(s => s.id === a.shopId);
+
+    return (
+      worker?.name?.toLowerCase().includes(f) ||
+      worker?.phone?.includes(f) ||
+      shop?.name?.toLowerCase().includes(f) ||
+      (a.checkIn || "").includes(f)
+    );
+  });
+
+  if (!filtered.length) {
+    list.innerHTML = `<div class="empty">No attendance records found</div>`;
+    return;
   }
 
-  function render(filter = "") {
-    list.innerHTML = "";
-    const f = filter.toLowerCase();
+  filtered.forEach(a => {
+    const worker = DB.users.find(u => u.id === a.workerId);
+    const shop = DB.shops.find(s => s.id === a.shopId);
+    const status = getStatus(a);
 
-    const filtered = records.filter(a => {
-      const worker = DB.users.find(u => u.id === a.workerId);
-      const shop = DB.shops.find(s => s.id === a.shopId);
+    const div = document.createElement("div");
+    div.className = "card";
+    div.innerHTML = `
+      <h4>${worker?.name || "Unknown Worker"}</h4>
+      <p><b>Phone:</b> ${worker?.phone || "-"}</p>
+      <p><b>Shop:</b> ${shop?.name || "Unknown Shop"}</p>
+      <p><b>Check-in:</b> ${fmt(a.checkIn)}</p>
+      <p><b>Check-out:</b> ${fmt(a.checkOut)}</p>
+      <span class="status ${status}">${status}</span>
+    `;
+    list.appendChild(div);
+  });
+}
 
-      return (
-        (worker?.name || "").toLowerCase().includes(f) ||
-        (worker?.phone || "").includes(f) ||
-        (shop?.shopName || "").toLowerCase().includes(f) ||
-        (a.checkIn || "").includes(f)
-      );
-    });
+/* SEARCH */
+searchInput.oninput = e => render(e.target.value);
 
-    if (!filtered.length) {
-      list.innerHTML = `<div class="empty">No attendance records found</div>`;
-      return;
-    }
-
-    filtered.forEach(a => {
-      const worker = DB.users.find(u => u.id === a.workerId);
-      const shop = DB.shops.find(s => s.id === a.shopId);
-      const status = getStatus(a);
-
-      const div = document.createElement("div");
-      div.className = "card";
-      div.innerHTML = `
-        <h4>${worker ? worker.name : "Unknown Worker"}</h4>
-        <p><b>Phone:</b> ${worker?.phone || "-"}</p>
-        <p><b>Shop:</b> ${shop?.shopName || "Unknown Shop"}</p>
-        <p><b>Check-in:</b> ${a.checkIn || "-"}</p>
-        <p><b>Check-out:</b> ${a.checkOut || "-"}</p>
-        <span class="status ${status}">${status}</span>
-      `;
-      list.appendChild(div);
-    });
-  }
-
-  searchInput.oninput = e => render(e.target.value);
-  render();
+/* INITIAL LOAD */
+render();
 </script>
 
 </body>

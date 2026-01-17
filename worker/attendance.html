@@ -1,50 +1,158 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Attendance</title>
-  <link rel="stylesheet" href="../css/style.css">
+  <title>My Attendance</title>
+
+  <style>
+    * { box-sizing: border-box; font-family: Segoe UI, Arial, sans-serif; }
+    body { margin:0; background:#eef2f3; }
+
+    header {
+      background: linear-gradient(90deg,#0f2027,#203a43,#2c5364);
+      color:white;
+      padding:18px;
+      text-align:center;
+    }
+
+    .container {
+      padding:40px 20px;
+      display:flex;
+      justify-content:center;
+    }
+
+    .card {
+      background:white;
+      width:100%;
+      max-width:420px;
+      border-radius:20px;
+      padding:30px;
+      text-align:center;
+      box-shadow:0 18px 40px rgba(0,0,0,.2);
+    }
+
+    .status { margin:20px 0; font-size:16px; font-weight:600; }
+
+    .badge {
+      padding:8px 20px;
+      border-radius:20px;
+      color:white;
+      font-size:14px;
+      display:inline-block;
+    }
+
+    .IN { background:#27ae60; }
+    .OUT { background:#7f8c8d; }
+
+    button {
+      width:100%;
+      padding:14px;
+      margin-top:12px;
+      border:none;
+      border-radius:14px;
+      font-weight:600;
+      cursor:pointer;
+    }
+
+    .checkin { background:#2ecc71; color:white; }
+    .checkout { background:#e74c3c; color:white; }
+    .refresh { background:#ecf0f1; }
+  </style>
 </head>
+
 <body>
 
-<header class="top-header">
-  <h2>Attendance</h2>
+<header>
+  <h2>My Attendance</h2>
 </header>
 
-<div style="padding:20px">
-  <button onclick="checkIn()">Check In</button>
-  <button onclick="checkOut()">Check Out</button>
+<div class="container">
+  <div class="card">
+    <div id="status" class="status"></div>
+
+    <button class="checkin" onclick="checkIn()">CHECK IN</button>
+    <button class="checkout" onclick="checkOut()">CHECK OUT</button>
+    <button class="refresh" onclick="loadStatus()">REFRESH</button>
+  </div>
 </div>
 
 <script type="module">
-  import { requireAuth } from "../auth/guard.js";
-  import { DB, saveDB } from "../db/fakeDB.js";
-  import { logAction } from "../core/audit.js";
+import { requireAuth } from "../auth/guard.js";
 
-  const user = requireAuth(["WORKER"]);
+const user = requireAuth(["WORKER"]);
 
-  window.checkIn = () => {
-    DB.attendance.push({
-      id: Date.now(),
-      workerId: user.id,
-      shopId: user.shopId,
-      checkIn: new Date().toISOString()
-    });
-    saveDB();
-    logAction("Worker check-in");
-    alert("Checked in");
-  };
+function getDB() {
+  return JSON.parse(localStorage.getItem("DB")) || {};
+}
 
-  window.checkOut = () => {
-    const today = DB.attendance.find(
-      a => a.workerId === user.id && !a.checkOut
-    );
-    if (!today) return alert("Not checked in");
+function saveDB(db) {
+  localStorage.setItem("DB", JSON.stringify(db));
+}
 
-    today.checkOut = new Date().toISOString();
-    saveDB();
-    logAction("Worker check-out");
-    alert("Checked out");
-  };
+function today() {
+  return new Date().toISOString().slice(0,10);
+}
+
+const statusDiv = document.getElementById("status");
+
+window.loadStatus = () => {
+  const db = getDB();
+  const record = (db.attendance || []).find(a =>
+    a.workerId === user.id &&
+    a.shopId === user.shopId &&
+    a.date === today() &&
+    !a.checkOut
+  );
+
+  statusDiv.innerHTML = record
+    ? `<span class="badge IN">Checked In</span>`
+    : `<span class="badge OUT">Not Checked In</span>`;
+};
+
+window.checkIn = () => {
+  const db = getDB();
+  db.attendance = db.attendance || [];
+
+  const already = db.attendance.find(a =>
+    a.workerId === user.id &&
+    a.shopId === user.shopId &&
+    a.date === today() &&
+    !a.checkOut
+  );
+
+  if (already) return alert("Already checked in");
+
+  db.attendance.push({
+    id: "ATT_" + Date.now(),
+    workerId: user.id,
+    shopId: user.shopId,
+    date: today(),
+    checkIn: new Date().toISOString(),
+    checkOut: null
+  });
+
+  saveDB(db);
+  alert("Check-in recorded");
+  loadStatus();
+};
+
+window.checkOut = () => {
+  const db = getDB();
+  const record = (db.attendance || []).find(a =>
+    a.workerId === user.id &&
+    a.shopId === user.shopId &&
+    a.date === today() &&
+    !a.checkOut
+  );
+
+  if (!record) return alert("Not checked in");
+
+  record.checkOut = new Date().toISOString();
+  saveDB(db);
+  alert("Check-out recorded");
+  loadStatus();
+};
+
+loadStatus();
 </script>
 
 </body>

@@ -4,171 +4,99 @@
   <title>Attendance Monitor</title>
 
   <style>
-    * {
-      box-sizing: border-box;
-      font-family: Arial, sans-serif;
+    * { box-sizing:border-box; font-family:Arial,sans-serif; }
+    body { margin:0; background:#f4f6f8; }
+
+    header {
+      background: linear-gradient(90deg,#0f2027,#203a43,#2c5364);
+      color:white;
+      padding:14px 18px;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
     }
 
-    body {
-      margin: 0;
-      background: #f4f6f8;
-    }
-
-    /* ===== HEADER ===== */
-    .app-header {
-      background: linear-gradient(90deg, #0f2027, #203a43, #2c5364);
-      color: white;
-      padding: 14px 18px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-    }
-
-    .app-header h2 {
-      margin: 0;
-      font-size: 20px;
-      font-weight: 600;
-    }
-
-    .header-btn {
-      background: rgba(255,255,255,0.15);
-      border: none;
-      color: white;
-      padding: 6px 12px;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 14px;
-    }
-
-    /* ===== PAGE ===== */
-    .container {
-      padding: 18px;
-    }
-
-    .search {
-      width: 100%;
-      padding: 12px;
-      font-size: 15px;
-      border-radius: 8px;
-      border: 1px solid #ccc;
-      margin-bottom: 15px;
-    }
+    .container { padding:18px; }
 
     .card {
-      background: white;
-      padding: 15px;
-      margin-bottom: 12px;
-      border-radius: 10px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-    }
-
-    .card h4 {
-      margin: 0 0 6px 0;
-      font-size: 16px;
-    }
-
-    .card p {
-      margin: 4px 0;
-      font-size: 14px;
-      color: #333;
+      background:white;
+      padding:15px;
+      margin-bottom:12px;
+      border-radius:12px;
+      box-shadow:0 6px 14px rgba(0,0,0,.15);
     }
 
     .status {
-      display: inline-block;
-      margin-top: 6px;
-      padding: 4px 10px;
-      border-radius: 12px;
-      font-size: 12px;
-      font-weight: bold;
+      padding:6px 14px;
+      border-radius:20px;
+      color:white;
+      font-size:12px;
+      font-weight:bold;
+      display:inline-block;
+      margin-top:6px;
     }
 
-    .PRESENT { background: #2ecc71; color: #fff; }
-    .WORKING { background: #3498db; color: #fff; }
-    .ABSENT { background: #e74c3c; color: #fff; }
-
-    .empty {
-      text-align: center;
-      color: #777;
-      margin-top: 40px;
-    }
+    .WORKING { background:#3498db; }
+    .PRESENT { background:#2ecc71; }
   </style>
 </head>
 
 <body>
 
-<header class="app-header">
-  <button class="header-btn" onclick="location.href='index.html'">⬅ Back</button>
-  <h2>Attendance Monitor</h2>
+<header>
+  <button onclick="location.href='index.html'">⬅ Back</button>
+  <h3>Attendance Monitor</h3>
   <span></span>
 </header>
 
 <div class="container">
-  <input
-    id="search"
-    class="search"
-    placeholder="Search by worker name, phone, or date (YYYY-MM-DD)"
-  >
-
   <div id="list"></div>
 </div>
 
 <script type="module">
-  import { requireAuth } from "../auth/guard.js";
-  import { DB } from "../db/fakeDB.js";
+import { requireAuth } from "../auth/guard.js";
 
-  const user = requireAuth(["SHOPKEEPER"]);
-  const list = document.getElementById("list");
-  const searchInput = document.getElementById("search");
+const user = requireAuth(["SHOPKEEPER"]);
+const list = document.getElementById("list");
 
-  // Attendance only for this shop
-  const records = (DB.attendance || []).filter(
-    a => a.shopId === user.shopId
-  );
+function getDB() {
+  return JSON.parse(localStorage.getItem("DB")) || {};
+}
 
-  function getStatus(a) {
-    if (a.checkIn && a.checkOut) return "PRESENT";
-    if (a.checkIn && !a.checkOut) return "WORKING";
-    return "ABSENT";
+function today() {
+  return new Date().toISOString().slice(0,10);
+}
+
+function render() {
+  list.innerHTML = "";
+
+  const db = getDB();
+  const records = (db.attendance || [])
+    .filter(a => a.shopId === user.shopId && a.date === today())
+    .reverse();
+
+  if (!records.length) {
+    list.innerHTML = "<p>No attendance today</p>";
+    return;
   }
 
-  function render(filter = "") {
-    list.innerHTML = "";
-    const f = filter.toLowerCase();
+  records.forEach(a => {
+    const worker = (db.users || []).find(u => u.id === a.workerId);
+    const status = a.checkOut ? "PRESENT" : "WORKING";
 
-    const filtered = records.filter(a => {
-      const worker = DB.users.find(u => u.id === a.workerId);
-      return (
-        (worker?.name || "").toLowerCase().includes(f) ||
-        (worker?.phone || "").includes(f) ||
-        (a.checkIn || "").includes(f)
-      );
-    });
+    const div = document.createElement("div");
+    div.className = "card";
+    div.innerHTML = `
+      <b>${worker?.name || "Unknown Worker"}</b><br>
+      Check-in: ${new Date(a.checkIn).toLocaleTimeString()}<br>
+      Check-out: ${a.checkOut ? new Date(a.checkOut).toLocaleTimeString() : "-"}<br>
+      <span class="status ${status}">${status}</span>
+    `;
+    list.appendChild(div);
+  });
+}
 
-    if (!filtered.length) {
-      list.innerHTML = `<div class="empty">No attendance records found</div>`;
-      return;
-    }
-
-    filtered.forEach(a => {
-      const worker = DB.users.find(u => u.id === a.workerId);
-      const status = getStatus(a);
-
-      const div = document.createElement("div");
-      div.className = "card";
-      div.innerHTML = `
-        <h4>${worker ? worker.name : "Unknown Worker"}</h4>
-        <p><b>Phone:</b> ${worker?.phone || "-"}</p>
-        <p><b>Check-in:</b> ${a.checkIn || "-"}</p>
-        <p><b>Check-out:</b> ${a.checkOut || "-"}</p>
-        <span class="status ${status}">${status}</span>
-      `;
-      list.appendChild(div);
-    });
-  }
-
-  searchInput.oninput = e => render(e.target.value);
-  render();
+render();
 </script>
 
 </body>
