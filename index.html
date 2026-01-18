@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Wholesale Management System</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        body {
+            margin: 0;
+            background: #f4f6f9;
+            color: #333;
+        }
+
+        header {
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            color: #fff;
+            padding: 40px 20px;
+            text-align: center;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 32px;
+        }
+
+        header p {
+            margin-top: 10px;
+            font-size: 16px;
+            opacity: 0.9;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 20px;
+        }
+
+        .info-card {
+            background: #fff;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+            transition: transform 0.2s ease;
+        }
+
+        .info-card:hover {
+            transform: translateY(-4px);
+        }
+
+        .info-card h3 {
+            margin-top: 0;
+            color: #1e3c72;
+        }
+
+        .info-card p {
+            font-size: 14px;
+            line-height: 1.6;
+            color: #555;
+        }
+
+        .login-section {
+            margin-top: 50px;
+            text-align: center;
+        }
+
+        .login-btn {
+            background: #1e3c72;
+            color: #fff;
+            border: none;
+            padding: 14px 40px;
+            font-size: 16px;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: background 0.3s ease, transform 0.2s ease;
+        }
+
+        .login-btn:hover {
+            background: #16315f;
+            transform: scale(1.05);
+        }
+
+        footer {
+            margin-top: 60px;
+            padding: 15px;
+            text-align: center;
+            font-size: 13px;
+            color: #777;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>Wholesale Management System</h1>
+    <p>Smart multi-shop management for sales, stock, repairs & workforce</p>
+</header>
+
+<div class="container">
+
+    <div class="info-grid">
+
+        <div class="info-card">
+            <h3>Multi-Shop Control</h3>
+            <p>
+                Manage multiple shops from a single owner dashboard with complete visibility
+                of stock, revenue, attendance, and activity logs.
+            </p>
+        </div>
+
+        <div class="info-card">
+            <h3>Stock & Sales</h3>
+            <p>
+                Track products by category, barcode, and location. Handle selling and repair
+                jobs with full history and profit calculation.
+            </p>
+        </div>
+
+        <div class="info-card">
+            <h3>Worker Management</h3>
+            <p>
+                Worker-specific access for selling, attendance, and tasks.
+                Every action is recorded with who, when, and where.
+            </p>
+        </div>
+
+        <div class="info-card">
+            <h3>Customer Transparency</h3>
+            <p>
+                Customers can track their repair or order status using a link or QR,
+                improving trust and service quality.
+            </p>
+        </div>
+
+    </div>
+
+    <div class="login-section">
+        <button class="login-btn" onclick="goToLogin()">Login to System</button>
+    </div>
+
+</div>
+
+<footer>
+    © 2026 Wholesale Management System. All rights reserved.
+</footer>
+
+<script>
+    function goToLogin() {
+        // CHANGE THIS PATH IF YOUR LOGIN PAGE IS IN A DIFFERENT FOLDER
+        window.location.href = "login.html";
+        // example: "pages/login.html" or "auth/login.html"
+    }
+</script>
+
+</body>
+</html>
