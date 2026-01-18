@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>My History</title>
+
+  <style>
+    * { box-sizing: border-box; font-family: Arial, sans-serif; }
+
+    body {
+      margin: 0;
+      background: #f4f6f8;
+    }
+
+    .app-header {
+      background: linear-gradient(90deg,#0f2027,#203a43,#2c5364);
+      color: white;
+      padding: 14px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 4px 10px rgba(0,0,0,.3);
+    }
+
+    .header-btn {
+      background: rgba(255,255,255,0.15);
+      border: none;
+      color: white;
+      padding: 6px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .container {
+      padding: 18px;
+    }
+
+    .card {
+      background: white;
+      padding: 16px;
+      margin-bottom: 14px;
+      border-radius: 14px;
+      box-shadow: 0 6px 16px rgba(0,0,0,.15);
+    }
+
+    .title {
+      font-weight: bold;
+      font-size: 15px;
+      margin-bottom: 6px;
+    }
+
+    .meta {
+      font-size: 13px;
+      color: #555;
+      margin-top: 4px;
+    }
+
+    .tag {
+      display: inline-block;
+      margin-top: 8px;
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: bold;
+      color: white;
+    }
+
+    .SELL { background:#2ecc71; }
+    .JOB  { background:#3498db; }
+
+    .empty {
+      text-align: center;
+      margin-top: 50px;
+      color: #777;
+    }
+  </style>
+</head>
+
+<body>
+
+<header class="app-header">
+  <button class="header-btn" onclick="location.href='index.html'">⬅ Back</button>
+  <h2>My History</h2>
+  <span></span>
+</header>
+
+<div class="container" id="list"></div>
+
+<script type="module">
+import { requireAuth } from "../auth/guard.js";
+import { DB } from "../db/fakeDB.js";
+
+/* AUTH */
+const user = requireAuth(["WORKER"]);
+const list = document.getElementById("list");
+
+/* SAFETY */
+DB.sales = DB.sales || [];
+DB.tasks = DB.tasks || [];
+
+/* COLLECT HISTORY */
+let history = [];
+
+/* 1️⃣ SALES BY THIS WORKER */
+DB.sales
+  .filter(s => s.soldBy === user.id && s.shopId === user.shopId)
+  .forEach(s => {
+    history.push({
+      type: "SELL",
+      title: `Sold items worth ₹${s.amount || s.total}`,
+      time: s.createdAt || s.timestamp
+    });
+  });
+
+/* 2️⃣ JOBS DONE BY THIS WORKER */
+DB.tasks
+  .filter(t =>
+    t.assignedTo === user.id &&
+    (t.status === "DONE" || t.status === "DELIVERED")
+  )
+  .forEach(t => {
+    history.push({
+      type: "JOB",
+      title: `Job completed – ${t.device || "Device"}`,
+      time: t.updatedAt || t.createdAt,
+      amount: t.expectedCost
+    });
+  });
+
+/* SORT LATEST FIRST */
+history.sort((a,b)=> new Date(b.time) - new Date(a.time));
+
+/* RENDER */
+if (!history.length) {
+  list.innerHTML = `<div class="empty">No history yet</div>`;
+} else {
+  history.forEach(h => {
+    const div = document.createElement("div");
+    div.className = "card";
+    div.innerHTML = `
+      <div class="title">${h.title}</div>
+      ${h.amount ? `<div class="meta"><b>Amount:</b> ₹${h.amount}</div>` : ""}
+      <div class="meta">${new Date(h.time).toLocaleString()}</div>
+      <span class="tag ${h.type}">${h.type}</span>
+    `;
+    list.appendChild(div);
+  });
+}
+</script>
+
+</body>
+</html>

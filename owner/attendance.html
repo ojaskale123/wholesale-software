@@ -4,31 +4,16 @@
   <title>All Shops Attendance</title>
 
   <style>
-    * {
-      box-sizing: border-box;
-      font-family: Arial, sans-serif;
-    }
+    * { box-sizing: border-box; font-family: Arial, sans-serif; }
+    body { margin: 0; background: #f4f6f8; }
 
-    body {
-      margin: 0;
-      background: #f4f6f8;
-    }
-
-    /* ===== HEADER ===== */
     .app-header {
-      background: linear-gradient(90deg, #0f2027, #203a43, #2c5364);
+      background: linear-gradient(90deg,#0f2027,#203a43,#2c5364);
       color: white;
       padding: 14px 18px;
       display: flex;
-      align-items: center;
       justify-content: space-between;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-    }
-
-    .app-header h2 {
-      margin: 0;
-      font-size: 20px;
-      font-weight: 600;
+      align-items: center;
     }
 
     .header-btn {
@@ -38,20 +23,17 @@
       padding: 6px 12px;
       border-radius: 6px;
       cursor: pointer;
-      font-size: 14px;
     }
 
-    .container {
-      padding: 18px;
-    }
+    .container { padding: 18px; }
 
-    .search {
+    select, input {
       width: 100%;
       padding: 12px;
-      font-size: 15px;
+      margin-bottom: 12px;
       border-radius: 8px;
       border: 1px solid #ccc;
-      margin-bottom: 15px;
+      font-size: 14px;
     }
 
     .card {
@@ -59,18 +41,7 @@
       padding: 15px;
       margin-bottom: 12px;
       border-radius: 12px;
-      box-shadow: 0 6px 14px rgba(0,0,0,0.15);
-    }
-
-    .card h4 {
-      margin: 0 0 6px 0;
-      font-size: 16px;
-    }
-
-    .card p {
-      margin: 4px 0;
-      font-size: 14px;
-      color: #333;
+      box-shadow: 0 6px 14px rgba(0,0,0,.15);
     }
 
     .status {
@@ -87,11 +58,7 @@
     .PRESENT { background:#2ecc71; }
     .ABSENT { background:#e74c3c; }
 
-    .empty {
-      text-align: center;
-      color: #777;
-      margin-top: 40px;
-    }
+    .empty { text-align:center; color:#777; margin-top:40px; }
   </style>
 </head>
 
@@ -104,87 +71,99 @@
 </header>
 
 <div class="container">
-  <input
-    id="search"
-    class="search"
-    placeholder="Search by shop, worker name, phone or date (YYYY-MM-DD)"
-  >
+  <select id="shopFilter">
+    <option value="">All Shops</option>
+  </select>
+
+  <input id="search" placeholder="Search worker / phone / date">
+
   <div id="list"></div>
 </div>
 
 <script type="module">
 import { requireAuth } from "../auth/guard.js";
-import { DB } from "../db/fakeDB.js";
 
-/* AUTH */
 requireAuth(["OWNER"]);
 
-/* SAFETY */
-DB.attendance = DB.attendance || [];
-
 const list = document.getElementById("list");
-const searchInput = document.getElementById("search");
+const search = document.getElementById("search");
+const shopFilter = document.getElementById("shopFilter");
 
-/* FORMAT TIME */
-function fmt(t) {
-  return t ? new Date(t).toLocaleString() : "-";
-}
-
-/* STATUS LOGIC (SAME AS SHOPKEEPER) */
 function getStatus(a) {
   if (a.checkIn && !a.checkOut) return "WORKING";
   if (a.checkIn && a.checkOut) return "PRESENT";
   return "ABSENT";
 }
 
-/* RENDER */
-function render(filter = "") {
-  list.innerHTML = "";
-  const f = filter.toLowerCase();
+function fmt(t) {
+  return t ? new Date(t).toLocaleString() : "-";
+}
 
-  /* ✅ ALWAYS READ LATEST DATA */
-  const records = DB.attendance.slice().reverse();
-
-  const filtered = records.filter(a => {
-    const worker = DB.users.find(u => u.id === a.workerId);
-    const shop = DB.shops.find(s => s.id === a.shopId);
-
-    return (
-      worker?.name?.toLowerCase().includes(f) ||
-      worker?.phone?.includes(f) ||
-      shop?.name?.toLowerCase().includes(f) ||
-      (a.checkIn || "").includes(f)
-    );
-  });
-
-  if (!filtered.length) {
-    list.innerHTML = `<div class="empty">No attendance records found</div>`;
-    return;
-  }
-
-  filtered.forEach(a => {
-    const worker = DB.users.find(u => u.id === a.workerId);
-    const shop = DB.shops.find(s => s.id === a.shopId);
-    const status = getStatus(a);
-
-    const div = document.createElement("div");
-    div.className = "card";
-    div.innerHTML = `
-      <h4>${worker?.name || "Unknown Worker"}</h4>
-      <p><b>Phone:</b> ${worker?.phone || "-"}</p>
-      <p><b>Shop:</b> ${shop?.name || "Unknown Shop"}</p>
-      <p><b>Check-in:</b> ${fmt(a.checkIn)}</p>
-      <p><b>Check-out:</b> ${fmt(a.checkOut)}</p>
-      <span class="status ${status}">${status}</span>
-    `;
-    list.appendChild(div);
+function loadShops(liveDB) {
+  shopFilter.innerHTML = `<option value="">All Shops</option>`;
+  (liveDB.shops || []).forEach(s => {
+    const o = document.createElement("option");
+    o.value = s.id;
+    o.innerText = s.name;
+    shopFilter.appendChild(o);
   });
 }
 
-/* SEARCH */
-searchInput.oninput = e => render(e.target.value);
+function render() {
+  list.innerHTML = "";
 
-/* INITIAL LOAD */
+  /* 🔥 THIS IS THE FIX */
+  const liveDB = JSON.parse(localStorage.getItem("DB")) || {};
+  const attendance = liveDB.attendance || [];
+  const users = liveDB.users || [];
+  const shops = liveDB.shops || [];
+
+  loadShops(liveDB);
+
+  const q = search.value.toLowerCase();
+  const shopId = shopFilter.value;
+
+  const records = attendance.slice().reverse().filter(a => {
+    if (shopId && a.shopId !== shopId) return false;
+
+    const u = users.find(x => x.id === a.workerId);
+    const s = shops.find(x => x.id === a.shopId);
+
+    return (
+      u?.name?.toLowerCase().includes(q) ||
+      u?.phone?.includes(q) ||
+      s?.name?.toLowerCase().includes(q) ||
+      (a.checkIn || "").includes(q)
+    );
+  });
+
+  if (!records.length) {
+    list.innerHTML = `<div class="empty">No attendance records</div>`;
+    return;
+  }
+
+  records.forEach(a => {
+    const u = users.find(x => x.id === a.workerId);
+    const s = shops.find(x => x.id === a.shopId);
+
+    list.innerHTML += `
+      <div class="card">
+        <b>${u?.name || "Unknown"}</b><br>
+        Phone: ${u?.phone || "-"}<br>
+        Shop: ${s?.name || "-"}<br>
+        Check-in: ${fmt(a.checkIn)}<br>
+        Check-out: ${fmt(a.checkOut)}<br>
+        <span class="status ${getStatus(a)}">${getStatus(a)}</span>
+      </div>
+    `;
+  });
+}
+
+search.oninput = render;
+shopFilter.onchange = render;
+
+/* REAL-TIME */
+setInterval(render, 2000);
 render();
 </script>
 
