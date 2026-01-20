@@ -66,8 +66,8 @@
   <label>Worker Name</label>
   <input id="workerName" placeholder="Full name">
 
-  <label>Phone Number</label>
-  <input id="phone" placeholder="Mobile number">
+  <label>Email (Login ID)</label>
+  <input id="email" placeholder="worker@email.com">
 
   <label>Password</label>
   <input id="password" type="password" placeholder="Password">
@@ -79,28 +79,43 @@
 </div>
 
 <script type="module">
-import { DB, saveDB } from "../db/fakeDB.js";
+import { auth, db } from "../js/firebase.js";
+import {
+  createUserWithEmailAndPassword
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import {
+  collection,
+  getDocs,
+  doc,
+  setDoc,
+  serverTimestamp
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 const shopSelect = document.getElementById("shopSelect");
 const workerNameEl = document.getElementById("workerName");
-const phoneEl = document.getElementById("phone");
+const emailEl = document.getElementById("email");
 const passwordEl = document.getElementById("password");
 const confirmPasswordEl = document.getElementById("confirmPassword");
 const btn = document.getElementById("createBtn");
 
-/* Load shops */
-DB.shops.forEach(shop => {
-  shopSelect.innerHTML += `<option value="${shop.id}">${shop.name}</option>`;
+/* 🔹 LOAD SHOPS FROM FIREBASE */
+const shopsSnap = await getDocs(collection(db, "shops"));
+shopsSnap.forEach(docSnap => {
+  const shop = docSnap.data();
+  shopSelect.innerHTML += `
+    <option value="${docSnap.id}">${shop.name}</option>
+  `;
 });
 
-btn.addEventListener("click", () => {
+/* 🔹 CREATE WORKER */
+btn.onclick = async () => {
   const shopId = shopSelect.value;
   const name = workerNameEl.value.trim();
-  const phone = phoneEl.value.trim();
+  const email = emailEl.value.trim();
   const password = passwordEl.value;
   const confirmPassword = confirmPasswordEl.value;
 
-  if (!shopId || !name || !phone || !password || !confirmPassword) {
+  if (!shopId || !name || !email || !password || !confirmPassword) {
     alert("All fields are required");
     return;
   }
@@ -110,40 +125,27 @@ btn.addEventListener("click", () => {
     return;
   }
 
-  if (DB.users.find(u => u.phone === phone)) {
-    alert("User with this phone already exists");
-    return;
+  try {
+    // 1️⃣ Create worker auth account
+    const cred = await createUserWithEmailAndPassword(auth, email, password);
+    const uid = cred.user.uid;
+
+    // 2️⃣ Save worker in Firestore
+    await setDoc(doc(db, "users", uid), {
+      name,
+      role: "WORKER",
+      shopId,
+      createdAt: serverTimestamp()
+    });
+
+    alert("Worker created successfully");
+    location.href = "index.html";
+
+  } catch (err) {
+    alert(err.message);
+    console.error(err);
   }
-
-  const workerId = "USER_" + Date.now();
-
-  /* Create worker */
-  DB.users.push({
-    id: workerId,
-    name,
-    phone,
-    password,
-    role: "WORKER",
-    shopId,
-    shopkeeperId: null,
-    createdAt: Date.now()
-  });
-
-  /* Audit log (IMPORTANT) */
-  DB.auditLogs.push({
-    id: "LOG_" + Date.now(),
-    userId: workerId,
-    role: "WORKER",
-    shopId,
-    actionType: "WORKER_CREATED",
-    action: "Worker created",
-    timestamp: Date.now()
-  });
-
-  saveDB();
-  alert("Worker created successfully");
-  location.href = "index.html";
-});
+};
 </script>
 
 </body>

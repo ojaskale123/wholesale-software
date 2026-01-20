@@ -26,6 +26,15 @@ body {
   display:inline-block;
   font-weight:600;
 }
+.logout-btn {
+  margin-left:12px;
+  background:#e74c3c;
+  padding:14px 20px;
+  border-radius:20px;
+  cursor:pointer;
+  display:inline-block;
+  font-weight:600;
+}
 .dashboard {
   background:var(--bg);
   border-radius:30px 30px 0 0;
@@ -113,10 +122,18 @@ td {
 
 <body>
 
+<!-- 🔒 OWNER ROUTE PROTECTION -->
+<script type="module">
+  import { requireAuth } from "../auth/guard.js";
+  requireAuth("OWNER");
+</script>
+
 <div class="hero">
   <h1>Owner Dashboard</h1>
   <p>All shops, staff, sales & activity</p>
+
   <div class="create-btn" onclick="location.href='create.html'">➕ Create</div>
+  <div class="logout-btn" id="logoutBtn">Logout</div>
 </div>
 
 <div class="dashboard">
@@ -125,7 +142,6 @@ td {
 <div class="shop-strip" id="shopStrip"></div>
 
 <div class="card-grid">
-
   <div class="card" onclick="location.href='stock.html'">
     <div class="count">📦</div>
     <div class="label">Stock</div>
@@ -155,7 +171,6 @@ td {
     <div class="count">🕘</div>
     <div class="label">History</div>
   </div>
-
 </div>
 
 <h3>Recent Activity</h3>
@@ -187,25 +202,30 @@ td {
 
 <script type="module">
 import { DB } from "../db/fakeDB.js";
+import { db } from "../js/firebase.js";
+import {
+  collection,
+  query,
+  orderBy,
+  getDocs
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-/* COUNTS */
+/* COUNTS (still fakeDB for now) */
 shopkeeperCount.innerText = DB.users.filter(u=>u.role==="SHOPKEEPER").length;
 workerCount.innerText = DB.users.filter(u=>u.role==="WORKER").length;
 jobCount.innerText = DB.tasks?.length || 0;
 
-/* ✅ FIXED TOTAL REVENUE */
+/* TOTAL REVENUE */
 const sellRevenue = (DB.sales || []).reduce(
   (s,x)=> s + Number(x.amount || x.total || 0),
   0
 );
-
 const jobRevenue = (DB.tasks || [])
   .filter(t => t.status === "DONE_DELIVERED" || t.status === "DELIVERED")
   .reduce(
     (s,x)=> s + Number(x.expectedCost || x.amount || 0),
     0
   );
-
 totalRevenue.innerText = sellRevenue + jobRevenue;
 
 /* SHOPS */
@@ -213,55 +233,39 @@ DB.shops.forEach(shop=>{
   const card=document.createElement("div");
   card.className="shop-card";
   card.innerHTML=`<h4>${shop.name}</h4>`;
-  card.onclick=()=>alert("Shop popup can be extended later");
   shopStrip.appendChild(card);
 });
 
-/* POPUP LISTS */
-shopkeepersList.innerHTML = DB.users
-  .filter(u=>u.role==="SHOPKEEPER")
-  .map(u=>`<p><b>${u.name}</b> (${u.phone})</p>`)
-  .join("") || "<p>No shopkeepers</p>";
+/* 🔹 RECENT ACTIVITY FROM FIREBASE */
+async function loadAuditLogs() {
+  const q = query(
+    collection(db, "auditLogs"),
+    orderBy("timestamp", "desc")
+  );
 
-workersList.innerHTML = DB.users
-  .filter(u=>u.role==="WORKER")
-  .map(u=>`<p><b>${u.name}</b> (${u.phone})</p>`)
-  .join("") || "<p>No workers</p>";
+  const snap = await getDocs(q);
+  auditTable.innerHTML = "";
 
-/* RECENT ACTIVITY */
-DB.auditLogs.slice().reverse().forEach(log=>{
-  const user = DB.users.find(u=>u.id===log.userId);
-  const shop = DB.shops.find(s=>s.id===log.shopId);
+  snap.forEach(d => {
+    const log = d.data();
+    auditTable.innerHTML += `
+      <tr>
+        <td>${log.userId || "-"}</td>
+        <td>${log.role || "-"}</td>
+        <td>${log.message || log.action || "-"}</td>
+        <td>${
+          log.timestamp?.toDate
+            ? log.timestamp.toDate().toLocaleString()
+            : "-"
+        }</td>
+      </tr>
+    `;
+  });
+}
 
-  let amountHTML = "";
+loadAuditLogs();
 
-  if (log.actionType === "SELL") {
-    const sale = DB.sales.find(
-      s => s.shopId === log.shopId && s.soldBy === log.userId
-    );
-    if (sale) amountHTML = `<div><b>Amount:</b> ₹${sale.amount}</div>`;
-  }
-
-  if (log.actionType === "WORK_DONE_DELIVERED") {
-    const job = DB.tasks.find(t=>t.shopId===log.shopId);
-    if (job?.expectedCost)
-      amountHTML = `<div><b>Job Amount:</b> ₹${job.expectedCost}</div>`;
-  }
-
-  auditTable.innerHTML += `
-    <tr>
-      <td>
-        <b>${user?.name || "System"}</b>
-        <div style="font-size:12px;color:#666;">${shop?.name || "-"}</div>
-      </td>
-      <td>${log.role || "-"}</td>
-      <td>${log.action}${amountHTML}</td>
-      <td>${new Date(log.timestamp).toLocaleString()}</td>
-    </tr>
-  `;
-});
-
-/* POPUP HANDLERS */
+/* POPUPS */
 window.openSmallPopup=id=>{
   overlay.style.display="block";
   document.getElementById(id).style.display="block";
@@ -270,6 +274,18 @@ window.openSmallPopup=id=>{
 overlay.onclick=()=>{
   overlay.style.display="none";
   document.querySelectorAll(".popup").forEach(p=>p.style.display="none");
+};
+</script>
+
+<!-- 🔓 LOGOUT -->
+<script type="module">
+import { auth } from "../js/firebase.js";
+import { signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+document.getElementById("logoutBtn").onclick = async () => {
+  await signOut(auth);
+  localStorage.removeItem("currentUser");
+  location.href = "/login.html";
 };
 </script>
 

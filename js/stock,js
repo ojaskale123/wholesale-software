@@ -1,4 +1,0 @@
-// owner-only visibility (same pattern as dashboard)
-document.querySelectorAll(".owner-only").forEach(el => {
-    el.style.display = "grid";
-});

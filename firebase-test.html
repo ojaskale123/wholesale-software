@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Firebase Test</title>
+</head>
+<body>
+
+<h2>Firebase Connection Test</h2>
+
+<script type="module">
+  import { auth, db } from "./js/firebase.js";
+
+  console.log("Firebase Auth:", auth);
+  console.log("Firebase Firestore:", db);
+  alert("Firebase connected successfully");
+</script>
+
+</body>
+</html>

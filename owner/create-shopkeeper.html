@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Create Shopkeeper</title>
+  <title>Create Shop & Shopkeeper</title>
 
   <style>
     body {
@@ -69,8 +69,8 @@
   <label>Shopkeeper Name</label>
   <input id="keeperName" placeholder="Full name">
 
-  <label>Phone Number</label>
-  <input id="phone" placeholder="Mobile number">
+  <label>Email (Login ID)</label>
+  <input id="email" placeholder="shopkeeper@email.com">
 
   <label>Password</label>
   <input id="password" type="password" placeholder="Password">
@@ -82,19 +82,33 @@
 </div>
 
 <script type="module">
-import { DB, saveDB } from "../db/fakeDB.js";
+import { auth, db } from "../js/firebase.js";
+import {
+  createUserWithEmailAndPassword
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import {
+  doc,
+  setDoc,
+  serverTimestamp
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
+const shopNameEl = document.getElementById("shopName");
+const cityEl = document.getElementById("city");
+const keeperNameEl = document.getElementById("keeperName");
+const emailEl = document.getElementById("email");
+const passwordEl = document.getElementById("password");
+const confirmPasswordEl = document.getElementById("confirmPassword");
 const btn = document.getElementById("createBtn");
 
-btn.addEventListener("click", () => {
+btn.onclick = async () => {
   const shopName = shopNameEl.value.trim();
   const city = cityEl.value.trim();
   const name = keeperNameEl.value.trim();
-  const phone = phoneEl.value.trim();
+  const email = emailEl.value.trim();
   const password = passwordEl.value;
   const confirmPassword = confirmPasswordEl.value;
 
-  if (!shopName || !name || !phone || !password || !confirmPassword) {
+  if (!shopName || !name || !email || !password || !confirmPassword) {
     alert("All fields are required");
     return;
   }
@@ -104,59 +118,37 @@ btn.addEventListener("click", () => {
     return;
   }
 
-  // Prevent duplicate phone
-  if (DB.users.find(u => u.phone === phone)) {
-    alert("User with this phone already exists");
-    return;
+  try {
+    // 1️⃣ Create Shopkeeper Auth account
+    const cred = await createUserWithEmailAndPassword(auth, email, password);
+    const uid = cred.user.uid;
+
+    const shopId = "SHOP_" + Date.now();
+
+    // 2️⃣ Create Shop
+    await setDoc(doc(db, "shops", shopId), {
+      name: shopName,
+      city,
+      shopkeeperId: uid,
+      createdAt: serverTimestamp()
+    });
+
+    // 3️⃣ Create Shopkeeper user record
+    await setDoc(doc(db, "users", uid), {
+      name,
+      role: "SHOPKEEPER",
+      shopId,
+      createdAt: serverTimestamp()
+    });
+
+    alert("Shop & Shopkeeper created successfully");
+    location.href = "index.html";
+
+  } catch (err) {
+    alert(err.message);
+    console.error(err);
   }
-
-  const shopId = "SHOP_" + Date.now();
-  const userId = "USER_" + Date.now();
-
-  // Create shop
-  DB.shops.push({
-    id: shopId,
-    name: shopName,
-    city,
-    shopkeeperId: userId,
-    createdAt: Date.now()
-  });
-
-  // Create shopkeeper
-  DB.users.push({
-    id: userId,
-    name,
-    phone,
-    password,
-    role: "SHOPKEEPER",
-    shopId,
-    shopkeeperId: null,
-    createdAt: Date.now()
-  });
-
-  // Audit log (IMPORTANT)
-  DB.auditLogs.push({
-    id: "LOG_" + Date.now(),
-    userId,
-    role: "SHOPKEEPER",
-    shopId,
-    actionType: "SHOPKEEPER_CREATED",
-    action: "Shop and shopkeeper created",
-    timestamp: Date.now()
-  });
-
-  saveDB();
-  alert("Shop & shopkeeper created successfully");
-  location.href = "index.html";
-});
-
-// element refs (clean)
-const shopNameEl = document.getElementById("shopName");
-const cityEl = document.getElementById("city");
-const keeperNameEl = document.getElementById("keeperName");
-const phoneEl = document.getElementById("phone");
-const passwordEl = document.getElementById("password");
-const confirmPasswordEl = document.getElementById("confirmPassword");
+};
 </script>
 
 </body>
