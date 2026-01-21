@@ -74,7 +74,7 @@ body {
   box-shadow:0 10px 26px rgba(0,0,0,.15);
   cursor:pointer;
 }
-.count { font-size:34px;font-weight:700;color:var(--primary); }
+.count { font-size:30px;font-weight:700;color:var(--primary); }
 .label { font-size:14px;color:#666; }
 
 /* TABLE */
@@ -93,29 +93,6 @@ td {
   padding:12px;
   font-size:13px;
   border-bottom:1px solid #eee;
-  vertical-align:top;
-}
-
-/* POPUPS */
-.overlay {
-  display:none;
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,.5);
-  z-index:999;
-}
-.popup {
-  display:none;
-  position:fixed;
-  top:50%;
-  left:50%;
-  transform:translate(-50%,-50%);
-  background:white;
-  width:90%;
-  max-width:900px;
-  border-radius:20px;
-  padding:22px;
-  z-index:1000;
 }
 </style>
 </head>
@@ -142,35 +119,27 @@ td {
 <div class="shop-strip" id="shopStrip"></div>
 
 <div class="card-grid">
-  <div class="card" onclick="location.href='stock.html'">
-    <div class="count">📦</div>
-    <div class="label">Stock</div>
-  </div>
 
-  <div class="card" onclick="location.href='revenue.html'">
-    <div class="count" id="totalRevenue">0</div>
+  <div class="card">
+    <div class="count" id="totalRevenue">₹0</div>
     <div class="label">Total Revenue</div>
   </div>
 
-  <div class="card" onclick="openSmallPopup('shopkeepersPopup')">
+  <div class="card">
     <div class="count" id="shopkeeperCount">0</div>
     <div class="label">Shopkeepers</div>
   </div>
 
-  <div class="card" onclick="openSmallPopup('workersPopup')">
+  <div class="card">
     <div class="count" id="workerCount">0</div>
     <div class="label">Workers</div>
   </div>
 
-  <div class="card" onclick="location.href='jobs.html'">
+  <div class="card">
     <div class="count" id="jobCount">0</div>
     <div class="label">Jobs</div>
   </div>
 
-  <div class="card" onclick="location.href='history.html'">
-    <div class="count">🕘</div>
-    <div class="label">History</div>
-  </div>
 </div>
 
 <h3>Recent Activity</h3>
@@ -188,55 +157,79 @@ td {
 
 </div>
 
-<div class="overlay" id="overlay"></div>
-
-<div class="popup" id="shopkeepersPopup">
-  <h3>Shopkeepers</h3>
-  <div id="shopkeepersList"></div>
-</div>
-
-<div class="popup" id="workersPopup">
-  <h3>Workers</h3>
-  <div id="workersList"></div>
-</div>
-
 <script type="module">
-import { DB } from "../db/fakeDB.js";
 import { db } from "../js/firebase.js";
 import {
   collection,
+  getDocs,
   query,
-  orderBy,
-  getDocs
+  where,
+  orderBy
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-/* COUNTS (still fakeDB for now) */
-shopkeeperCount.innerText = DB.users.filter(u=>u.role==="SHOPKEEPER").length;
-workerCount.innerText = DB.users.filter(u=>u.role==="WORKER").length;
-jobCount.innerText = DB.tasks?.length || 0;
+/* 🔹 LOAD SHOPS */
+async function loadShops() {
+  const snap = await getDocs(collection(db, "shops"));
+  shopStrip.innerHTML = "";
+  snap.forEach(docSnap => {
+    const shop = docSnap.data();
+    const card = document.createElement("div");
+    card.className = "shop-card";
+    card.innerHTML = `<h4>${shop.name}</h4>`;
+    shopStrip.appendChild(card);
+  });
+}
 
-/* TOTAL REVENUE */
-const sellRevenue = (DB.sales || []).reduce(
-  (s,x)=> s + Number(x.amount || x.total || 0),
-  0
-);
-const jobRevenue = (DB.tasks || [])
-  .filter(t => t.status === "DONE_DELIVERED" || t.status === "DELIVERED")
-  .reduce(
-    (s,x)=> s + Number(x.expectedCost || x.amount || 0),
-    0
+/* 🔹 LOAD USER COUNTS */
+async function loadCounts() {
+  const shopkeepersQ = query(
+    collection(db, "users"),
+    where("role", "==", "SHOPKEEPER")
   );
-totalRevenue.innerText = sellRevenue + jobRevenue;
+  const workersQ = query(
+    collection(db, "users"),
+    where("role", "==", "WORKER")
+  );
 
-/* SHOPS */
-DB.shops.forEach(shop=>{
-  const card=document.createElement("div");
-  card.className="shop-card";
-  card.innerHTML=`<h4>${shop.name}</h4>`;
-  shopStrip.appendChild(card);
-});
+  const [sSnap, wSnap] = await Promise.all([
+    getDocs(shopkeepersQ),
+    getDocs(workersQ)
+  ]);
 
-/* 🔹 RECENT ACTIVITY FROM FIREBASE */
+  shopkeeperCount.innerText = sSnap.size;
+  workerCount.innerText = wSnap.size;
+}
+
+/* 🔹 LOAD JOB COUNT */
+async function loadJobCount() {
+  const snap = await getDocs(collection(db, "jobs"));
+  jobCount.innerText = snap.size;
+}
+
+/* 🔹 LOAD REVENUE (SALES + JOBS) */
+async function loadRevenue() {
+  let total = 0;
+
+  // SALES revenue
+  const salesSnap = await getDocs(collection(db, "sales"));
+  salesSnap.forEach(d => {
+    const s = d.data();
+    total += Number(s.amount || s.total || 0);
+  });
+
+  // JOBS revenue (delivered only)
+  const jobsSnap = await getDocs(collection(db, "jobs"));
+  jobsSnap.forEach(d => {
+    const j = d.data();
+    if (j.status === "DELIVERED" || j.status === "DONE_DELIVERED") {
+      total += Number(j.expectedCost || j.amount || 0);
+    }
+  });
+
+  totalRevenue.innerText = "₹" + total;
+}
+
+/* 🔹 LOAD ACTIVITY */
 async function loadAuditLogs() {
   const q = query(
     collection(db, "auditLogs"),
@@ -252,29 +245,19 @@ async function loadAuditLogs() {
       <tr>
         <td>${log.userId || "-"}</td>
         <td>${log.role || "-"}</td>
-        <td>${log.message || log.action || "-"}</td>
-        <td>${
-          log.timestamp?.toDate
-            ? log.timestamp.toDate().toLocaleString()
-            : "-"
-        }</td>
+        <td>${log.message || log.action}</td>
+        <td>${log.timestamp?.toDate().toLocaleString() || "-"}</td>
       </tr>
     `;
   });
 }
 
+/* 🔹 INIT */
+loadShops();
+loadCounts();
+loadJobCount();
+loadRevenue();
 loadAuditLogs();
-
-/* POPUPS */
-window.openSmallPopup=id=>{
-  overlay.style.display="block";
-  document.getElementById(id).style.display="block";
-};
-
-overlay.onclick=()=>{
-  overlay.style.display="none";
-  document.querySelectorAll(".popup").forEach(p=>p.style.display="none");
-};
 </script>
 
 <!-- 🔓 LOGOUT -->

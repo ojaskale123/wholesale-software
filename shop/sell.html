@@ -1,30 +1,147 @@
-<script type="module">
-import { DB, saveDB } from "../db/fakeDB.js";
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Sell</title>
 
+<style>
+body {
+  margin:0;
+  font-family:Segoe UI, Arial, sans-serif;
+  background:#f4f6f8;
+}
+
+.header {
+  padding:20px;
+  background:#203a43;
+  color:white;
+  font-size:22px;
+  font-weight:600;
+}
+
+.container {
+  display:flex;
+  gap:20px;
+  padding:20px;
+}
+
+.stock, .cart {
+  flex:1;
+}
+
+.item {
+  background:white;
+  padding:14px;
+  border-radius:14px;
+  box-shadow:0 8px 20px rgba(0,0,0,.12);
+  margin-bottom:12px;
+}
+
+.qty button {
+  padding:4px 10px;
+  margin:0 4px;
+  cursor:pointer;
+}
+
+.cart-bar {
+  position:fixed;
+  bottom:0;
+  left:0;
+  right:0;
+  background:#203a43;
+  color:white;
+  padding:12px 20px;
+  display:none;
+  justify-content:space-between;
+  align-items:center;
+}
+
+.checkout {
+  background:#2ecc71;
+  padding:8px 16px;
+  border-radius:10px;
+  cursor:pointer;
+  font-weight:600;
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">Sell</div>
+
+<div class="container">
+  <div class="stock">
+    <input id="search" placeholder="Search by name / barcode" style="width:100%;padding:10px;margin-bottom:12px">
+    <div id="list"></div>
+  </div>
+</div>
+
+<div class="cart-bar" id="cartBar">
+  <div>
+    Items: <span id="itemCount">0</span> |
+    Total: ₹<span id="totalAmount">0</span>
+  </div>
+  <div class="checkout" id="checkoutBtn">Checkout</div>
+</div>
+
+<script type="module">
+import { db } from "../js/firebase.js";
+import {
+  collection,
+  getDocs,
+  query,
+  where,
+  addDoc,
+  doc,
+  updateDoc,
+  serverTimestamp
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+/* 🔐 AUTH */
 const user = JSON.parse(localStorage.getItem("currentUser"));
 if (!user || !["SHOPKEEPER","WORKER"].includes(user.role)) {
   location.href = "/login.html";
 }
+const shopId = user.shopId;
 
-DB.products = DB.products || [];
-
+/* STATE */
+let products = [];
 let cart = { items: [] };
 let activeCategory = null;
 
+/* UI */
 const list = document.getElementById("list");
 const search = document.getElementById("search");
+const cartBar = document.getElementById("cartBar");
+const itemCount = document.getElementById("itemCount");
+const totalAmount = document.getElementById("totalAmount");
+const checkoutBtn = document.getElementById("checkoutBtn");
 
+/* LOAD PRODUCTS */
+async function loadProducts() {
+  const q = query(
+    collection(db, "stock"),
+    where("shopId", "==", shopId)
+  );
+
+  const snap = await getDocs(q);
+  products = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  render();
+}
+
+/* CATEGORY FILTER (future use) */
 window.setCategory = cat => {
   activeCategory = cat;
   render();
 };
 
+/* RENDER */
 function render() {
   const q = search.value.toLowerCase();
   list.innerHTML = "";
 
-  DB.products
-    .filter(p => String(p.shopId) === String(user.shopId))
+  products
     .filter(p => !activeCategory || p.category === activeCategory)
     .filter(p =>
       p.name.toLowerCase().includes(q) ||
@@ -52,8 +169,9 @@ function render() {
   updateCartBar();
 }
 
+/* UPDATE QTY */
 window.updateQty = (id, delta) => {
-  const product = DB.products.find(p => p.id === id);
+  const product = products.find(p => p.id === id);
   let item = cart.items.find(i => i.productId === id);
 
   if (!item && delta > 0) {
@@ -62,7 +180,8 @@ window.updateQty = (id, delta) => {
       productId: id,
       name: product.name,
       sellPrice: product.sellPrice,
-      quantity: 1
+      quantity: 1,
+      stockQty: product.quantity
     });
   } else if (item) {
     item.quantity += delta;
@@ -72,6 +191,7 @@ window.updateQty = (id, delta) => {
   render();
 };
 
+/* CART BAR */
 function updateCartBar() {
   const count = cart.items.reduce((s,i)=>s+i.quantity,0);
   const total = cart.items.reduce((s,i)=>s+i.sellPrice*i.quantity,0);
@@ -80,6 +200,54 @@ function updateCartBar() {
   cartBar.style.display = count ? "flex" : "none";
 }
 
+/* CHECKOUT */
+checkoutBtn.onclick = async () => {
+  if (!cart.items.length) return alert("Cart empty");
+
+  let amount = 0;
+  cart.items.forEach(i => amount += i.sellPrice * i.quantity);
+
+  // 1️⃣ CREATE SALE
+  const saleRef = await addDoc(collection(db, "sales"), {
+    shopId,
+    soldBy: user.uid,
+    soldByRole: user.role,
+    items: cart.items,
+    amount,
+    createdAt: serverTimestamp()
+  });
+
+  // 2️⃣ AUDIT LOG
+  await addDoc(collection(db, "auditLogs"), {
+    userId: user.uid,
+    role: user.role,
+    shopId,
+    actionType: "SELL",
+    action: "Sale completed",
+    saleId: saleRef.id,
+    amount,
+    timestamp: serverTimestamp()
+  });
+
+  // 3️⃣ UPDATE STOCK
+  for (const i of cart.items) {
+    await updateDoc(doc(db, "stock", i.productId), {
+      quantity: i.stockQty - i.quantity
+    });
+  }
+
+  cart.items = [];
+  render();
+  loadProducts();
+  alert("Sale completed");
+};
+
+/* SEARCH */
 search.oninput = render;
-render();
+
+/* INIT */
+loadProducts();
 </script>
+
+</body>
+</html>

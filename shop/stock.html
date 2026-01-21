@@ -1,266 +1,236 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Stock</title>
+<meta charset="UTF-8">
+<title>Stock</title>
 
-  <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: #f4f6f8;
-    }
+<style>
+body {
+  margin:0;
+  font-family:Segoe UI, Arial, sans-serif;
+  background:#f4f6f8;
+}
 
-    header {
-      background: linear-gradient(90deg,#0f2027,#203a43,#2c5364);
-      color: white;
-      padding: 15px 20px;
-    }
+.header {
+  padding:20px;
+  background:#203a43;
+  color:white;
+  font-size:22px;
+  font-weight:600;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
 
-    .container { padding: 20px; }
+.add-btn {
+  background:#2ecc71;
+  padding:10px 16px;
+  border-radius:12px;
+  cursor:pointer;
+  font-size:14px;
+  font-weight:600;
+}
 
-    .categories {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(180px,1fr));
-      gap: 16px;
-      margin-bottom: 20px;
-    }
+.stock-grid {
+  padding:20px;
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(220px,1fr));
+  gap:18px;
+}
 
-    .cat-card {
-      padding: 18px;
-      border-radius: 14px;
-      color: white;
-      font-weight: bold;
-      text-align: center;
-      box-shadow: 0 6px 18px rgba(0,0,0,0.25);
-      cursor: pointer;
-      transition: transform 0.2s ease;
-    }
+.stock-card {
+  background:white;
+  border-radius:16px;
+  padding:16px;
+  box-shadow:0 10px 25px rgba(0,0,0,.12);
+  cursor:pointer;
+}
 
-    .cat-card:hover { transform: translateY(-4px); }
+.stock-name {
+  font-weight:600;
+  margin-bottom:6px;
+}
 
-    .spare { background: linear-gradient(135deg,#667eea,#764ba2); }
-    .electronics { background: linear-gradient(135deg,#38ef7d,#11998e); }
-    .battery { background: linear-gradient(135deg,#dd2476,#ff512f); }
-    .phone { background: linear-gradient(135deg,#ffd200,#f7971e); color:#000; }
+.stock-meta {
+  font-size:13px;
+  color:#666;
+  margin-bottom:4px;
+}
 
-    .card {
-      background: white;
-      padding: 20px;
-      border-radius: 12px;
-      margin-bottom: 20px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-    }
+.price {
+  margin-top:8px;
+  font-weight:700;
+  color:#2ecc71;
+}
 
-    input, select, button {
-      width: 100%;
-      padding: 12px;
-      margin-bottom: 10px;
-      font-size: 14px;
-    }
+/* MODAL */
+.overlay {
+  display:none;
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.4);
+}
 
-    button {
-      background: #203a43;
-      color: white;
-      border: none;
-      cursor: pointer;
-      border-radius: 6px;
-    }
+.modal {
+  display:none;
+  position:fixed;
+  top:50%;
+  left:50%;
+  transform:translate(-50%,-50%);
+  background:white;
+  padding:20px;
+  border-radius:16px;
+  width:90%;
+  max-width:400px;
+}
 
-    .overlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.6);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      z-index: 999;
-    }
+.modal input {
+  width:100%;
+  padding:10px;
+  margin-bottom:12px;
+  border-radius:8px;
+  border:1px solid #ccc;
+}
 
-    .popup {
-      background: #f9fbfc;
-      width: 92%;
-      max-width: 620px;
-      border-radius: 16px;
-      box-shadow: 0 15px 40px rgba(0,0,0,0.35);
-      overflow: hidden;
-    }
-
-    .popup-header {
-      background: linear-gradient(90deg,#0f2027,#203a43,#2c5364);
-      color: white;
-      padding: 14px 18px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .popup-body {
-      padding: 18px;
-      max-height: 65vh;
-      overflow-y: auto;
-    }
-
-    .item {
-      background: white;
-      border-radius: 10px;
-      padding: 14px;
-      margin-bottom: 12px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.12);
-      font-size: 14px;
-    }
-
-    .profit { color: #1e8e3e; font-weight: bold; }
-  </style>
+.modal button {
+  width:100%;
+  padding:12px;
+  background:#203a43;
+  color:white;
+  border:none;
+  border-radius:10px;
+  font-weight:600;
+}
+</style>
 </head>
 
 <body>
 
-<header>
-  <h2>Stock Management</h2>
-</header>
-
-<div class="container">
-
-  <div class="categories">
-    <div class="cat-card spare" onclick="openCategory('SPARE')">Spare Parts</div>
-    <div class="cat-card electronics" onclick="openCategory('ELECTRONICS')">Electronics</div>
-    <div class="cat-card battery" onclick="openCategory('BATTERY')">Batteries</div>
-    <div class="cat-card phone" onclick="openCategory('SECOND_HAND')">Second-hand Phones</div>
-  </div>
-
-  <div class="card">
-    <h3>Add Product</h3>
-
-    <input id="name" placeholder="Product Name">
-    <input id="barcode" placeholder="Barcode">
-
-    <select id="category">
-      <option value="">Select Category</option>
-      <option value="SPARE">Spare Parts</option>
-      <option value="ELECTRONICS">Electronics</option>
-      <option value="BATTERY">Batteries</option>
-      <option value="SECOND_HAND">Second-hand Phones</option>
-    </select>
-
-    <input id="buyPrice" type="number" placeholder="Buy Price">
-    <input id="sellPrice" type="number" placeholder="Sell Price">
-    <input id="quantity" type="number" placeholder="Quantity">
-    <input id="location" placeholder="Location (optional)">
-
-    <button onclick="addProduct()">ADD PRODUCT</button>
-  </div>
-
+<div class="header">
+  <div>Stock</div>
+  <div class="add-btn" id="addBtn">+ Add Stock</div>
 </div>
 
-<div class="overlay" id="overlay">
-  <div class="popup">
-    <div class="popup-header">
-      <h3 id="popupTitle"></h3>
-      <button onclick="closePopup()">Back</button>
-    </div>
-    <div class="popup-body" id="popupList"></div>
-  </div>
+<div class="stock-grid" id="stockGrid"></div>
+
+<!-- MODAL -->
+<div class="overlay" id="overlay"></div>
+<div class="modal" id="modal">
+  <input id="name" placeholder="Item name">
+  <input id="category" placeholder="Category">
+  <input id="quantity" type="number" placeholder="Quantity">
+  <input id="sellPrice" type="number" placeholder="Sell price">
+  <button id="saveBtn">Save</button>
 </div>
 
 <script type="module">
-import { DB, saveDB } from "../db/fakeDB.js";
+import { db } from "../js/firebase.js";
+import {
+  collection,
+  addDoc,
+  getDocs,
+  query,
+  where,
+  serverTimestamp,
+  doc,
+  updateDoc
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-const user = JSON.parse(localStorage.getItem("currentUser"));
-if (!user || !["SHOPKEEPER","OWNER"].includes(user.role)) {
+/* 🔐 AUTH */
+const currentUser = JSON.parse(localStorage.getItem("currentUser"));
+if (!currentUser || currentUser.role !== "SHOPKEEPER") {
+  alert("Access denied");
   location.href = "/login.html";
 }
+const shopId = currentUser.shopId;
 
-/* ✅ ENSURE ARRAYS EXIST */
-DB.products = DB.products || [];
-DB.auditLogs = DB.auditLogs || [];
+/* UI */
+const stockGrid = document.getElementById("stockGrid");
+const modal = document.getElementById("modal");
+const overlay = document.getElementById("overlay");
 
-const nameEl = document.getElementById("name");
-const barcodeEl = document.getElementById("barcode");
-const categoryEl = document.getElementById("category");
-const buyPriceEl = document.getElementById("buyPrice");
-const sellPriceEl = document.getElementById("sellPrice");
-const quantityEl = document.getElementById("quantity");
-const locationEl = document.getElementById("location");
+let editId = null;
 
-/* ✅ FIX: EXPOSE TO WINDOW */
-window.addProduct = function () {
-  const name = nameEl.value.trim();
-  const barcode = barcodeEl.value.trim();
-  const category = categoryEl.value;
-  const buyPrice = Number(buyPriceEl.value);
-  const sellPrice = Number(sellPriceEl.value);
-  const quantity = Number(quantityEl.value);
-  const location = locationEl.value.trim();
+/* LOAD STOCK */
+async function loadStock() {
+  stockGrid.innerHTML = "";
+  const q = query(collection(db, "stock"), where("shopId", "==", shopId));
+  const snap = await getDocs(q);
 
-  if (!name || !category || !buyPrice || !sellPrice || !quantity) {
-    alert("Fill all required fields");
+  snap.forEach(d => {
+    const item = d.data();
+    const card = document.createElement("div");
+    card.className = "stock-card";
+    card.innerHTML = `
+      <div class="stock-name">${item.name}</div>
+      <div class="stock-meta">Category: ${item.category}</div>
+      <div class="stock-meta">Qty: ${item.quantity}</div>
+      <div class="price">₹${item.sellPrice}</div>
+    `;
+
+    card.onclick = () => openEdit(d.id, item);
+    stockGrid.appendChild(card);
+  });
+}
+
+/* OPEN EDIT */
+function openEdit(id, item) {
+  editId = id;
+  name.value = item.name;
+  category.value = item.category;
+  quantity.value = item.quantity;
+  sellPrice.value = item.sellPrice;
+  modal.style.display = "block";
+  overlay.style.display = "block";
+}
+
+/* SAVE */
+saveBtn.onclick = async () => {
+  const data = {
+    name: name.value.trim(),
+    category: category.value.trim(),
+    quantity: Number(quantity.value),
+    sellPrice: Number(sellPrice.value)
+  };
+
+  if (!data.name || !data.category) {
+    alert("Invalid data");
     return;
   }
 
-  DB.products.push({
-    id: "PROD_" + Date.now(),
-    shopId: user.shopId,
-    name,
-    barcode,
-    category,
-    buyPrice,
-    sellPrice,
-    quantity,
-    location,
-    createdAt: Date.now()
-  });
-
-  DB.auditLogs.push({
-    id: "LOG_" + Date.now(),
-    userId: user.id,
-    role: user.role,
-    shopId: user.shopId,
-    actionType: "BUY",
-    action: `Added stock: ${name} (${quantity})`,
-    timestamp: Date.now()
-  });
-
-  saveDB();
-  alert("Product added successfully");
-
-  nameEl.value =
-  barcodeEl.value =
-  categoryEl.value =
-  buyPriceEl.value =
-  sellPriceEl.value =
-  quantityEl.value =
-  locationEl.value = "";
-};
-
-window.openCategory = function (cat) {
-  const products = DB.products.filter(
-    p => p.shopId === user.shopId && p.category === cat
-  );
-
-  popupTitle.innerText = cat.replace("_"," ");
-  popupList.innerHTML = "";
-
-  if (!products.length) {
-    popupList.innerHTML = "<p>No items in this category</p>";
+  if (editId) {
+    await updateDoc(doc(db, "stock", editId), data);
+  } else {
+    await addDoc(collection(db, "stock"), {
+      ...data,
+      shopId,
+      createdAt: serverTimestamp()
+    });
   }
 
-  products.forEach(p => {
-    popupList.innerHTML += `
-      <div class="item">
-        <b>${p.name}</b><br>
-        Sell: ₹${p.sellPrice} | Buy: ₹${p.buyPrice}<br>
-        Qty: ${p.quantity} |
-        <span class="profit">Profit: ₹${p.sellPrice - p.buyPrice}</span>
-      </div>
-    `;
-  });
-
-  overlay.style.display = "flex";
+  editId = null;
+  modal.style.display = "none";
+  overlay.style.display = "none";
+  loadStock();
 };
 
-window.closePopup = function () {
+/* ADD NEW */
+addBtn.onclick = () => {
+  editId = null;
+  name.value = "";
+  category.value = "";
+  quantity.value = "";
+  sellPrice.value = "";
+  modal.style.display = "block";
+  overlay.style.display = "block";
+};
+
+overlay.onclick = () => {
+  modal.style.display = "none";
   overlay.style.display = "none";
 };
+
+loadStock();
 </script>
 
 </body>
