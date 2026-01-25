@@ -69,21 +69,26 @@
   <div class="card">
 
     <input id="custName" placeholder="Customer Name">
-    <input id="custPhone" placeholder="Customer Phone">
+    <input id="custPhone" placeholder="Customer Phone (+91...)">
     <input id="device" placeholder="Device Name">
     <textarea id="issue" placeholder="Issue description"></textarea>
     <input id="expectedCost" type="number" placeholder="Expected Cost">
     <input id="expectedDate" type="date">
 
-    <!-- ✅ FIXED BUTTON -->
     <button class="btn" id="createJobBtn">CREATE JOB</button>
 
   </div>
 </div>
 
 <script type="module">
-import { DB, saveDB } from "../db/fakeDB.js";
+import { db } from "../js/firebase.js";
+import {
+  collection,
+  addDoc,
+  serverTimestamp
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
+/* 🔐 AUTH */
 const currentUser = JSON.parse(localStorage.getItem("currentUser"));
 if (!currentUser || !["SHOPKEEPER","WORKER"].includes(currentUser.role)) {
   location.href = "/login.html";
@@ -98,53 +103,48 @@ const expectedCostEl = document.getElementById("expectedCost");
 const expectedDateEl = document.getElementById("expectedDate");
 const btn = document.getElementById("createJobBtn");
 
-/* CLICK HANDLER */
-btn.addEventListener("click", () => {
-  const custName = custNameEl.value.trim();
-  const custPhone = custPhoneEl.value.trim();
+/* CREATE JOB */
+btn.onclick = async () => {
+  const customerName = custNameEl.value.trim();
+  const customerPhone = custPhoneEl.value.trim();
   const device = deviceEl.value.trim();
   const issue = issueEl.value.trim();
   const expectedCost = Number(expectedCostEl.value);
   const expectedDate = expectedDateEl.value;
 
-  if (!custName || !custPhone || !device) {
+  if (!customerName || !customerPhone || !device) {
     alert("Please fill required fields");
     return;
   }
 
-  const jobId = "JOB_" + Date.now();
+  try {
+    await addDoc(collection(db, "jobs"), {
+      type: "REPAIR",
+      shopId: currentUser.shopId,
 
-  DB.tasks.push({
-    id: jobId,
-    type: "REPAIR",
-    shopId: currentUser.shopId,
-    customerName: custName,
-    customerPhone: custPhone,
-    device,
-    issue,
-    expectedCost,
-    expectedDate,
-    status: "OPEN",
-    assignedTo: null,
-    createdBy: currentUser.id,
-    createdAt: Date.now()
-  });
+      customerName,
+      customerPhone,
+      device,
+      issue,
+      expectedCost,
+      expectedDate,
 
-  /* ✅ AUDIT LOG */
-  DB.auditLogs.push({
-    id: "LOG_" + Date.now(),
-    userId: currentUser.id,
-    role: currentUser.role,
-    shopId: currentUser.shopId,
-    actionType: "WORK_CREATED",
-    action: `Created repair job (${device})`,
-    timestamp: Date.now()
-  });
+      status: "COLLECTED",   // 🔒 LOCKED STATUS
+      assignedTo: null,
 
-  saveDB();
-  alert("Repair job created successfully");
-  location.href = "index.html";
-});
+      createdBy: currentUser.uid,
+      createdByRole: currentUser.role,
+      createdAt: serverTimestamp()
+    });
+
+    alert("Repair job created successfully");
+    location.href = "index.html";
+
+  } catch (err) {
+    alert(err.message);
+    console.error(err);
+  }
+};
 </script>
 
 </body>

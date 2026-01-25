@@ -12,9 +12,8 @@
       color:white;
       padding:14px 18px;
       display:flex;
-      align-items:center;
       justify-content:space-between;
-      box-shadow:0 4px 10px rgba(0,0,0,0.3);
+      align-items:center;
     }
 
     .header-btn {
@@ -46,8 +45,9 @@
       color:white;
     }
 
+    .COLLECTED { background:#f1c40f; color:#000; }
     .IN_PROGRESS { background:#3498db; }
-    .DONE_NOT_DELIVERED { background:#8e44ad; }
+    .READY { background:#2ecc71; }
 
     .btn {
       margin-top:10px;
@@ -60,8 +60,6 @@
       cursor:pointer;
       font-size:14px;
     }
-
-    .deliver { background:#2ecc71; }
   </style>
 </head>
 
@@ -76,8 +74,18 @@
 <div class="container" id="jobs"></div>
 
 <script type="module">
-import { DB, saveDB } from "../db/fakeDB.js";
+import { db } from "../js/firebase.js";
+import {
+  collection,
+  query,
+  where,
+  getDocs,
+  doc,
+  updateDoc,
+  serverTimestamp
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
+/* 🔐 AUTH */
 const currentUser = JSON.parse(localStorage.getItem("currentUser"));
 if (!currentUser || currentUser.role !== "WORKER") {
   location.href = "/login.html";
@@ -85,106 +93,79 @@ if (!currentUser || currentUser.role !== "WORKER") {
 
 const container = document.getElementById("jobs");
 
-/* ACTIVE JOBS */
-const myJobs = DB.tasks.filter(t =>
-  t.type === "REPAIR" &&
-  t.assignedTo === currentUser.id &&
-  t.status !== "DONE_DELIVERED"
-);
+/* LOAD JOBS */
+async function loadJobs() {
+  container.innerHTML = "";
 
-if (!myJobs.length) {
-  container.innerHTML = "<p>No active jobs</p>";
+  const q = query(
+    collection(db, "jobs"),
+    where("type", "==", "REPAIR"),
+    where("assignedTo", "==", currentUser.uid),
+    where("status", "!=", "READY")
+  );
+
+  const snap = await getDocs(q);
+
+  if (snap.empty) {
+    container.innerHTML = "<p>No active jobs</p>";
+    return;
+  }
+
+  snap.forEach(docSnap => {
+    const job = { id: docSnap.id, ...docSnap.data() };
+
+    const div = document.createElement("div");
+    div.className = "job";
+
+    div.innerHTML = `
+      <b>${job.device}</b><br>
+      Customer: ${job.customerName}<br>
+      Phone: ${job.customerPhone}<br>
+      Cost: ₹${job.expectedCost || 0}<br>
+
+      <span class="status ${job.status}">
+        ${job.status}
+      </span>
+
+      ${
+        job.status === "COLLECTED"
+          ? `<button class="btn" onclick="startRepair('${job.id}')">
+               START REPAIR
+             </button>`
+          : ""
+      }
+
+      ${
+        job.status === "IN_PROGRESS"
+          ? `<button class="btn" onclick="markReady('${job.id}')">
+               MARK READY
+             </button>`
+          : ""
+      }
+    `;
+
+    container.appendChild(div);
+  });
 }
 
-myJobs.forEach(job => {
-  const div = document.createElement("div");
-  div.className = "job";
-
-  div.innerHTML = `
-    <b>${job.device}</b><br>
-    Customer: ${job.customerName}<br>
-    Phone: ${job.customerPhone}<br>
-    Cost: ₹${job.expectedCost || 0}<br>
-    Issue: ${job.issue || "-"}<br>
-
-    <span class="status ${job.status}">
-      ${job.status.replaceAll("_"," ")}
-    </span>
-
-    ${
-      job.status === "IN_PROGRESS"
-        ? `<button class="btn" onclick="markDone('${job.id}')">
-             MARK REPAIR DONE
-           </button>`
-        : ""
-    }
-
-    ${
-      job.status === "DONE_NOT_DELIVERED"
-        ? `<button class="btn deliver" onclick="markDelivered('${job.id}')">
-             DELIVER TO CUSTOMER
-           </button>`
-        : ""
-    }
-  `;
-
-  container.appendChild(div);
-});
-
-/* MARK DONE */
-window.markDone = id => {
-  const job = DB.tasks.find(t => t.id === id);
-  if (!job) return;
-
-  job.status = "DONE_NOT_DELIVERED";
-  job.completedAt = Date.now();
-
-  DB.auditLogs.push({
-    id: "LOG_" + Date.now(),
-    userId: currentUser.id,
-    role: "WORKER",
-    shopId: job.shopId,
-    actionType: "WORK_DONE_NOT_DELIVERED",
-    action: `Repair completed (${job.device})`,
-    timestamp: Date.now()
+/* STATUS ACTIONS */
+window.startRepair = async jobId => {
+  await updateDoc(doc(db, "jobs", jobId), {
+    status: "IN_PROGRESS",
+    startedAt: serverTimestamp()
   });
-
-  saveDB();
-  location.reload();
+  loadJobs();
 };
 
-/* MARK DELIVERED + 💰 ADD REVENUE */
-window.markDelivered = id => {
-  const job = DB.tasks.find(t => t.id === id);
-  if (!job) return;
-
-  job.status = "DONE_DELIVERED";
-  job.deliveredAt = Date.now();
-
-  /* ✅ ADD JOB REVENUE */
-  DB.sales.push({
-    id: "SALE_JOB_" + Date.now(),
-    type: "JOB",
-    shopId: job.shopId,
-    userId: currentUser.id,
-    amount: Number(job.expectedCost || 0),
-    createdAt: Date.now()
+window.markReady = async jobId => {
+  await updateDoc(doc(db, "jobs", jobId), {
+    status: "READY",
+    completedAt: serverTimestamp()
   });
-
-  DB.auditLogs.push({
-    id: "LOG_" + Date.now(),
-    userId: currentUser.id,
-    role: "WORKER",
-    shopId: job.shopId,
-    actionType: "WORK_DONE_DELIVERED",
-    action: `Job delivered (${job.device}) for ₹${job.expectedCost}`,
-    timestamp: Date.now()
-  });
-
-  saveDB();
-  alert("Job delivered & revenue added");
-  location.reload();
+  loadJobs();
 };
+
+loadJobs();
 </script>
 
 </body>

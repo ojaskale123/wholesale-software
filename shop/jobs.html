@@ -14,7 +14,6 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
     }
 
     .header-btn {
@@ -31,7 +30,6 @@
     .search {
       width: 100%;
       padding: 12px;
-      font-size: 15px;
       border-radius: 8px;
       border: 1px solid #ccc;
       margin-bottom: 15px;
@@ -42,31 +40,27 @@
       padding: 16px;
       margin-bottom: 14px;
       border-radius: 12px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      box-shadow:0 4px 12px rgba(0,0,0,0.15);
     }
-
-    .job h4 { margin: 0 0 6px 0; }
-
-    .job p { margin: 4px 0; font-size: 14px; }
 
     .status {
-      display: inline-block;
-      padding: 6px 12px;
-      border-radius: 14px;
-      font-size: 12px;
-      font-weight: bold;
-      margin-top: 8px;
+      display:inline-block;
+      padding:6px 12px;
+      border-radius:14px;
+      font-size:12px;
+      font-weight:bold;
+      margin-top:8px;
+      color:white;
     }
 
-    .OPEN { background:#f1c40f; color:#000; }
-    .IN_PROGRESS { background:#3498db; color:#fff; }
-    .DONE_NOT_DELIVERED { background:#9b59b6; color:#fff; }
-    .DONE_DELIVERED { background:#2ecc71; color:#fff; }
+    .COLLECTED { background:#f1c40f; color:#000; }
+    .IN_PROGRESS { background:#3498db; }
+    .READY { background:#2ecc71; }
 
     .empty {
-      text-align: center;
-      color: #777;
-      margin-top: 40px;
+      text-align:center;
+      color:#777;
+      margin-top:40px;
     }
   </style>
 </head>
@@ -80,41 +74,50 @@
 </header>
 
 <div class="container">
-  <input
-    id="search"
-    class="search"
-    placeholder="Search by device, customer, phone, or status"
-  >
-
+  <input id="search" class="search" placeholder="Search by device, customer, phone, status">
   <div id="jobs"></div>
 </div>
 
 <script type="module">
-import { DB } from "../db/fakeDB.js";
+import { db } from "../js/firebase.js";
+import {
+  collection,
+  query,
+  where,
+  getDocs
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+const currentUser = JSON.parse(localStorage.getItem("currentUser"));
+if (!currentUser || currentUser.role !== "SHOPKEEPER") {
+  location.href = "/login.html";
+}
 
 const jobsDiv = document.getElementById("jobs");
 const searchInput = document.getElementById("search");
-const currentUser = JSON.parse(localStorage.getItem("currentUser"));
 
-function render(filter = "") {
+let allJobs = [];
+
+async function loadJobs() {
+  const q = query(
+    collection(db, "jobs"),
+    where("type", "==", "REPAIR"),
+    where("shopId", "==", currentUser.shopId)
+  );
+
+  const snap = await getDocs(q);
+  allJobs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  render();
+}
+
+function render() {
+  const f = searchInput.value.toLowerCase();
   jobsDiv.innerHTML = "";
-  const f = filter.toLowerCase();
 
-  let tasks = DB.tasks || [];
-
-  // 🔐 Role-based visibility
-  if (currentUser.role !== "OWNER") {
-    tasks = tasks.filter(t => t.shopId === currentUser.shopId);
-  }
-
-  const filtered = tasks.filter(j =>
-    j.type === "REPAIR" &&
-    (
-      (j.device || "").toLowerCase().includes(f) ||
-      (j.customerName || "").toLowerCase().includes(f) ||
-      (j.customerPhone || "").includes(f) ||
-      (j.status || "").toLowerCase().includes(f)
-    )
+  const filtered = allJobs.filter(j =>
+    (j.device || "").toLowerCase().includes(f) ||
+    (j.customerName || "").toLowerCase().includes(f) ||
+    (j.customerPhone || "").includes(f) ||
+    (j.status || "").toLowerCase().includes(f)
   );
 
   if (!filtered.length) {
@@ -123,24 +126,19 @@ function render(filter = "") {
   }
 
   filtered.forEach(job => {
-    const worker = DB.users.find(u => u.id === job.assignedTo);
-
-    const div = document.createElement("div");
-    div.className = "job";
-    div.innerHTML = `
-      <h4>${job.device}</h4>
-      <p><b>Customer:</b> ${job.customerName} (${job.customerPhone})</p>
-      <p><b>Issue:</b> ${job.issue || "-"}</p>
-      <p><b>Expected Cost:</b> ₹${job.expectedCost || "-"}</p>
-      <p><b>Worker:</b> ${worker?.name || "Not accepted yet"}</p>
-      <span class="status ${job.status}">${job.status.replaceAll("_"," ")}</span>
+    jobsDiv.innerHTML += `
+      <div class="job">
+        <b>${job.device}</b><br>
+        Customer: ${job.customerName} (${job.customerPhone})<br>
+        Expected Cost: ₹${job.expectedCost || "-"}<br>
+        <span class="status ${job.status}">${job.status}</span>
+      </div>
     `;
-    jobsDiv.appendChild(div);
   });
 }
 
-searchInput.oninput = e => render(e.target.value);
-render();
+searchInput.oninput = render;
+loadJobs();
 </script>
 
 </body>

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Jobs</title>
+<title>All Jobs</title>
 
 <style>
 body {
@@ -12,15 +12,9 @@ body {
   padding: 20px;
 }
 
-h2 {
-  margin-bottom: 20px;
-  color: #203a43;
-}
+h2 { margin-bottom: 20px; color: #203a43; }
 
-/* FILTERS */
-.filters {
-  margin-bottom: 20px;
-}
+.filters { margin-bottom: 20px; }
 select {
   padding: 10px;
   border-radius: 8px;
@@ -28,85 +22,83 @@ select {
   margin-right: 10px;
 }
 
-/* JOB CARD */
 .job {
   background: white;
   padding: 16px;
   border-radius: 14px;
   margin-bottom: 14px;
-  box-shadow: 0 6px 16px rgba(0,0,0,0.15);
-}
-
-.job b {
-  font-size: 16px;
+  box-shadow:0 6px 16px rgba(0,0,0,0.15);
 }
 
 .status {
-  display: inline-block;
-  margin-top: 8px;
-  padding: 4px 10px;
-  border-radius: 12px;
-  font-size: 12px;
-  font-weight: bold;
-  color: white;
+  display:inline-block;
+  margin-top:8px;
+  padding:4px 10px;
+  border-radius:12px;
+  font-size:12px;
+  font-weight:bold;
+  color:white;
 }
 
-/* STATUS COLORS */
-.OPEN { background:#f1c40f; color:#000; }
+.COLLECTED { background:#f1c40f; color:#000; }
 .IN_PROGRESS { background:#3498db; }
-.DONE_NOT_DELIVERED { background:#8e44ad; }
-.DONE_DELIVERED { background:#2ecc71; }
+.READY { background:#2ecc71; }
 
 .empty {
-  margin-top: 40px;
-  color: #777;
-  text-align: center;
+  margin-top:40px;
+  color:#777;
+  text-align:center;
 }
 </style>
 </head>
 
 <body>
 
-<h2>All Jobs</h2>
+<h2>All Repair Jobs</h2>
 
-<!-- FILTERS -->
 <div class="filters">
   <select id="statusFilter">
     <option value="">All Status</option>
-    <option value="OPEN">Not Assigned</option>
+    <option value="COLLECTED">Collected</option>
     <option value="IN_PROGRESS">In Progress</option>
-    <option value="DONE_NOT_DELIVERED">Done (Not Delivered)</option>
-    <option value="DONE_DELIVERED">Done & Delivered</option>
-  </select>
-
-  <select id="shopFilter">
-    <option value="">All Shops</option>
+    <option value="READY">Ready</option>
   </select>
 </div>
 
 <div id="jobsList"></div>
 
 <script type="module">
-import { DB } from "../db/fakeDB.js";
+import { db } from "../js/firebase.js";
+import {
+  collection,
+  getDocs
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+const currentUser = JSON.parse(localStorage.getItem("currentUser"));
+if (!currentUser || currentUser.role !== "OWNER") {
+  location.href = "/login.html";
+}
 
 const statusFilter = document.getElementById("statusFilter");
-const shopFilter = document.getElementById("shopFilter");
 const jobsList = document.getElementById("jobsList");
 
-/* LOAD SHOPS */
-shopFilter.innerHTML += DB.shops
-  .map(s => `<option value="${s.id}">${s.name}</option>`)
-  .join("");
+let allJobs = [];
 
-function renderJobs() {
+async function loadJobs() {
+  const snap = await getDocs(collection(db, "jobs"));
+  allJobs = snap.docs
+    .map(d => ({ id: d.id, ...d.data() }))
+    .filter(j => j.type === "REPAIR");
+
+  render();
+}
+
+function render() {
   jobsList.innerHTML = "";
 
-  const filtered = DB.tasks.filter(job => {
-    if (job.type !== "REPAIR") return false;
-    if (statusFilter.value && job.status !== statusFilter.value) return false;
-    if (shopFilter.value && job.shopId !== shopFilter.value) return false;
-    return true;
-  });
+  const filtered = allJobs.filter(j =>
+    !statusFilter.value || j.status === statusFilter.value
+  );
 
   if (!filtered.length) {
     jobsList.innerHTML = `<div class="empty">No jobs found</div>`;
@@ -114,28 +106,20 @@ function renderJobs() {
   }
 
   filtered.forEach(job => {
-    const shop = DB.shops.find(s => s.id === job.shopId);
-    const worker = DB.users.find(u => u.id === job.assignedTo);
-
     jobsList.innerHTML += `
       <div class="job">
         <b>${job.device}</b><br>
         Customer: ${job.customerName} (${job.customerPhone})<br>
-        Shop: ${shop?.name || "-"}<br>
-        Worker: ${worker?.name || "Not Assigned"}<br>
-
-        <span class="status ${job.status}">
-          ${job.status.replaceAll("_"," ")}
-        </span>
+        Shop ID: ${job.shopId}<br>
+        Expected Cost: ₹${job.expectedCost || "-"}<br>
+        <span class="status ${job.status}">${job.status}</span>
       </div>
     `;
   });
 }
 
-statusFilter.onchange = renderJobs;
-shopFilter.onchange = renderJobs;
-
-renderJobs();
+statusFilter.onchange = render;
+loadJobs();
 </script>
 
 </body>
