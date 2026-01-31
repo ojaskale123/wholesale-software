@@ -1,35 +1,199 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Track Repair</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Track Repair Status</title>
   <link rel="stylesheet" href="./css/style.css">
+
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card-bg: rgba(30, 41, 59, 0.85);
+      --border: rgba(148, 163, 184, 0.22);
+      --text: #e2e8f0;
+      --text-muted: #94a3b8;
+      --accent: #3b82f6;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --radius: 16px;
+      --shadow: 0 12px 32px rgba(0,0,0,0.4);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      line-height: 1.6;
+    }
+
+    .top-header {
+      background: linear-gradient(135deg, #1e293b, #0f172a);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      padding: 1.4rem 1.5rem;
+      text-align: center;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.35);
+    }
+
+    .top-header h2 {
+      font-size: 1.55rem;
+      font-weight: 700;
+      margin: 0;
+      background: linear-gradient(90deg, #93c5fd, #c7d2fe);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    #info {
+      max-width: 600px;
+      margin: 4rem auto 2rem;
+      padding: 0 1.5rem;
+    }
+
+    .status-card {
+      background: var(--card-bg);
+      backdrop-filter: blur(14px);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 2.5rem 2rem;
+      box-shadow: var(--shadow);
+      text-align: center;
+      animation: fadeUp 0.6s ease-out;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .status-card h3 {
+      font-size: 1.8rem;
+      font-weight: 700;
+      margin-bottom: 1.5rem;
+      color: white;
+    }
+
+    .detail {
+      font-size: 1.1rem;
+      margin: 1rem 0;
+      color: var(--text-muted);
+    }
+
+    .detail strong {
+      color: var(--text);
+    }
+
+    .status-badge {
+      display: inline-block;
+      margin: 1.5rem 0 1rem;
+      padding: 0.75rem 1.8rem;
+      border-radius: 2rem;
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: white;
+      letter-spacing: 0.5px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    }
+
+    .status-OPEN,
+    .status-COLLECTED { background: var(--warning); }
+    .status-IN_PROGRESS { background: var(--accent); }
+    .status-DONE_NOT_DELIVERED { background: var(--purple); }
+    .status-DONE_DELIVERED { background: var(--success); }
+
+    .footer-note {
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      margin-top: 3rem;
+      padding: 0 1rem;
+    }
+
+    @media (max-width: 480px) {
+      .status-card { padding: 2rem 1.5rem; }
+      .status-card h3 { font-size: 1.6rem; }
+      .status-badge { font-size: 1rem; padding: 0.6rem 1.4rem; }
+    }
+  </style>
 </head>
+
 <body>
 
 <header class="top-header">
   <h2>Repair Status</h2>
 </header>
 
-<div id="info" style="padding:20px"></div>
+<div id="info"></div>
+
+<div class="footer-note">
+  Track your repair job using the link or QR code provided by the shop.
+</div>
 
 <script type="module">
-  import { DB } from "./db/fakeDB.js";
+import { DB } from "./db/fakeDB.js";
 
-  const params = new URLSearchParams(location.search);
-  const jobId = Number(params.get("jobId"));
-  const job = (DB.jobs || []).find(j => j.id === jobId);
+const params = new URLSearchParams(location.search);
+const jobId = Number(params.get("jobId"));
+const job = (DB.jobs || []).find(j => j.id === jobId);
 
-  const div = document.getElementById("info");
+const div = document.getElementById("info");
 
-  if (!job) {
-    div.innerText = "Invalid Job";
-  } else {
-    div.innerHTML = `
-      <p>Device: ${job.device || "Item"}</p>
-      <p>Status: ${job.status}</p>
-      <p>Expected Cost: ₹${job.expectedCost || "-"}</p>
-    `;
-  }
+if (!job) {
+  div.innerHTML = `
+    <div class="status-card">
+      <h3>Job Not Found</h3>
+      <p style="color: var(--text-muted);">
+        Invalid or expired tracking link.<br>
+        Please contact the shop for assistance.
+      </p>
+    </div>
+  `;
+} else {
+  const statusClass = `status-${job.status}`;
+
+  div.innerHTML = `
+    <div class="status-card">
+      <h3>${job.device || "Repair Item"}</h3>
+
+      <div class="detail">
+        <strong>Status:</strong> 
+        <span class="status-badge ${statusClass}">
+          ${job.status.replaceAll("_", " ")}
+        </span>
+      </div>
+
+      <div class="detail">
+        <strong>Expected Cost:</strong> ₹${job.expectedCost || "—"}
+      </div>
+
+      ${job.customerName ? `
+        <div class="detail">
+          <strong>Customer:</strong> ${job.customerName}
+        </div>
+      ` : ""}
+
+      ${job.issue ? `
+        <div class="detail" style="margin-top: 1.5rem;">
+          <strong>Reported Issue:</strong><br>
+          ${job.issue}
+        </div>
+      ` : ""}
+    </div>
+  `;
+}
 </script>
 
 </body>

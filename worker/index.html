@@ -1,51 +1,108 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Worker Dashboard</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Worker Panel</title>
   <link rel="stylesheet" href="../css/style.css">
 
   <style>
-    body {
-      background: #aec6eb;
-      font-family: Arial, sans-serif;
+    :root {
+      --bg: #0f172a;
+      --card-bg: rgba(30, 41, 59, 0.82);
+      --border: rgba(148, 163, 184, 0.22);
+      --text: #e2e8f0;
+      --text-muted: #94a3b8;
+      --radius: 16px;
+      --shadow: 0 10px 30px rgba(0,0,0,0.4);
+    }
+
+    * {
       margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      line-height: 1.5;
+    }
+
+    .top-header {
+      background: linear-gradient(135deg, #1e293b, #0f172a);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      padding: 1.2rem 1.5rem;
+      text-align: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.35);
+    }
+
+    .top-header h2 {
+      font-size: 1.55rem;
+      font-weight: 700;
+      margin: 0;
+      background: linear-gradient(90deg, #93c5fd, #c7d2fe);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
     }
 
     .dashboard {
-      padding: 22px;
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem;
     }
 
     .card-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 20px;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 1.4rem;
     }
 
     .card {
-      background: white;
-      padding: 22px;
-      border-radius: 14px;
-      box-shadow: 0 8px 22px rgba(0,0,0,0.18);
+      background: var(--card-bg);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 2rem 1.6rem;
+      box-shadow: var(--shadow);
       cursor: pointer;
-      transition: transform 0.2s ease;
+      transition: all 0.28s ease;
       text-align: center;
+      position: relative;
+      overflow: hidden;
     }
 
     .card:hover {
-      transform: scale(1.05);
+      transform: translateY(-8px);
+      box-shadow: 0 20px 48px rgba(0,0,0,0.5);
+      border-color: rgba(147, 197, 253, 0.35);
     }
 
     .card h2 {
-      margin: 0;
-      font-size: 26px;
-      color: #203a43;
+      font-size: 2.8rem;
+      margin: 0 0 1rem;
+      line-height: 1;
+      color: white;
     }
 
     .card p {
-      margin-top: 8px;
-      font-size: 14px;
-      color: #555;
+      font-size: 1.05rem;
+      color: var(--text-muted);
+      margin: 0;
+    }
+
+    @media (max-width: 640px) {
+      .dashboard { padding: 1.5rem 1rem; }
+      .card { padding: 1.8rem 1.4rem; }
+      .card h2 { font-size: 2.4rem; }
+      .card-grid { gap: 1.2rem; }
     }
   </style>
 </head>
@@ -57,7 +114,6 @@
 </header>
 
 <div class="dashboard">
-
   <div class="card-grid">
 
     <!-- SELL -->
@@ -84,7 +140,7 @@
       <p>Attendance</p>
     </div>
 
-    <!-- HISTORY (✅ ADDED) -->
+    <!-- HISTORY -->
     <div class="card" onclick="location.href='history.html'">
       <h2>🕘</h2>
       <p>My History</p>
@@ -92,13 +148,11 @@
 
     <!-- PROFILE (FUTURE) -->
     <div class="card" onclick="location.href='profile.html'">
-  <h2>👤</h2>
-  <p>My Profile</p>
-</div>
-
+      <h2>👤</h2>
+      <p>My Profile</p>
+    </div>
 
   </div>
-
 </div>
 
 <script type="module">

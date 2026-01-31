@@ -1,90 +1,172 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>System History</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>System Activity History</title>
 
-<style>
-:root {
-  --primary:#203a43;
-  --bg:#f4f6f8;
-}
-body {
-  margin:0;
-  font-family:Segoe UI, Arial, sans-serif;
-  background:var(--bg);
-  padding:30px;
-}
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card-bg: rgba(30, 41, 59, 0.75);
+      --border: rgba(148, 163, 184, 0.18);
+      --text: #e2e8f0;
+      --text-muted: #94a3b8;
+      --accent: #3b82f6;
+      --radius: 14px;
+    }
 
-h2 {
-  margin-bottom:20px;
-  color:var(--primary);
-}
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
 
-/* FILTER BAR */
-.filters {
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
-  gap:12px;
-  margin-bottom:25px;
-}
-select, input {
-  padding:10px;
-  border-radius:10px;
-  border:1px solid #ccc;
-  font-size:14px;
-}
+    body {
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 2rem 1.5rem;
+      line-height: 1.5;
+    }
 
-/* TIMELINE */
-.timeline {
-  display:flex;
-  flex-direction:column;
-  gap:14px;
-}
+    h2 {
+      font-size: 1.9rem;
+      font-weight: 700;
+      margin-bottom: 1.8rem;
+      background: linear-gradient(90deg, #93c5fd, #c7d2fe);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-align: center;
+    }
 
-.log {
-  background:white;
-  padding:16px 18px;
-  border-radius:14px;
-  box-shadow:0 8px 20px rgba(0,0,0,.12);
-}
+    /* Filters */
+    .filters {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-bottom: 2.5rem;
+      max-width: 1400px;
+      margin-left: auto;
+      margin-right: auto;
+    }
 
-.log b {
-  font-size:15px;
-  color:#111;
-}
+    select, input[type="date"] {
+      padding: 0.9rem 1rem;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: rgba(51, 65, 85, 0.55);
+      color: var(--text);
+      font-size: 1rem;
+      backdrop-filter: blur(6px);
+      transition: all 0.2s ease;
+    }
 
-.log small {
-  display:block;
-  margin-top:6px;
-  color:#666;
-  font-size:12px;
-}
+    select:focus, input:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
+    }
 
-/* BADGES */
-.badge {
-  display:inline-block;
-  padding:5px 10px;
-  border-radius:20px;
-  font-size:11px;
-  font-weight:700;
-  margin-left:8px;
-  color:white;
-}
+    select {
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2394a3b8' d='M6 8.825L1.175 4 2.238 2.938 6 6.7l3.763-3.762L10.825 4z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 1rem center;
+      padding-right: 2.5rem;
+    }
 
-.BUY { background:#2980b9; }
-.SELL { background:#27ae60; }
+    /* Timeline / Logs */
+    .timeline {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
 
-.WORK_CREATED { background:#7f8c8d; }
-.WORK_IN_PROGRESS { background:#f39c12; }
-.WORK_DONE_NOT_DELIVERED { background:#8e44ad; }
-.WORK_DONE_DELIVERED { background:#2ecc71; }
+    .log {
+      background: var(--card-bg);
+      backdrop-filter: blur(10px);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.3rem 1.4rem;
+      transition: all 0.22s ease;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+    }
 
-.SHOP_CREATED,
-.SHOPKEEPER_CREATED,
-.WORKER_CREATED { background:#34495e; }
-.SYSTEM { background:#95a5a6; }
-</style>
+    .log:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 12px 32px rgba(0,0,0,0.35);
+      border-color: rgba(147, 197, 253, 0.25);
+    }
+
+    .log-header {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.8rem;
+      margin-bottom: 0.6rem;
+    }
+
+    .log b {
+      font-size: 1.15rem;
+      color: white;
+      font-weight: 600;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 0.35rem 0.9rem;
+      border-radius: 2rem;
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: white;
+      letter-spacing: 0.3px;
+    }
+
+    /* Badge colors – improved contrast */
+    .BUY                      { background: #2563eb; }
+    .SELL                     { background: #059669; }
+    .WORK_CREATED             { background: #6b7280; }
+    .WORK_IN_PROGRESS         { background: #d97706; }
+    .WORK_DONE_NOT_DELIVERED  { background: #7c3aed; }
+    .WORK_DONE_DELIVERED      { background: #16a34a; }
+    .SHOP_CREATED,
+    .SHOPKEEPER_CREATED,
+    .WORKER_CREATED           { background: #475569; }
+    .SYSTEM                   { background: #64748b; }
+
+    .log .action-text {
+      font-size: 0.98rem;
+      color: var(--text);
+      margin: 0.4rem 0 0.8rem;
+    }
+
+    .log small {
+      display: block;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    .log small span {
+      color: var(--text);
+      font-weight: 500;
+    }
+
+    @media (max-width: 640px) {
+      .filters {
+        grid-template-columns: 1fr;
+      }
+      h2 {
+        font-size: 1.7rem;
+      }
+      .log {
+        padding: 1.1rem;
+      }
+    }
+  </style>
 </head>
 
 <body>
@@ -115,7 +197,6 @@ select, input {
     <option value="WORKER_CREATED">Worker Created</option>
   </select>
 
-  <!-- ✅ SINGLE DATE -->
   <input type="date" id="dateFilter">
 </div>
 
@@ -172,12 +253,14 @@ function renderHistory() {
 
       historyList.innerHTML += `
         <div class="log">
-          <b>${user?.name || "System"}</b>
-          <span class="badge ${type}">${type.replaceAll("_"," ")}</span>
-          <div>${log.action}</div>
+          <div class="log-header">
+            <b>${user?.name || "System"}</b>
+            <span class="badge ${type}">${type.replaceAll("_"," ")}</span>
+          </div>
+          <div class="action-text">${log.action}</div>
           <small>
-            Role: ${log.role || "-"} |
-            Shop: ${shop?.name || "-"} |
+            Role: <span>${log.role || "—"}</span> • 
+            Shop: <span>${shop?.name || "—"}</span> • 
             ${new Date(log.timestamp).toLocaleString()}
           </small>
         </div>

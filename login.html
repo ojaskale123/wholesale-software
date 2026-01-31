@@ -1,29 +1,236 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Login</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Login | Your App Name</title>
   <link rel="stylesheet" href="./css/style.css">
+  <style>
+    /* Reset & Global */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      min-height: 100vh;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      color: #333;
+    }
+
+    /* Glassmorphism Card */
+    .login-container {
+      background: rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-radius: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+      padding: 40px 32px;
+      width: 100%;
+      max-width: 420px;
+      animation: fadeInUp 0.8s ease-out forwards;
+      opacity: 0;
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 32px;
+      font-size: 2rem;
+      font-weight: 600;
+      color: white;
+      letter-spacing: -0.5px;
+    }
+
+    /* Floating Label Input Group */
+    .form-group {
+      position: relative;
+      margin-bottom: 28px;
+    }
+
+    .form-group input {
+      width: 100%;
+      padding: 14px 16px;
+      border: none;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.25);
+      color: white;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+    }
+
+    .form-group input:focus {
+      outline: none;
+      background: rgba(255, 255, 255, 0.35);
+      box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.2);
+      transform: translateY(-2px);
+    }
+
+    .form-group input::placeholder {
+      color: rgba(255, 255, 255, 0.7);
+    }
+
+    .form-group label {
+      position: absolute;
+      left: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: rgba(255, 255, 255, 0.9);
+      font-size: 1rem;
+      pointer-events: none;
+      transition: all 0.3s ease;
+    }
+
+    .form-group input:focus + label,
+    .form-group input:not(:placeholder-shown) + label {
+      top: -10px;
+      left: 12px;
+      font-size: 0.82rem;
+      background: rgba(102, 126, 234, 0.9); /* matches gradient start */
+      padding: 0 8px;
+      border-radius: 6px;
+      color: white;
+    }
+
+    /* Button */
+    .login-btn {
+      width: 100%;
+      padding: 14px;
+      background: linear-gradient(90deg, #667eea, #764ba2);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+    }
+
+    .login-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 12px 30px rgba(102, 126, 234, 0.55);
+    }
+
+    .login-btn:active {
+      transform: translateY(0);
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.35);
+    }
+
+    /* Optional: subtle loading state (you can toggle via JS) */
+    .login-btn.loading {
+      pointer-events: none;
+      background: linear-gradient(90deg, #5a6fd1, #6a3f8f);
+    }
+
+    .login-btn.loading::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+      animation: shimmer 1.5s infinite;
+    }
+
+    @keyframes shimmer {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(100%); }
+    }
+
+    /* Extra links (optional – add later) */
+    .extra {
+      text-align: center;
+      margin-top: 24px;
+      color: rgba(255,255,255,0.85);
+      font-size: 0.95rem;
+    }
+
+    .extra a {
+      color: white;
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .extra a:hover {
+      text-decoration: underline;
+    }
+
+    @media (max-width: 480px) {
+      .login-container {
+        padding: 32px 20px;
+      }
+      h2 { font-size: 1.8rem; }
+    }
+  </style>
 </head>
 <body>
 
-<h2>Login</h2>
+  <div class="login-container">
+    <h2>Welcome Back</h2>
 
-<input id="email" type="email" placeholder="Email">
-<br><br>
-<input id="password" type="password" placeholder="Password">
-<br><br>
-<button id="loginBtn">Login</button>
+    <form id="loginForm">
+      <div class="form-group">
+        <input id="email" type="email" placeholder=" " required autocomplete="email" />
+        <label for="email">Email</label>
+      </div>
 
-<script type="module">
-  import { login } from "./auth/login.js";
+      <div class="form-group">
+        <input id="password" type="password" placeholder=" " required autocomplete="current-password" />
+        <label for="password">Password</label>
+      </div>
 
-  document.getElementById("loginBtn").onclick = () => {
-    login(
-      document.getElementById("email").value,
-      document.getElementById("password").value
-    );
-  };
-</script>
+      <button type="button" id="loginBtn" class="login-btn">Login</button>
+    </form>
+
+    <!-- Optional footer links -->
+    <div class="extra">
+      Don't have an account? <a href="#">Sign up</a>
+    </div>
+  </div>
+
+  <script type="module">
+    import { login } from "./auth/login.js";
+
+    const loginBtn = document.getElementById("loginBtn");
+
+    loginBtn.onclick = () => {
+      // Optional: add loading state
+      loginBtn.classList.add("loading");
+      loginBtn.textContent = "Signing in...";
+
+      login(
+        document.getElementById("email").value.trim(),
+        document.getElementById("password").value
+      )
+      .then(() => {
+        // success → redirect happens in your login.js
+      })
+      .catch(err => {
+        loginBtn.classList.remove("loading");
+        loginBtn.textContent = "Login";
+        // You can show error message here later
+        console.error(err);
+      });
+    };
+  </script>
 
 </body>
 </html>

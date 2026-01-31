@@ -1,166 +1,217 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Wholesale Management System</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Wholesale Management System</title>
 
-    <style>
-        * {
-            box-sizing: border-box;
-            font-family: Arial, Helvetica, sans-serif;
-        }
+  <style>
+    :root {
+      --bg: #0f172a;
+      --gradient: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+      --card-bg: rgba(30, 41, 59, 0.78);
+      --border: rgba(148, 163, 184, 0.18);
+      --text: #e2e8f0;
+      --text-muted: #94a3b8;
+      --accent: #3b82f6;
+      --success: #10b981;
+      --radius: 16px;
+      --shadow: 0 12px 32px rgba(0,0,0,0.4);
+    }
 
-        body {
-            margin: 0;
-            background: #f4f6f9;
-            color: #333;
-        }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
 
-        header {
-            background: linear-gradient(135deg, #1e3c72, #2a5298);
-            color: #fff;
-            padding: 40px 20px;
-            text-align: center;
-        }
+    body {
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      line-height: 1.6;
+    }
 
-        header h1 {
-            margin: 0;
-            font-size: 32px;
-        }
+    header {
+      background: var(--gradient);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      padding: 5rem 1.5rem 4rem;
+      text-align: center;
+      border-bottom: 1px solid var(--border);
+      box-shadow: 0 6px 20px rgba(0,0,0,0.35);
+    }
 
-        header p {
-            margin-top: 10px;
-            font-size: 16px;
-            opacity: 0.9;
-        }
+    header h1 {
+      font-size: clamp(2.2rem, 6vw, 3.8rem);
+      font-weight: 800;
+      margin-bottom: 0.8rem;
+      background: linear-gradient(90deg, #a5b4fc, #c7d2fe, #e0f2fe);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
 
-        .container {
-            max-width: 1100px;
-            margin: 40px auto;
-            padding: 0 20px;
-        }
+    header p {
+      font-size: clamp(1.1rem, 3vw, 1.35rem);
+      max-width: 720px;
+      margin: 0 auto;
+      color: var(--text-muted);
+      opacity: 0.95;
+    }
 
-        .info-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-            gap: 20px;
-        }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 3rem 1.5rem;
+    }
 
-        .info-card {
-            background: #fff;
-            padding: 25px;
-            border-radius: 12px;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.08);
-            transition: transform 0.2s ease;
-        }
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.6rem;
+    }
 
-        .info-card:hover {
-            transform: translateY(-4px);
-        }
+    .info-card {
+      background: var(--card-bg);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 2rem 1.8rem;
+      box-shadow: var(--shadow);
+      transition: all 0.28s ease;
+      animation: fadeUp 0.6s ease-out forwards;
+      opacity: 0;
+    }
 
-        .info-card h3 {
-            margin-top: 0;
-            color: #1e3c72;
-        }
+    .info-card:nth-child(1) { animation-delay: 0.1s; }
+    .info-card:nth-child(2) { animation-delay: 0.2s; }
+    .info-card:nth-child(3) { animation-delay: 0.3s; }
+    .info-card:nth-child(4) { animation-delay: 0.4s; }
 
-        .info-card p {
-            font-size: 14px;
-            line-height: 1.6;
-            color: #555;
-        }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(25px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
 
-        .login-section {
-            margin-top: 50px;
-            text-align: center;
-        }
+    .info-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 20px 48px rgba(0,0,0,0.5);
+      border-color: rgba(59, 130, 246, 0.35);
+    }
 
-        .login-btn {
-            background: #1e3c72;
-            color: #fff;
-            border: none;
-            padding: 14px 40px;
-            font-size: 16px;
-            border-radius: 30px;
-            cursor: pointer;
-            transition: background 0.3s ease, transform 0.2s ease;
-        }
+    .info-card h3 {
+      font-size: 1.45rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      color: white;
+    }
 
-        .login-btn:hover {
-            background: #16315f;
-            transform: scale(1.05);
-        }
+    .info-card p {
+      font-size: 1rem;
+      color: var(--text-muted);
+      line-height: 1.7;
+    }
 
-        footer {
-            margin-top: 60px;
-            padding: 15px;
-            text-align: center;
-            font-size: 13px;
-            color: #777;
-        }
-    </style>
+    .login-section {
+      text-align: center;
+      margin: 5rem 0 3rem;
+    }
+
+    .login-btn {
+      background: linear-gradient(135deg, var(--accent), #1d4ed8);
+      color: white;
+      border: none;
+      padding: 1.1rem 3.5rem;
+      font-size: 1.25rem;
+      font-weight: 600;
+      border-radius: 50px;
+      cursor: pointer;
+      transition: all 0.32s ease;
+      box-shadow: 0 6px 20px rgba(59,130,246,0.35);
+    }
+
+    .login-btn:hover {
+      transform: translateY(-4px) scale(1.04);
+      box-shadow: 0 16px 40px rgba(59,130,246,0.55);
+    }
+
+    footer {
+      text-align: center;
+      padding: 2rem 1rem;
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      border-top: 1px solid var(--border);
+    }
+
+    @media (max-width: 768px) {
+      header { padding: 4rem 1.2rem 3rem; }
+      .container { padding: 2rem 1rem; }
+      .login-section { margin: 4rem 0 2rem; }
+      .login-btn { padding: 1rem 2.8rem; font-size: 1.15rem; }
+    }
+  </style>
 </head>
+
 <body>
 
 <header>
-    <h1>Wholesale Management System</h1>
-    <p>Smart multi-shop management for sales, stock, repairs & workforce</p>
+  <h1>Wholesale Management System</h1>
+  <p>Smart multi-shop management for sales, stock, repairs & workforce</p>
 </header>
 
 <div class="container">
 
-    <div class="info-grid">
+  <div class="info-grid">
 
-        <div class="info-card">
-            <h3>Multi-Shop Control</h3>
-            <p>
-                Manage multiple shops from a single owner dashboard with complete visibility
-                of stock, revenue, attendance, and activity logs.
-            </p>
-        </div>
-
-        <div class="info-card">
-            <h3>Stock & Sales</h3>
-            <p>
-                Track products by category, barcode, and location. Handle selling and repair
-                jobs with full history and profit calculation.
-            </p>
-        </div>
-
-        <div class="info-card">
-            <h3>Worker Management</h3>
-            <p>
-                Worker-specific access for selling, attendance, and tasks.
-                Every action is recorded with who, when, and where.
-            </p>
-        </div>
-
-        <div class="info-card">
-            <h3>Customer Transparency</h3>
-            <p>
-                Customers can track their repair or order status using a link or QR,
-                improving trust and service quality.
-            </p>
-        </div>
-
+    <div class="info-card">
+      <h3>Multi-Shop Control</h3>
+      <p>
+        Manage multiple shops from a single owner dashboard with complete visibility
+        of stock, revenue, attendance, and activity logs.
+      </p>
     </div>
 
-    <div class="login-section">
-        <button class="login-btn" onclick="goToLogin()">Login to System</button>
+    <div class="info-card">
+      <h3>Stock & Sales</h3>
+      <p>
+        Track products by category, barcode, and location. Handle selling and repair
+        jobs with full history and profit calculation.
+      </p>
     </div>
+
+    <div class="info-card">
+      <h3>Worker Management</h3>
+      <p>
+        Worker-specific access for selling, attendance, and tasks.
+        Every action is recorded with who, when, and where.
+      </p>
+    </div>
+
+    <div class="info-card">
+      <h3>Customer Transparency</h3>
+      <p>
+        Customers can track their repair or order status using a link or QR,
+        improving trust and service quality.
+      </p>
+    </div>
+
+  </div>
+
+  <div class="login-section">
+    <button class="login-btn" onclick="goToLogin()">Login to System</button>
+  </div>
 
 </div>
 
 <footer>
-    © 2026 Wholesale Management System. All rights reserved.
+  © 2026 Wholesale Management System. All rights reserved.
 </footer>
 
 <script>
-    function goToLogin() {
-        // CHANGE THIS PATH IF YOUR LOGIN PAGE IS IN A DIFFERENT FOLDER
-        window.location.href = "login.html";
-        // example: "pages/login.html" or "auth/login.html"
-    }
+  function goToLogin() {
+    window.location.href = "login.html";
+  }
 </script>
 
 </body>

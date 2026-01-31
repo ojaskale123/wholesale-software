@@ -1,88 +1,231 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Sell</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Sell – Point of Sale</title>
 
-<style>
-body {
-  margin:0;
-  font-family:Segoe UI, Arial, sans-serif;
-  background:#f4f6f8;
-}
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card-bg: rgba(30, 41, 59, 0.82);
+      --border: rgba(148, 163, 184, 0.22);
+      --text: #e2e8f0;
+      --text-muted: #94a3b8;
+      --accent-green: #10b981;
+      --radius: 14px;
+      --shadow: 0 6px 20px rgba(0,0,0,0.28);
+    }
 
-.header {
-  padding:20px;
-  background:#203a43;
-  color:white;
-  font-size:22px;
-  font-weight:600;
-}
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
 
-.container {
-  display:flex;
-  gap:20px;
-  padding:20px;
-}
+    body {
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      line-height: 1.5;
+    }
 
-.stock, .cart {
-  flex:1;
-}
+    .header {
+      background: linear-gradient(135deg, #1e293b, #0f172a);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      padding: 1.2rem 1.5rem;
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: white;
+      text-align: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.35);
+    }
 
-.item {
-  background:white;
-  padding:14px;
-  border-radius:14px;
-  box-shadow:0 8px 20px rgba(0,0,0,.12);
-  margin-bottom:12px;
-}
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 1.5rem;
+    }
 
-.qty button {
-  padding:4px 10px;
-  margin:0 4px;
-  cursor:pointer;
-}
+    #search {
+      width: 100%;
+      padding: 1rem 1.2rem;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: rgba(51, 65, 85, 0.6);
+      color: var(--text);
+      font-size: 1.05rem;
+      backdrop-filter: blur(6px);
+      transition: all 0.2s ease;
+      margin-bottom: 1.5rem;
+    }
 
-.cart-bar {
-  position:fixed;
-  bottom:0;
-  left:0;
-  right:0;
-  background:#203a43;
-  color:white;
-  padding:12px 20px;
-  display:none;
-  justify-content:space-between;
-  align-items:center;
-}
+    #search:focus {
+      outline: none;
+      border-color: var(--accent-green);
+      box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.25);
+    }
 
-.checkout {
-  background:#2ecc71;
-  padding:8px 16px;
-  border-radius:10px;
-  cursor:pointer;
-  font-weight:600;
-}
-</style>
+    #search::placeholder {
+      color: var(--text-muted);
+    }
+
+    #list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1.2rem;
+    }
+
+    .item {
+      background: var(--card-bg);
+      backdrop-filter: blur(10px);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.3rem 1.4rem;
+      box-shadow: var(--shadow);
+      transition: all 0.25s ease;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .item:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 32px rgba(0,0,0,0.4);
+      border-color: rgba(16, 185, 129, 0.3);
+    }
+
+    .item-info {
+      flex: 1;
+    }
+
+    .item-info b {
+      font-size: 1.15rem;
+      color: white;
+      display: block;
+      margin-bottom: 0.4rem;
+    }
+
+    .item-info div {
+      font-size: 0.95rem;
+      color: var(--text-muted);
+    }
+
+    .qty-controls {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .qty-btn {
+      width: 38px;
+      height: 38px;
+      background: rgba(51, 65, 85, 0.7);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: white;
+      font-size: 1.3rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .qty-btn:hover {
+      background: rgba(51, 65, 85, 0.9);
+      transform: scale(1.08);
+    }
+
+    .qty-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    .qty-display {
+      min-width: 40px;
+      text-align: center;
+    }
+
+    /* Fixed Cart Bar */
+    .cart-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: linear-gradient(135deg, #1e293b, #0f172a);
+      backdrop-filter: blur(10px);
+      border-top: 1px solid var(--border);
+      padding: 1rem 1.5rem;
+      display: none;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 -4px 16px rgba(0,0,0,0.4);
+      z-index: 90;
+    }
+
+    .cart-info {
+      font-size: 1.1rem;
+      font-weight: 500;
+    }
+
+    .cart-info span {
+      color: var(--accent-green);
+      font-weight: 700;
+    }
+
+    #checkoutBtn {
+      background: linear-gradient(135deg, var(--accent-green), #059669);
+      color: white;
+      border: none;
+      padding: 0.9rem 1.8rem;
+      border-radius: 12px;
+      font-size: 1.05rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.28s ease;
+      box-shadow: 0 4px 14px rgba(16,185,129,0.3);
+    }
+
+    #checkoutBtn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 28px rgba(16,185,129,0.45);
+    }
+
+    @media (max-width: 640px) {
+      .container { padding: 1.2rem 1rem; }
+      #list { grid-template-columns: 1fr; }
+      .cart-bar { flex-direction: column; gap: 1rem; padding: 1rem; }
+      .cart-info { text-align: center; }
+    }
+  </style>
 </head>
 
 <body>
 
-<div class="header">Sell</div>
+<div class="header">Sell – Point of Sale</div>
 
 <div class="container">
-  <div class="stock">
-    <input id="search" placeholder="Search by name / barcode" style="width:100%;padding:10px;margin-bottom:12px">
-    <div id="list"></div>
-  </div>
+  <input id="search" placeholder="Search product name or barcode..." />
+
+  <div id="list"></div>
 </div>
 
 <div class="cart-bar" id="cartBar">
-  <div>
-    Items: <span id="itemCount">0</span> |
-    Total: ₹<span id="totalAmount">0</span>
+  <div class="cart-info">
+    Items: <span id="itemCount">0</span>  |  Total: ₹<span id="totalAmount">0</span>
   </div>
-  <div class="checkout" id="checkoutBtn">Checkout</div>
+  <button id="checkoutBtn">Checkout →</button>
 </div>
 
 <script type="module">
@@ -153,14 +296,14 @@ function render() {
 
       list.innerHTML += `
         <div class="item">
-          <div>
-            <b>${p.name}</b><br>
-            ₹${p.sellPrice} | Stock: ${p.quantity}
+          <div class="item-info">
+            <b>${p.name}</b>
+            <div>₹${p.sellPrice}  •  Stock: ${p.quantity}</div>
           </div>
-          <div class="qty">
-            <button onclick="updateQty('${p.id}',-1)">−</button>
-            ${qty}
-            <button onclick="updateQty('${p.id}',1)">+</button>
+          <div class="qty-controls">
+            <button class="qty-btn" ${qty <= 0 ? 'disabled' : ''} onclick="updateQty('${p.id}',-1)">−</button>
+            <span class="qty-display">${qty}</span>
+            <button class="qty-btn" ${p.quantity <= qty ? 'disabled' : ''} onclick="updateQty('${p.id}',1)">+</button>
           </div>
         </div>
       `;
@@ -196,7 +339,7 @@ function updateCartBar() {
   const count = cart.items.reduce((s,i)=>s+i.quantity,0);
   const total = cart.items.reduce((s,i)=>s+i.sellPrice*i.quantity,0);
   itemCount.innerText = count;
-  totalAmount.innerText = total;
+  totalAmount.innerText = total.toLocaleString();
   cartBar.style.display = count ? "flex" : "none";
 }
 
@@ -239,13 +382,11 @@ checkoutBtn.onclick = async () => {
   cart.items = [];
   render();
   loadProducts();
-  alert("Sale completed");
+  alert("Sale completed successfully");
 };
 
-/* SEARCH */
+/* SEARCH & INIT */
 search.oninput = render;
-
-/* INIT */
 loadProducts();
 </script>
 
