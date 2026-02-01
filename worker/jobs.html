@@ -19,21 +19,9 @@
   --radius:16px;
   --shadow:0 6px 20px rgba(0,0,0,.28);
 }
-
 *{margin:0;padding:0;box-sizing:border-box}
-
-body{
-  font-family:system-ui;
-  background:var(--bg);
-  color:var(--text);
-}
-
-.container{
-  max-width:900px;
-  margin:auto;
-  padding:1.8rem 1.5rem;
-}
-
+body{font-family:system-ui;background:var(--bg);color:var(--text)}
+.container{max-width:900px;margin:auto;padding:1.8rem 1.5rem}
 .job{
   background:var(--card-bg);
   border:1px solid var(--border);
@@ -42,20 +30,9 @@ body{
   margin-bottom:1.2rem;
   box-shadow:var(--shadow);
 }
-
-.job b{
-  font-size:1.25rem;
-  display:block;
-  margin-bottom:.7rem;
-}
-
-.job div{
-  color:var(--text-muted);
-  margin:.45rem 0;
-}
-
+.job b{font-size:1.25rem;display:block;margin-bottom:.7rem}
+.job div{color:var(--text-muted);margin:.45rem 0}
 .job strong{color:var(--text)}
-
 .status{
   display:inline-block;
   margin-top:.8rem;
@@ -65,11 +42,9 @@ body{
   font-weight:700;
   color:white;
 }
-
 .COLLECTED{background:var(--warning)}
 .IN_PROGRESS{background:var(--accent-blue)}
 .DONE_NOT_DELIVERED{background:var(--purple)}
-
 .btn{
   width:100%;
   margin-top:1rem;
@@ -80,15 +55,10 @@ body{
   font-weight:600;
   cursor:pointer;
 }
-
 .btn-start{background:#d97706}
+.btn-ready{background:#8b5cf6}
 .btn-deliver{background:#10b981}
-
-.loading,.empty{
-  text-align:center;
-  color:var(--text-muted);
-  padding:4rem;
-}
+.loading,.empty{text-align:center;color:var(--text-muted);padding:4rem}
 </style>
 </head>
 
@@ -114,148 +84,140 @@ import {
   serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-/* AUTH */
-
 const currentUser = JSON.parse(localStorage.getItem("currentUser"));
-if(!currentUser || currentUser.role!=="WORKER"){
+
+if(!currentUser || currentUser.role !== "WORKER"){
   location.href="/login.html";
 }
 
-const jobsContainer=document.getElementById("jobs");
-const loading=document.getElementById("loading");
+const jobsContainer = document.getElementById("jobs");
+const loading = document.getElementById("loading");
 
-/* LOAD MY JOBS */
+/* ✅ LOAD ACTIVE JOBS */
 
 async function loadMyJobs(){
 
-const q=query(
-  collection(db,"jobs"),
-  where("type","==","REPAIR"),
-  where("assignedTo","==",currentUser.uid),
-  where("status","!=","DONE_DELIVERED")
-);
+  const q = query(
+    collection(db,"jobs"),
+    where("type","==","REPAIR"),
+    where("assignedTo","==",currentUser.uid),
+    where("status","in",["COLLECTED","IN_PROGRESS","DONE_NOT_DELIVERED"])
+  );
 
-const snap=await getDocs(q);
+  const snap = await getDocs(q);
 
-loading.style.display="none";
+  loading.style.display="none";
 
-if(snap.empty){
-  jobsContainer.innerHTML=`<div class="empty">No active jobs assigned</div>`;
-  return;
+  if(snap.empty){
+    jobsContainer.innerHTML = `<div class="empty">No active jobs assigned</div>`;
+    return;
+  }
+
+  jobsContainer.innerHTML="";
+
+  snap.forEach(docSnap=>{
+
+    const job = docSnap.data();
+    const jobId = docSnap.id;
+
+    jobsContainer.innerHTML+=`
+    <div class="job">
+      <b>${job.device}</b>
+
+      <div>Customer: <strong>${job.customerName}</strong></div>
+      <div>Phone: ${job.customerPhone}</div>
+      <div>Expected Cost: <strong>₹${job.expectedCost}</strong></div>
+      <div>Issue: ${job.issue}</div>
+
+      <span class="status ${job.status}">
+        ${job.status.replaceAll("_"," ")}
+      </span>
+
+      ${job.status==="COLLECTED" ? 
+        `<button class="btn btn-start" onclick="startRepair('${jobId}')">START REPAIR</button>` : ""}
+
+      ${job.status==="IN_PROGRESS" ? 
+        `<button class="btn btn-ready" onclick="markReady('${jobId}')">MARK READY</button>` : ""}
+
+      ${job.status==="DONE_NOT_DELIVERED" ? 
+        `<button class="btn btn-deliver" onclick="markDelivered('${jobId}')">MARK DELIVERED</button>` : ""}
+    </div>
+    `;
+  });
 }
 
-jobsContainer.innerHTML="";
+/* ▶ START */
 
-snap.forEach(docSnap=>{
+window.startRepair = async(jobId)=>{
+  await updateDoc(doc(db,"jobs",jobId),{
+    status:"IN_PROGRESS",
+    startedAt:serverTimestamp()
+  });
 
-const job=docSnap.data();
-const jobId=docSnap.id;
+  await addDoc(collection(db,"auditLogs"),{
+    userId:currentUser.uid,
+    role:"WORKER",
+    shopId:currentUser.shopId,
+    actionType:"WORK_STARTED",
+    action:`Repair started (${jobId})`,
+    timestamp:serverTimestamp()
+  });
 
-jobsContainer.innerHTML+=`
-<div class="job">
-<b>${job.device || "Device"}</b>
-
-<div>Customer: <strong>${job.customerName || "-"}</strong></div>
-<div>Phone: ${job.customerPhone || "-"}</div>
-<div>Expected Cost: <strong>₹${job.expectedCost || 0}</strong></div>
-<div>Issue: ${job.issue || "-"}</div>
-
-<span class="status ${job.status}">
-${job.status.replaceAll("_"," ")}
-</span>
-
-${job.status==="COLLECTED" ? 
-`<button class="btn btn-start" onclick="startRepair('${jobId}')">START REPAIR</button>` : ""}
-
-${job.status==="DONE_NOT_DELIVERED" ? 
-`<button class="btn btn-deliver" onclick="markDelivered('${jobId}')">MARK AS DELIVERED</button>` : ""}
-
-</div>
-`;
-
-});
-
-}
-
-/* START REPAIR */
-
-window.startRepair=async(jobId)=>{
-
-try{
-
-const jobRef=doc(db,"jobs",jobId);
-
-await updateDoc(jobRef,{
-  status:"IN_PROGRESS",
-  startedAt:serverTimestamp()
-});
-
-const jobSnap=await getDoc(jobRef);
-const job=jobSnap.data();
-
-/* audit */
-
-await addDoc(collection(db,"auditLogs"),{
-  userId:currentUser.uid,
-  role:"WORKER",
-  shopId:currentUser.shopId,
-  actionType:"WORK_STARTED",
-  action:`Repair started (${jobId})`,
-  timestamp:serverTimestamp()
-});
-
-location.reload();
-
-}catch(err){
-alert(err.message);
-}
-
+  location.reload();
 };
 
-/* MARK DELIVERED */
+/* ✅ READY */
 
-window.markDelivered=async(jobId)=>{
+window.markReady = async(jobId)=>{
+  await updateDoc(doc(db,"jobs",jobId),{
+    status:"DONE_NOT_DELIVERED",
+    finishedAt:serverTimestamp()
+  });
 
-try{
+  await addDoc(collection(db,"auditLogs"),{
+    userId:currentUser.uid,
+    role:"WORKER",
+    shopId:currentUser.shopId,
+    actionType:"WORK_READY",
+    action:`Job ready (${jobId})`,
+    timestamp:serverTimestamp()
+  });
 
-const jobRef=doc(db,"jobs",jobId);
+  location.reload();
+};
 
-await updateDoc(jobRef,{
-  status:"DONE_DELIVERED",
-  deliveredAt:serverTimestamp()
-});
+/* 📦 DELIVER */
 
-const jobSnap=await getDoc(jobRef);
-const job=jobSnap.data();
+window.markDelivered = async(jobId)=>{
 
-/* create sale */
+  const jobRef = doc(db,"jobs",jobId);
 
-await addDoc(collection(db,"sales"),{
-  type:"JOB",
-  shopId:job.shopId,
-  userId:currentUser.uid,
-  amount:Number(job.expectedCost || 0),
-  jobId:jobId,
-  createdAt:serverTimestamp()
-});
+  await updateDoc(jobRef,{
+    status:"DONE_DELIVERED",
+    deliveredAt:serverTimestamp()
+  });
 
-/* audit */
+  const job = (await getDoc(jobRef)).data();
 
-await addDoc(collection(db,"auditLogs"),{
-  userId:currentUser.uid,
-  role:"WORKER",
-  shopId:currentUser.shopId,
-  actionType:"WORK_DELIVERED",
-  action:`Job delivered (${jobId})`,
-  timestamp:serverTimestamp()
-});
+  await addDoc(collection(db,"sales"),{
+    type:"JOB",
+    shopId:job.shopId,
+    userId:currentUser.uid,
+    amount:Number(job.expectedCost),
+    jobId,
+    createdAt:serverTimestamp()
+  });
 
-location.reload();
+  await addDoc(collection(db,"auditLogs"),{
+    userId:currentUser.uid,
+    role:"WORKER",
+    shopId:currentUser.shopId,
+    actionType:"WORK_DELIVERED",
+    action:`Job delivered (${jobId})`,
+    timestamp:serverTimestamp()
+  });
 
-}catch(err){
-alert(err.message);
-}
-
+  location.reload();
 };
 
 loadMyJobs();

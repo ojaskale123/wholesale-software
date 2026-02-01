@@ -1,171 +1,102 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Available Jobs</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Available Jobs</title>
 
-  <style>
-    :root {
-      --bg: #0f172a;
-      --card-bg: rgba(30, 41, 59, 0.82);
-      --border: rgba(148, 163, 184, 0.22);
-      --text: #e2e8f0;
-      --text-muted: #94a3b8;
-      --accent-green: #10b981;
-      --radius: 16px;
-      --shadow: 0 8px 24px rgba(0,0,0,0.35);
-    }
-
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
-    body {
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      min-height: 100vh;
-      line-height: 1.5;
-    }
-
-    .app-header {
-      background: linear-gradient(135deg, #1e293b, #0f172a);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      border-bottom: 1px solid var(--border);
-      padding: 1rem 1.5rem;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      position: sticky;
-      top: 0;
-      z-index: 10;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.35);
-    }
-
-    .header-btn {
-      background: rgba(239, 68, 68, 0.9);
-      color: white;
-      border: none;
-      padding: 0.6rem 1.3rem;
-      border-radius: 10px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.22s ease;
-    }
-
-    .header-btn:hover {
-      background: #dc2626;
-      transform: translateY(-1px);
-    }
-
-    .app-header h2 {
-      font-size: 1.45rem;
-      font-weight: 600;
-      margin: 0;
-      background: linear-gradient(90deg, #93c5fd, #c7d2fe);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-
-    .container {
-      max-width: 900px;
-      margin: 0 auto;
-      padding: 1.8rem 1.5rem;
-    }
-
-    .job {
-      background: var(--card-bg);
-      backdrop-filter: blur(10px);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 1.5rem 1.6rem;
-      margin-bottom: 1.2rem;
-      box-shadow: var(--shadow);
-      transition: all 0.25s ease;
-    }
-
-    .job:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 12px 32px rgba(0,0,0,0.4);
-      border-color: rgba(147, 197, 253, 0.3);
-    }
-
-    .job h4 {
-      font-size: 1.35rem;
-      font-weight: 700;
-      color: white;
-      margin: 0 0 0.8rem;
-    }
-
-    .job p {
-      font-size: 0.98rem;
-      color: var(--text-muted);
-      margin: 0.5rem 0;
-    }
-
-    .job p strong {
-      color: var(--text);
-    }
-
-    .accept-btn {
-      margin-top: 1.2rem;
-      width: 100%;
-      padding: 1rem;
-      background: linear-gradient(135deg, var(--accent-green), #059669);
-      color: white;
-      border: none;
-      border-radius: 12px;
-      font-size: 1.05rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.28s ease;
-      box-shadow: 0 4px 14px rgba(16,185,129,0.3);
-    }
-
-    .accept-btn:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 10px 28px rgba(16,185,129,0.45);
-    }
-
-    .accept-btn:disabled {
-      background: #475569;
-      cursor: not-allowed;
-      opacity: 0.7;
-    }
-
-    .empty {
-      text-align: center;
-      color: var(--text-muted);
-      font-size: 1.15rem;
-      padding: 4rem 1rem;
-      opacity: 0.9;
-    }
-
-    @media (max-width: 640px) {
-      .container { padding: 1.4rem 1rem; }
-      .job { padding: 1.3rem; }
-    }
-  </style>
+<style>
+:root {
+  --bg:#0f172a;
+  --card-bg:rgba(30,41,59,.82);
+  --border:rgba(148,163,184,.22);
+  --text:#e2e8f0;
+  --text-muted:#94a3b8;
+  --accent-green:#10b981;
+  --radius:16px;
+  --shadow:0 8px 24px rgba(0,0,0,.35);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+  font-family:system-ui;
+  background:var(--bg);
+  color:var(--text);
+}
+.app-header{
+  background:linear-gradient(135deg,#1e293b,#0f172a);
+  border-bottom:1px solid var(--border);
+  padding:1rem 1.5rem;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+.header-btn{
+  background:#ef4444;
+  color:white;
+  border:none;
+  padding:.6rem 1.3rem;
+  border-radius:10px;
+  cursor:pointer;
+}
+.container{
+  max-width:900px;
+  margin:auto;
+  padding:1.8rem 1.5rem;
+}
+.job{
+  background:var(--card-bg);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  padding:1.5rem;
+  margin-bottom:1.2rem;
+  box-shadow:var(--shadow);
+}
+.job h4{margin-bottom:.7rem}
+.job p{color:var(--text-muted);margin:.4rem 0}
+.job strong{color:var(--text)}
+.accept-btn{
+  width:100%;
+  margin-top:1rem;
+  padding:1rem;
+  background:linear-gradient(135deg,#10b981,#059669);
+  border:none;
+  border-radius:12px;
+  font-weight:600;
+  color:white;
+  cursor:pointer;
+}
+.empty{
+  text-align:center;
+  color:var(--text-muted);
+  padding:4rem;
+}
+</style>
 </head>
 
 <body>
 
 <header class="app-header">
-  <button class="header-btn" onclick="location.href='index.html'">← Back</button>
-  <h2>Available Jobs</h2>
-  <span></span>
+<button class="header-btn" onclick="location.href='index.html'">← Back</button>
+<h2>Available Jobs</h2>
+<span></span>
 </header>
 
 <div class="container">
-  <div id="jobs"></div>
+<div id="jobs"></div>
 </div>
 
 <script type="module">
-import { DB, saveDB } from "../db/fakeDB.js";
+import { db } from "../js/firebase.js";
+import {
+  collection,
+  getDocs,
+  query,
+  where,
+  doc,
+  updateDoc,
+  addDoc,
+  serverTimestamp
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 const container = document.getElementById("jobs");
 const currentUser = JSON.parse(localStorage.getItem("currentUser"));
@@ -174,62 +105,73 @@ if (!currentUser || currentUser.role !== "WORKER") {
   location.href = "/login.html";
 }
 
-// ✅ OPEN REPAIR JOBS (same shop only)
-const openJobs = DB.tasks.filter(
-  t =>
-    t.type === "REPAIR" &&
-    t.status === "OPEN" &&
-    t.shopId === currentUser.shopId
-);
+/* ✅ LOAD AVAILABLE JOBS FROM FIREBASE */
 
-if (!openJobs.length) {
-  container.innerHTML = `<div class="empty">No available repair jobs right now</div>`;
-}
+async function loadJobs(){
 
-openJobs.forEach(job => {
-  const div = document.createElement("div");
-  div.className = "job";
-  div.innerHTML = `
-    <h4>${job.device}</h4>
-    <p><strong>Issue:</strong> ${job.issue || "—"}</p>
-    <p><strong>Expected Cost:</strong> ₹${job.expectedCost || "—"}</p>
-    <p><strong>Customer:</strong> ${job.customerName}</p>
-    <button class="accept-btn" onclick="acceptJob('${job.id}')">
-      ACCEPT JOB
-    </button>
-  `;
-  container.appendChild(div);
-});
+  const q = query(
+    collection(db,"jobs"),
+    where("type","==","REPAIR"),
+    where("status","==","OPEN"),
+    where("shopId","==",currentUser.shopId)
+  );
 
-window.acceptJob = function (id) {
-  const job = DB.tasks.find(t => t.id === id);
+  const snap = await getDocs(q);
 
-  if (!job || job.status !== "OPEN") {
-    alert("Job already taken or unavailable");
-    location.reload();
+  if(snap.empty){
+    container.innerHTML = `<div class="empty">No available repair jobs right now</div>`;
     return;
   }
 
-  job.status = "IN_PROGRESS";
-  job.assignedTo = currentUser.id;
-  job.acceptedAt = Date.now();
+  container.innerHTML="";
 
-  // 🔴 AUDIT LOG (IMPORTANT)
-  DB.auditLogs.push({
-    id: "LOG_" + Date.now(),
-    userId: currentUser.id,
-    role: "WORKER",
-    shopId: currentUser.shopId,
-    actionType: "WORK_ACCEPTED",
-    action: `Accepted repair job (${job.device})`,
-    timestamp: Date.now()
+  snap.forEach(docSnap=>{
+    const job = docSnap.data();
+    const jobId = docSnap.id;
+
+    const div = document.createElement("div");
+    div.className="job";
+
+    div.innerHTML=`
+      <h4>${job.device}</h4>
+      <p><strong>Issue:</strong> ${job.issue || "—"}</p>
+      <p><strong>Expected Cost:</strong> ₹${job.expectedCost || "—"}</p>
+      <p><strong>Customer:</strong> ${job.customerName}</p>
+
+      <button class="accept-btn" onclick="acceptJob('${jobId}')">
+        ACCEPT JOB
+      </button>
+    `;
+
+    container.appendChild(div);
+  });
+}
+
+/* ✅ ACCEPT JOB */
+
+window.acceptJob = async function(jobId){
+
+  const jobRef = doc(db,"jobs",jobId);
+
+  await updateDoc(jobRef,{
+    status:"COLLECTED",
+    assignedTo:currentUser.uid,
+    acceptedAt:serverTimestamp()
   });
 
-  saveDB();
+  await addDoc(collection(db,"auditLogs"),{
+    userId:currentUser.uid,
+    role:"WORKER",
+    shopId:currentUser.shopId,
+    actionType:"WORK_ACCEPTED",
+    action:`Accepted repair job (${jobId})`,
+    timestamp:serverTimestamp()
+  });
 
-  alert("Job accepted successfully");
-  location.href = "jobs.html";
+  location.href="jobs.html";
 };
+
+loadJobs();
 </script>
 
 </body>

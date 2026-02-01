@@ -54,15 +54,16 @@ export async function login(email, password) {
       });
     }
 
-    /* 5️⃣ REDIRECT (FIXED PATHS) */
+    /* 5️⃣ REDIRECT — FIXED */
+
     if (user.role === "OWNER") {
-      location.href = "/owner/index.html";
+      location.href = "../owner/index.html";
     } 
     else if (user.role === "SHOPKEEPER") {
-      location.href = "/shop/index.html";
+      location.href = "../shop/index.html";
     } 
     else if (user.role === "WORKER") {
-      location.href = "/worker/index.html";
+      location.href = "../worker/index.html";
     } 
     else {
       alert("Invalid role assigned");
