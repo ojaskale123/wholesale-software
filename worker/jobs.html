@@ -1,316 +1,265 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>My Jobs – Worker Panel</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>My Jobs – Worker Panel</title>
 
-  <style>
-    :root {
-      --bg: #0f172a;
-      --card-bg: rgba(30, 41, 59, 0.82);
-      --border: rgba(148, 163, 184, 0.22);
-      --text: #e2e8f0;
-      --text-muted: #94a3b8;
-      --accent-blue: #3b82f6;
-      --warning: #d97706;
-      --success: #10b981;
-      --purple: #8b5cf6;
-      --radius: 16px;
-      --shadow: 0 6px 20px rgba(0,0,0,0.28);
-    }
+<style>
+:root {
+  --bg:#0f172a;
+  --card-bg:rgba(30,41,59,.85);
+  --border:rgba(148,163,184,.22);
+  --text:#e2e8f0;
+  --text-muted:#94a3b8;
+  --accent-blue:#3b82f6;
+  --warning:#d97706;
+  --success:#10b981;
+  --purple:#8b5cf6;
+  --radius:16px;
+  --shadow:0 6px 20px rgba(0,0,0,.28);
+}
 
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+*{margin:0;padding:0;box-sizing:border-box}
 
-    body {
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      min-height: 100vh;
-      line-height: 1.5;
-    }
+body{
+  font-family:system-ui;
+  background:var(--bg);
+  color:var(--text);
+}
 
-    .app-header {
-      background: linear-gradient(135deg, #1e293b, #0f172a);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      border-bottom: 1px solid var(--border);
-      padding: 1rem 1.5rem;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      position: sticky;
-      top: 0;
-      z-index: 10;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.35);
-    }
+.container{
+  max-width:900px;
+  margin:auto;
+  padding:1.8rem 1.5rem;
+}
 
-    .header-btn {
-      background: rgba(239, 68, 68, 0.9);
-      color: white;
-      border: none;
-      padding: 0.6rem 1.3rem;
-      border-radius: 10px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.22s ease;
-    }
+.job{
+  background:var(--card-bg);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  padding:1.5rem;
+  margin-bottom:1.2rem;
+  box-shadow:var(--shadow);
+}
 
-    .header-btn:hover {
-      background: #dc2626;
-      transform: translateY(-1px);
-    }
+.job b{
+  font-size:1.25rem;
+  display:block;
+  margin-bottom:.7rem;
+}
 
-    .app-header h2 {
-      font-size: 1.45rem;
-      font-weight: 600;
-      margin: 0;
-      background: linear-gradient(90deg, #93c5fd, #c7d2fe);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
+.job div{
+  color:var(--text-muted);
+  margin:.45rem 0;
+}
 
-    .container {
-      max-width: 900px;
-      margin: 0 auto;
-      padding: 1.8rem 1.5rem;
-    }
+.job strong{color:var(--text)}
 
-    .job {
-      background: var(--card-bg);
-      backdrop-filter: blur(10px);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 1.5rem 1.6rem;
-      margin-bottom: 1.2rem;
-      box-shadow: var(--shadow);
-      transition: all 0.25s ease;
-    }
+.status{
+  display:inline-block;
+  margin-top:.8rem;
+  padding:.4rem 1rem;
+  border-radius:20px;
+  font-size:.8rem;
+  font-weight:700;
+  color:white;
+}
 
-    .job:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 12px 32px rgba(0,0,0,0.4);
-      border-color: rgba(147, 197, 253, 0.3);
-    }
+.COLLECTED{background:var(--warning)}
+.IN_PROGRESS{background:var(--accent-blue)}
+.DONE_NOT_DELIVERED{background:var(--purple)}
 
-    .job b {
-      font-size: 1.25rem;
-      color: white;
-      display: block;
-      margin-bottom: 0.7rem;
-    }
+.btn{
+  width:100%;
+  margin-top:1rem;
+  padding:.9rem;
+  border:none;
+  border-radius:12px;
+  color:white;
+  font-weight:600;
+  cursor:pointer;
+}
 
-    .job div {
-      font-size: 0.98rem;
-      color: var(--text-muted);
-      margin: 0.45rem 0;
-    }
+.btn-start{background:#d97706}
+.btn-deliver{background:#10b981}
 
-    .job div strong {
-      color: var(--text);
-    }
-
-    .status {
-      display: inline-block;
-      margin-top: 0.9rem;
-      padding: 0.45rem 1rem;
-      border-radius: 2rem;
-      font-size: 0.82rem;
-      font-weight: 700;
-      color: white;
-      letter-spacing: 0.3px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-    }
-
-    .IN_PROGRESS       { background: var(--accent-blue); }
-    .DONE_NOT_DELIVERED { background: var(--purple); }
-
-    .btn {
-      margin-top: 1rem;
-      width: 100%;
-      padding: 0.95rem;
-      border: none;
-      border-radius: 12px;
-      font-size: 1rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.28s ease;
-      color: white;
-    }
-
-    .btn-start {
-      background: linear-gradient(135deg, var(--warning), #b45309);
-      box-shadow: 0 4px 14px rgba(217, 119, 6, 0.3);
-    }
-
-    .btn-start:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 10px 28px rgba(217, 119, 6, 0.45);
-    }
-
-    .btn-deliver {
-      background: linear-gradient(135deg, var(--success), #059669);
-      box-shadow: 0 4px 14px rgba(16, 185, 129, 0.3);
-    }
-
-    .btn-deliver:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 10px 28px rgba(16, 185, 129, 0.45);
-    }
-
-    .empty {
-      text-align: center;
-      color: var(--text-muted);
-      font-size: 1.15rem;
-      padding: 4rem 1rem;
-      opacity: 0.9;
-    }
-
-    @media (max-width: 640px) {
-      .container { padding: 1.4rem 1rem; }
-      .job { padding: 1.2rem; }
-    }
-  </style>
+.loading,.empty{
+  text-align:center;
+  color:var(--text-muted);
+  padding:4rem;
+}
+</style>
 </head>
 
 <body>
 
-<header class="app-header">
-  <button class="header-btn" onclick="location.href='index.html'">← Back</button>
-  <h2>My Jobs</h2>
-  <span></span>
-</header>
-
 <div class="container">
-  <div id="jobs"></div>
+<div id="loading" class="loading">Loading your jobs...</div>
+<div id="jobs"></div>
 </div>
 
 <script type="module">
-import { DB, saveDB } from "../db/fakeDB.js";
-import { sendWhatsAppTemplate } from "../js/whatsapp.js";
+
+import { db } from "../js/firebase.js";
+import {
+  collection,
+  getDocs,
+  getDoc,
+  query,
+  where,
+  doc,
+  updateDoc,
+  addDoc,
+  serverTimestamp
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+/* AUTH */
 
 const currentUser = JSON.parse(localStorage.getItem("currentUser"));
-if (!currentUser || currentUser.role !== "WORKER") {
-  location.href = "/login.html";
+if(!currentUser || currentUser.role!=="WORKER"){
+  location.href="/login.html";
 }
 
-const container = document.getElementById("jobs");
+const jobsContainer=document.getElementById("jobs");
+const loading=document.getElementById("loading");
 
-/* ACTIVE JOBS */
-const myJobs = DB.tasks.filter(t =>
-  t.type === "REPAIR" &&
-  t.assignedTo === currentUser.id &&
-  t.status !== "DONE_DELIVERED"
+/* LOAD MY JOBS */
+
+async function loadMyJobs(){
+
+const q=query(
+  collection(db,"jobs"),
+  where("type","==","REPAIR"),
+  where("assignedTo","==",currentUser.uid),
+  where("status","!=","DONE_DELIVERED")
 );
 
-if (!myJobs.length) {
-  container.innerHTML = `<div class="empty">No active repair jobs assigned to you right now</div>`;
+const snap=await getDocs(q);
+
+loading.style.display="none";
+
+if(snap.empty){
+  jobsContainer.innerHTML=`<div class="empty">No active jobs assigned</div>`;
+  return;
 }
 
-myJobs.forEach(job => {
-  const div = document.createElement("div");
-  div.className = "job";
+jobsContainer.innerHTML="";
 
-  div.innerHTML = `
-    <b>${job.device}</b>
-    <div>Customer: <strong>${job.customerName}</strong></div>
-    <div>Phone: ${job.customerPhone}</div>
-    <div>Expected Cost: <strong>₹${job.expectedCost || 0}</strong></div>
-    <div>Issue: ${job.issue || "—"}</div>
+snap.forEach(docSnap=>{
 
-    <span class="status ${job.status}">
-      ${job.status.replaceAll("_"," ")}
-    </span>
+const job=docSnap.data();
+const jobId=docSnap.id;
 
-    ${
-      job.status === "COLLECTED"
-        ? `<button class="btn btn-start" onclick="startRepair('${job.id}')">
-             START REPAIR
-           </button>`
-        : ""
-    }
+jobsContainer.innerHTML+=`
+<div class="job">
+<b>${job.device || "Device"}</b>
 
-    ${
-      job.status === "DONE_NOT_DELIVERED"
-        ? `<button class="btn btn-deliver" onclick="markDelivered('${job.id}')">
-             MARK AS DELIVERED
-           </button>`
-        : ""
-    }
-  `;
+<div>Customer: <strong>${job.customerName || "-"}</strong></div>
+<div>Phone: ${job.customerPhone || "-"}</div>
+<div>Expected Cost: <strong>₹${job.expectedCost || 0}</strong></div>
+<div>Issue: ${job.issue || "-"}</div>
 
-  container.appendChild(div);
+<span class="status ${job.status}">
+${job.status.replaceAll("_"," ")}
+</span>
+
+${job.status==="COLLECTED" ? 
+`<button class="btn btn-start" onclick="startRepair('${jobId}')">START REPAIR</button>` : ""}
+
+${job.status==="DONE_NOT_DELIVERED" ? 
+`<button class="btn btn-deliver" onclick="markDelivered('${jobId}')">MARK AS DELIVERED</button>` : ""}
+
+</div>
+`;
+
 });
 
-/* ▶️ START REPAIR */
-window.startRepair = id => {
-  const job = DB.tasks.find(t => t.id === id);
-  if (!job) return;
+}
 
-  job.status = "IN_PROGRESS";
-  job.startedAt = Date.now();
+/* START REPAIR */
 
-  DB.auditLogs.push({
-    id: "LOG_" + Date.now(),
-    userId: currentUser.id,
-    role: "WORKER",
-    shopId: job.shopId,
-    actionType: "WORK_IN_PROGRESS",
-    action: `Repair started (${job.device})`,
-    timestamp: Date.now()
-  });
+window.startRepair=async(jobId)=>{
 
-  saveDB();
+try{
 
-  // 📲 WHATSAPP — REPAIR IN PROGRESS
-  sendWhatsAppTemplate({
-    to: "+91" + job.customerPhone,
-    templateName: "repair_in_progress",
-    bodyParams: [
-      job.customerName,
-      job.device
-    ]
-  });
+const jobRef=doc(db,"jobs",jobId);
 
-  location.reload();
+await updateDoc(jobRef,{
+  status:"IN_PROGRESS",
+  startedAt:serverTimestamp()
+});
+
+const jobSnap=await getDoc(jobRef);
+const job=jobSnap.data();
+
+/* audit */
+
+await addDoc(collection(db,"auditLogs"),{
+  userId:currentUser.uid,
+  role:"WORKER",
+  shopId:currentUser.shopId,
+  actionType:"WORK_STARTED",
+  action:`Repair started (${jobId})`,
+  timestamp:serverTimestamp()
+});
+
+location.reload();
+
+}catch(err){
+alert(err.message);
+}
+
 };
 
-/* ▶️ DELIVER JOB */
-window.markDelivered = id => {
-  const job = DB.tasks.find(t => t.id === id);
-  if (!job) return;
+/* MARK DELIVERED */
 
-  job.status = "DONE_DELIVERED";
-  job.deliveredAt = Date.now();
+window.markDelivered=async(jobId)=>{
 
-  DB.sales.push({
-    id: "SALE_JOB_" + Date.now(),
-    type: "JOB",
-    shopId: job.shopId,
-    userId: currentUser.id,
-    amount: Number(job.expectedCost || 0),
-    createdAt: Date.now()
-  });
+try{
 
-  DB.auditLogs.push({
-    id: "LOG_" + Date.now(),
-    userId: currentUser.id,
-    role: "WORKER",
-    shopId: job.shopId,
-    actionType: "WORK_DONE_DELIVERED",
-    action: `Job delivered (${job.device})`,
-    timestamp: Date.now()
-  });
+const jobRef=doc(db,"jobs",jobId);
 
-  saveDB();
-  alert("Job marked as delivered to customer");
-  location.reload();
+await updateDoc(jobRef,{
+  status:"DONE_DELIVERED",
+  deliveredAt:serverTimestamp()
+});
+
+const jobSnap=await getDoc(jobRef);
+const job=jobSnap.data();
+
+/* create sale */
+
+await addDoc(collection(db,"sales"),{
+  type:"JOB",
+  shopId:job.shopId,
+  userId:currentUser.uid,
+  amount:Number(job.expectedCost || 0),
+  jobId:jobId,
+  createdAt:serverTimestamp()
+});
+
+/* audit */
+
+await addDoc(collection(db,"auditLogs"),{
+  userId:currentUser.uid,
+  role:"WORKER",
+  shopId:currentUser.shopId,
+  actionType:"WORK_DELIVERED",
+  action:`Job delivered (${jobId})`,
+  timestamp:serverTimestamp()
+});
+
+location.reload();
+
+}catch(err){
+alert(err.message);
+}
+
 };
+
+loadMyJobs();
+
 </script>
-
 </body>
 </html>

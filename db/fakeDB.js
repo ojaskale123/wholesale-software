@@ -1,15 +1,20 @@
+// fakeDB.js
 export const DB = {
   users: JSON.parse(localStorage.getItem("users")) || [],
   shops: JSON.parse(localStorage.getItem("shops")) || [],
   products: JSON.parse(localStorage.getItem("products")) || [],
   sales: JSON.parse(localStorage.getItem("sales")) || [],
   attendance: JSON.parse(localStorage.getItem("attendance")) || [],
-  tasks: JSON.parse(localStorage.getItem("tasks")) || [],
-  auditLogs: JSON.parse(localStorage.getItem("auditLogs")) || []
+  tasks: JSON.parse(localStorage.getItem("tasks")) || [],      // ← jobs/repairs
+  auditLogs: JSON.parse(localStorage.getItem("auditLogs")) || [],
+  
+  // NEW: Retailer credit tracking
+  retailers: JSON.parse(localStorage.getItem("retailers")) || [],       // [{id, name, phone, shopId, pendingAmount}]
+  settlements: JSON.parse(localStorage.getItem("settlements")) || []    // [{id, retailerId, amount, paidAt, method}]
 };
 
 /**
- * Save complete DB back to localStorage
+ * Save ALL data back to localStorage
  */
 export function saveDB() {
   localStorage.setItem("users", JSON.stringify(DB.users));
@@ -19,4 +24,6 @@ export function saveDB() {
   localStorage.setItem("attendance", JSON.stringify(DB.attendance));
   localStorage.setItem("tasks", JSON.stringify(DB.tasks));
   localStorage.setItem("auditLogs", JSON.stringify(DB.auditLogs));
+  localStorage.setItem("retailers", JSON.stringify(DB.retailers));       // NEW
+  localStorage.setItem("settlements", JSON.stringify(DB.settlements));   // NEW
 }

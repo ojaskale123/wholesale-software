@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Retailer Management - Owner</title>
+
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card-bg: rgba(30, 41, 59, 0.85);
+      --border: rgba(148, 163, 184, 0.22);
+      --text: #e2e8f0;
+      --text-muted: #94a3b8;
+      --accent-green: #10b981;
+      --accent-yellow: #fbbf24;
+      --radius: 16px;
+      --shadow: 0 8px 24px rgba(0,0,0,0.35);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      line-height: 1.5;
+    }
+
+    header {
+      background: linear-gradient(135deg, #1e293b, #0f172a);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      padding: 1.2rem 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.35);
+    }
+
+    .header-btn {
+      background: rgba(239, 68, 68, 0.9);
+      color: white;
+      border: none;
+      padding: 0.6rem 1.3rem;
+      border-radius: 10px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.22s ease;
+    }
+
+    .header-btn:hover {
+      background: #dc2626;
+      transform: translateY(-1px);
+    }
+
+    header h2 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin: 0;
+      background: linear-gradient(90deg, #93c5fd, #c7d2fe);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem;
+    }
+
+    #search {
+      width: 100%;
+      padding: 1rem 1.2rem;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: rgba(51, 65, 85, 0.6);
+      color: var(--text);
+      font-size: 1.05rem;
+      backdrop-filter: blur(6px);
+      transition: all 0.2s ease;
+      margin-bottom: 1.5rem;
+    }
+
+    #search:focus {
+      outline: none;
+      border-color: var(--accent-green);
+      box-shadow: 0 0 0 3px rgba(16,185,129,0.3);
+    }
+
+    #search::placeholder {
+      color: var(--text-muted);
+    }
+
+    .summary {
+      background: var(--card-bg);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 2rem;
+      text-align: center;
+      box-shadow: var(--shadow);
+      margin-bottom: 2rem;
+    }
+
+    .summary h1 {
+      font-size: 3rem;
+      font-weight: 800;
+      margin: 0 0 0.5rem;
+      color: var(--accent-yellow);
+    }
+
+    .summary p {
+      font-size: 1.1rem;
+      color: var(--text-muted);
+      margin: 0;
+    }
+
+    .retailer-card {
+      background: var(--card-bg);
+      backdrop-filter: blur(10px);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      margin-bottom: 1.2rem;
+      box-shadow: var(--shadow);
+      transition: all 0.25s ease;
+    }
+
+    .retailer-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 32px rgba(0,0,0,0.45);
+    }
+
+    .retailer-card h3 {
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: white;
+      margin: 0 0 0.8rem;
+    }
+
+    .retailer-card .detail {
+      font-size: 1rem;
+      color: var(--text-muted);
+      margin: 0.5rem 0;
+    }
+
+    .retailer-card .detail strong {
+      color: var(--text);
+    }
+
+    .pending-amount {
+      color: var(--accent-yellow);
+      font-weight: 700;
+    }
+
+    .settle-btn {
+      width: 100%;
+      padding: 1rem;
+      background: linear-gradient(135deg, var(--accent-green), #059669);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-size: 1.05rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.28s ease;
+      box-shadow: 0 4px 14px rgba(16,185,129,0.3);
+      margin-top: 1rem;
+    }
+
+    .settle-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 28px rgba(16,185,129,0.45);
+    }
+
+    .history-section {
+      margin-top: 1.5rem;
+      background: rgba(51,65,85,0.4);
+      border-radius: 12px;
+      padding: 1rem;
+    }
+
+    .history-item {
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      margin: 0.5rem 0;
+    }
+
+    .empty {
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 1.15rem;
+      padding: 4rem 1rem;
+      opacity: 0.9;
+    }
+
+    @media (max-width: 640px) {
+      .container { padding: 1.5rem 1rem; }
+      .retailer-card { padding: 1.3rem; }
+    }
+  </style>
+</head>
+
+<body>
+
+<header>
+  <button class="header-btn" onclick="location.href='index.html'">← Back</button>
+  <h2>Retailer Management</h2>
+  <span></span>
+</header>
+
+<div class="container">
+  <input id="search" placeholder="Search by name or phone..." />
+
+  <div class="summary">
+    <h1>₹<span id="totalPending">0</span></h1>
+    <p>Total Pending Payments</p>
+  </div>
+
+  <div id="retailerList"></div>
+</div>
+
+<script type="module">
+  import { db } from "../js/firebase.js";
+  import {
+    collection,
+    getDocs,
+    query,
+    addDoc,
+    doc,
+    updateDoc,
+    serverTimestamp,
+    increment
+  } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+  import { requireAuth } from "../auth/guard.js";
+
+  const user = requireAuth(["OWNER"]);
+
+  const searchInput = document.getElementById("search");
+  const totalPendingEl = document.getElementById("totalPending");
+  const retailerList = document.getElementById("retailerList");
+
+  let retailers = [];  // Local array for search filtering
+  let totalPending = 0;
+
+  // Load all retailers & their settlements
+  async function loadRetailers() {
+    retailerList.innerHTML = "";
+
+    const q = query(collection(db, "retailers"));  // Adjust if you want shopId filter
+    const snap = await getDocs(q);
+    retailers = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+    totalPending = 0;
+    retailers.forEach(r => totalPending += r.pendingAmount || 0);
+    totalPendingEl.innerText = totalPending.toLocaleString();
+
+    renderRetailers(retailers);
+  }
+
+  // Render filtered list
+  function renderRetailers(filtered) {
+    retailerList.innerHTML = "";
+
+    if (filtered.length === 0) {
+      retailerList.innerHTML = `<div class="empty">No retailers found</div>`;
+      return;
+    }
+
+    filtered.forEach(r => {
+      const card = document.createElement("div");
+      card.className = "retailer-card";
+      card.innerHTML = `
+        <h3>${r.name}</h3>
+        <div class="detail">Phone: ${r.phone}</div>
+        <div class="detail pending-amount">Pending: ₹${(r.pendingAmount || 0).toLocaleString()}</div>
+        <button class="settle-btn" onclick="settlePayment('${r.id}', ${r.pendingAmount || 0})">Settle Payment</button>
+        <div class="history-section" id="history-${r.id}"></div>
+      `;
+
+      retailerList.appendChild(card);
+
+      // Load & show history
+      loadSettlementHistory(r.id, `history-${r.id}`);
+    });
+  }
+
+  // Load settlement history for a retailer
+  async function loadSettlementHistory(retailerId, containerId) {
+    const container = document.getElementById(containerId);
+    container.innerHTML = "<div class="loading">Loading history...</div>";
+
+    const q = query(collection(db, "settlements"), where("retailerId", "==", retailerId));
+    const snap = await getDocs(q);
+    const settlements = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+    container.innerHTML = "<h4>Payment History</h4>";
+    if (settlements.length === 0) {
+      container.innerHTML += `<div class="empty">No payments made yet</div>`;
+      return;
+    }
+
+    settlements.forEach(s => {
+      container.innerHTML += `
+        <div class="history-item">
+          <strong>₹${s.amount.toLocaleString()}</strong> paid on ${new Date(s.paidAt.toDate()).toLocaleString()}
+        </div>
+      `;
+    });
+  }
+
+  // Settle payment
+  window.settlePayment = async (id, maxPending) => {
+    const amountStr = prompt(`Enter payment amount (max ₹${maxPending.toLocaleString()}):`);
+    if (!amountStr) return;
+
+    const amount = Number(amountStr);
+    if (isNaN(amount) || amount <= 0 || amount > maxPending) {
+      alert("Invalid amount");
+      return;
+    }
+
+    try {
+      // Reduce pending in retailer
+      await updateDoc(doc(db, "retailers", id), {
+        pendingAmount: increment(-amount)
+      });
+
+      // Add settlement record
+      await addDoc(collection(db, "settlements"), {
+        retailerId: id,
+        amount,
+        method: "Cash / UPI / Bank",  // Can prompt if you want
+        paidAt: serverTimestamp(),
+        settledBy: user.uid
+      });
+
+      // Audit log
+      await addDoc(collection(db, "auditLogs"), {
+        userId: user.uid,
+        role: user.role,
+        actionType: "SETTLEMENT",
+        action: `Settled ₹${amount} for retailer (ID: ${id})`,
+        timestamp: serverTimestamp()
+      });
+
+      alert("Payment settled successfully!");
+      loadRetailers();
+    } catch (err) {
+      alert("Error settling payment: " + err.message);
+      console.error(err);
+    }
+  };
+
+  // Search
+  searchInput.addEventListener("input", () => {
+    const q = searchInput.value.toLowerCase();
+    const filtered = retailers.filter(r =>
+      r.name.toLowerCase().includes(q) ||
+      r.phone.includes(q)
+    );
+    renderRetailers(filtered);
+  });
+
+  loadRetailers();
+</script>
+
+</body>
+</html>

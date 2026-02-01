@@ -1,239 +1,266 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Owner Dashboard</title>
+  <meta charset="UTF-8">
+  <title>Owner Dashboard</title>
 
-<style>
-:root {
-  --primary: #1d4ed8;
-  --primary-dark: #1e40af;
-  --accent: #059669;
-  --danger: #dc2626;
-  --bg: #0f172a;
-  --card: rgba(30, 41, 59, 0.7);
-  --border: rgba(148, 163, 184, 0.18);
-  --text: #f1f5f9;
-  --text-light: #cbd5e1;
-  --radius: 16px;
-}
+  <style>
+    :root {
+      --primary: #1d4ed8;
+      --primary-dark: #1e40af;
+      --accent: #059669;
+      --danger: #dc2626;
+      --bg: #0f172a;
+      --card: rgba(30, 41, 59, 0.7);
+      --border: rgba(148, 163, 184, 0.18);
+      --text: #f1f5f9;
+      --text-light: #cbd5e1;
+      --radius: 16px;
+    }
 
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
 
-body {
-  font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
-  background: var(--bg);
-  color: var(--text);
-  min-height: 100vh;
-  line-height: 1.5;
-}
+    body {
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      line-height: 1.5;
+    }
 
-header.hero {
-  background: linear-gradient(to bottom right, #1e3a8a40, #0f172a);
-  padding: 2.5rem 1.5rem 4rem;
-  border-bottom: 1px solid var(--border);
-}
+    header.hero {
+      background: linear-gradient(to bottom right, #1e3a8a40, #0f172a);
+      padding: 2.5rem 1.5rem 4rem;
+      border-bottom: 1px solid var(--border);
+    }
 
-.hero-inner {
-  max-width: 1400px;
-  margin: 0 auto;
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-}
+    .hero-inner {
+      max-width: 1400px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
 
-h1 {
-  font-size: 2.5rem;
-  font-weight: 700;
-  background: linear-gradient(90deg, #93c5fd, #c7d2fe, #e0f2fe);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  letter-spacing: -0.5px;
-}
+    h1 {
+      font-size: 2.5rem;
+      font-weight: 700;
+      background: linear-gradient(90deg, #93c5fd, #c7d2fe, #e0f2fe);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      letter-spacing: -0.5px;
+    }
 
-.hero p {
-  font-size: 1.1rem;
-  color: var(--text-light);
-  max-width: 460px;
-}
+    .hero p {
+      font-size: 1.1rem;
+      color: var(--text-light);
+      max-width: 460px;
+    }
 
-.action-row {
-  display: flex;
-  gap: 1rem;
-  flex-wrap: wrap;
-}
+    .action-row {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
 
-.btn {
-  padding: 0.9rem 1.8rem;
-  font-weight: 600;
-  font-size: 1rem;
-  border-radius: 12px;
-  cursor: pointer;
-  transition: all 0.28s ease;
-  border: none;
-  box-shadow: 0 3px 10px rgba(0,0,0,0.3);
-}
+    .btn {
+      padding: 0.9rem 1.8rem;
+      font-weight: 600;
+      font-size: 1rem;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.28s ease;
+      border: none;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.3);
+    }
 
-.btn-create {
-  background: linear-gradient(135deg, #10b981, #047857);
-  color: white;
-}
+    .btn-create {
+      background: linear-gradient(135deg, #10b981, #047857);
+      color: white;
+    }
 
-.btn-create:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(5,150,105,0.4);
-}
+    .btn-create:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(5,150,105,0.4);
+    }
 
-.btn-logout {
-  background: #dc2626;
-  color: white;
-}
+    .btn-logout {
+      background: #dc2626;
+      color: white;
+    }
 
-.btn-logout:hover {
-  background: #b91c1c;
-  transform: translateY(-2px);
-}
+    .btn-logout:hover {
+      background: #b91c1c;
+      transform: translateY(-2px);
+    }
 
-/* Main content wrapper */
-main.dashboard {
-  max-width: 1400px;
-  margin: -3rem auto 0;
-  padding: 0 1.5rem 4rem;
-}
+    /* Main content wrapper */
+    main.dashboard {
+      max-width: 1400px;
+      margin: -3rem auto 0;
+      padding: 0 1.5rem 4rem;
+    }
 
-/* Stats – most important → first */
-.stats {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 1.5rem;
-  margin: 2.5rem 0 3.5rem;
-}
+    /* Stats – most important → first */
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1.5rem;
+      margin: 2.5rem 0 3.5rem;
+    }
 
-.stat-card {
-  background: var(--card);
-  backdrop-filter: blur(10px);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 1.8rem 1.6rem;
-  transition: all 0.3s ease;
-}
+    .stat-card {
+      background: var(--card);
+      backdrop-filter: blur(10px);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.8rem 1.6rem;
+      transition: all 0.3s ease;
+    }
 
-.stat-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 12px 32px rgba(0,0,0,0.35);
-}
+    .stat-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 12px 32px rgba(0,0,0,0.35);
+    }
 
-.stat-number {
-  font-size: 2.8rem;
-  font-weight: 800;
-  color: #60a5fa;
-  line-height: 1;
-  margin-bottom: 0.5rem;
-}
+    .stat-number {
+      font-size: 2.8rem;
+      font-weight: 800;
+      color: #60a5fa;
+      line-height: 1;
+      margin-bottom: 0.5rem;
+    }
 
-.stat-label {
-  font-size: 1rem;
-  color: var(--text-light);
-  font-weight: 500;
-}
+    .stat-label {
+      font-size: 1rem;
+      color: var(--text-light);
+      font-weight: 500;
+    }
 
-/* Shops */
-h2.section-title {
-  font-size: 1.7rem;
-  font-weight: 600;
-  margin: 0 0 1.4rem;
-  color: white;
-}
+    /* Shops */
+    h2.section-title {
+      font-size: 1.7rem;
+      font-weight: 600;
+      margin: 0 0 1.4rem;
+      color: white;
+    }
 
-.shop-container {
-  overflow-x: auto;
-  padding-bottom: 1rem;
-  scrollbar-width: thin;
-}
+    .shop-container {
+      overflow-x: auto;
+      padding-bottom: 1rem;
+      scrollbar-width: thin;
+    }
 
-.shop-strip {
-  display: flex;
-  gap: 1.25rem;
-  min-width: max-content;
-}
+    .shop-strip {
+      display: flex;
+      gap: 1.25rem;
+      min-width: max-content;
+    }
 
-.shop-card {
-  width: 300px;
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 1.6rem;
-  transition: all 0.3s ease;
-  cursor: pointer;
-  backdrop-filter: blur(8px);
-}
+    .shop-card {
+      width: 300px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.6rem;
+      transition: all 0.3s ease;
+      cursor: pointer;
+      backdrop-filter: blur(8px);
+    }
 
-.shop-card:hover {
-  transform: translateY(-6px);
-  border-color: #60a5fa60;
-  box-shadow: 0 14px 32px rgba(0,0,0,0.3);
-}
+    .shop-card:hover {
+      transform: translateY(-6px);
+      border-color: #60a5fa60;
+      box-shadow: 0 14px 32px rgba(0,0,0,0.3);
+    }
 
-.shop-card h3 {
-  font-size: 1.35rem;
-  margin-bottom: 0.75rem;
-  color: white;
-}
+    .shop-card h3 {
+      font-size: 1.35rem;
+      margin-bottom: 0.75rem;
+      color: white;
+    }
 
-/* Activity Table */
-.activity-section {
-  margin-top: 4rem;
-}
+    /* NEW: Retailer Credit Card */
+    .retailer-card {
+      background: var(--card);
+      backdrop-filter: blur(10px);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.8rem 1.6rem;
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
 
-table {
-  width: 100%;
-  background: var(--card);
-  border-radius: var(--radius);
-  border-collapse: collapse;
-  overflow: hidden;
-  border: 1px solid var(--border);
-  backdrop-filter: blur(8px);
-}
+    .retailer-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 12px 32px rgba(0,0,0,0.35);
+    }
 
-th {
-  background: rgba(29, 78, 216, 0.4);
-  color: white;
-  padding: 1.1rem 1.4rem;
-  text-align: left;
-  font-weight: 600;
-  font-size: 0.95rem;
-}
+    .retailer-card h3 {
+      font-size: 1.6rem;
+      margin-bottom: 0.5rem;
+      color: #fbbf24;
+    }
 
-td {
-  padding: 1.1rem 1.4rem;
-  font-size: 0.93rem;
-  color: var(--text);
-  border-top: 1px solid var(--border);
-}
+    .retailer-card p {
+      font-size: 1rem;
+      color: var(--text-light);
+    }
 
-tr:hover {
-  background: rgba(255,255,255,0.04);
-}
+    /* Activity Table */
+    .activity-section {
+      margin-top: 4rem;
+    }
 
-/* Responsive */
-@media (max-width: 900px) {
-  .stats { gap: 1.25rem; }
-  .stat-card { padding: 1.5rem; }
-  .shop-card { width: 280px; }
-}
+    table {
+      width: 100%;
+      background: var(--card);
+      border-radius: var(--radius);
+      border-collapse: collapse;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      backdrop-filter: blur(8px);
+    }
 
-@media (max-width: 640px) {
-  .action-row { flex-direction: column; }
-  .btn { width: 100%; text-align: center; }
-  .hero-inner { text-align: center; }
-  h1 { font-size: 2.1rem; }
-}
-</style>
+    th {
+      background: rgba(29, 78, 216, 0.4);
+      color: white;
+      padding: 1.1rem 1.4rem;
+      text-align: left;
+      font-weight: 600;
+      font-size: 0.95rem;
+    }
+
+    td {
+      padding: 1.1rem 1.4rem;
+      font-size: 0.93rem;
+      color: var(--text);
+      border-top: 1px solid var(--border);
+    }
+
+    tr:hover {
+      background: rgba(255,255,255,0.04);
+    }
+
+    /* Responsive */
+    @media (max-width: 900px) {
+      .stats { gap: 1.25rem; }
+      .stat-card { padding: 1.5rem; }
+      .shop-card { width: 280px; }
+    }
+
+    @media (max-width: 640px) {
+      .action-row { flex-direction: column; }
+      .btn { width: 100%; text-align: center; }
+      .hero-inner { text-align: center; }
+      h1 { font-size: 2.1rem; }
+    }
+  </style>
 </head>
 
 <body>
@@ -285,6 +312,12 @@ tr:hover {
 
   </div>
 
+  <!-- NEW: Retailer Credit Card -->
+  <div class="retailer-card" onclick="location.href='retailers.html'">
+    <h3>Retailer Credit</h3>
+    <p>Monitor pending payments & settlements from retailers</p>
+  </div>
+
   <!-- Shops -->
   <h2 class="section-title">Your Shops</h2>
   <div class="shop-container">
@@ -295,130 +328,130 @@ tr:hover {
   <div class="activity-section">
     <h2 class="section-title">Recent Activity</h2>
     <table>
-    <thead>
-    <tr>
-      <th>User</th>
-      <th>Role</th>
-      <th>Activity</th>
-      <th>Time</th>
-    </tr>
-    </thead>
-    <tbody id="auditTable"></tbody>
+      <thead>
+        <tr>
+          <th>User</th>
+          <th>Role</th>
+          <th>Activity</th>
+          <th>Time</th>
+        </tr>
+      </thead>
+      <tbody id="auditTable"></tbody>
     </table>
   </div>
 
 </main>
 
 <script type="module">
-import { db } from "../js/firebase.js";
-import {
-  collection,
-  getDocs,
-  query,
-  where,
-  orderBy
-} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+  import { db } from "../js/firebase.js";
+  import {
+    collection,
+    getDocs,
+    query,
+    where,
+    orderBy
+  } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-/* 🔹 LOAD SHOPS */
-async function loadShops() {
-  const snap = await getDocs(collection(db, "shops"));
-  shopStrip.innerHTML = "";
-  snap.forEach(docSnap => {
-    const shop = docSnap.data();
-    const card = document.createElement("div");
-    card.className = "shop-card";
-    card.innerHTML = `<h3>${shop.name}</h3>`;
-    shopStrip.appendChild(card);
-  });
-}
+  /* 🔹 LOAD SHOPS */
+  async function loadShops() {
+    const snap = await getDocs(collection(db, "shops"));
+    shopStrip.innerHTML = "";
+    snap.forEach(docSnap => {
+      const shop = docSnap.data();
+      const card = document.createElement("div");
+      card.className = "shop-card";
+      card.innerHTML = `<h3>${shop.name}</h3>`;
+      shopStrip.appendChild(card);
+    });
+  }
 
-/* 🔹 LOAD USER COUNTS */
-async function loadCounts() {
-  const shopkeepersQ = query(
-    collection(db, "users"),
-    where("role", "==", "SHOPKEEPER")
-  );
-  const workersQ = query(
-    collection(db, "users"),
-    where("role", "==", "WORKER")
-  );
+  /* 🔹 LOAD USER COUNTS */
+  async function loadCounts() {
+    const shopkeepersQ = query(
+      collection(db, "users"),
+      where("role", "==", "SHOPKEEPER")
+    );
+    const workersQ = query(
+      collection(db, "users"),
+      where("role", "==", "WORKER")
+    );
 
-  const [sSnap, wSnap] = await Promise.all([
-    getDocs(shopkeepersQ),
-    getDocs(workersQ)
-  ]);
+    const [sSnap, wSnap] = await Promise.all([
+      getDocs(shopkeepersQ),
+      getDocs(workersQ)
+    ]);
 
-  shopkeeperCount.innerText = sSnap.size;
-  workerCount.innerText = wSnap.size;
-}
+    shopkeeperCount.innerText = sSnap.size;
+    workerCount.innerText = wSnap.size;
+  }
 
-/* 🔹 LOAD JOB COUNT */
-async function loadJobCount() {
-  const snap = await getDocs(collection(db, "jobs"));
-  jobCount.innerText = snap.size;
-}
+  /* 🔹 LOAD JOB COUNT */
+  async function loadJobCount() {
+    const snap = await getDocs(collection(db, "jobs"));
+    jobCount.innerText = snap.size;
+  }
 
-/* 🔹 LOAD REVENUE (SALES + JOBS) */
-async function loadRevenue() {
-  let total = 0;
+  /* 🔹 LOAD REVENUE (SALES + JOBS) */
+  async function loadRevenue() {
+    let total = 0;
 
-  const salesSnap = await getDocs(collection(db, "sales"));
-  salesSnap.forEach(d => {
-    const s = d.data();
-    total += Number(s.amount || s.total || 0);
-  });
+    const salesSnap = await getDocs(collection(db, "sales"));
+    salesSnap.forEach(d => {
+      const s = d.data();
+      total += Number(s.amount || s.total || 0);
+    });
 
-  const jobsSnap = await getDocs(collection(db, "jobs"));
-  jobsSnap.forEach(d => {
-    const j = d.data();
-    if (j.status === "DELIVERED" || j.status === "DONE_DELIVERED") {
-      total += Number(j.expectedCost || j.amount || 0);
-    }
-  });
+    const jobsSnap = await getDocs(collection(db, "jobs"));
+    jobsSnap.forEach(d => {
+      const j = d.data();
+      if (j.status === "DELIVERED" || j.status === "DONE_DELIVERED") {
+        total += Number(j.expectedCost || j.amount || 0);
+      }
+    });
 
-  totalRevenue.innerText = "₹" + total;
-}
+    totalRevenue.innerText = "₹" + total;
+  }
 
-/* 🔹 LOAD ACTIVITY */
-async function loadAuditLogs() {
-  const q = query(
-    collection(db, "auditLogs"),
-    orderBy("timestamp", "desc")
-  );
+  /* 🔹 LOAD ACTIVITY */
+  async function loadAuditLogs() {
+    const q = query(
+      collection(db, "auditLogs"),
+      orderBy("timestamp", "desc")
+    );
 
-  const snap = await getDocs(q);
-  auditTable.innerHTML = "";
+    const snap = await getDocs(q);
+    auditTable.innerHTML = "";
 
-  snap.forEach(d => {
-    const log = d.data();
-    auditTable.innerHTML += `
-      <tr>
-        <td>${log.userId || "-"}</td>
-        <td>${log.role || "-"}</td>
-        <td>${log.message || log.action}</td>
-        <td>${log.timestamp?.toDate().toLocaleString() || "-"}</td>
-      </tr>
-    `;
-  });
-}
+    snap.forEach(d => {
+      const log = d.data();
+      auditTable.innerHTML += `
+        <tr>
+          <td>${log.userId || "-"}</td>
+          <td>${log.role || "-"}</td>
+          <td>${log.message || log.action}</td>
+          <td>${log.timestamp?.toDate().toLocaleString() || "-"}</td>
+        </tr>
+      `;
+    });
+  }
 
-/* 🔹 INIT */
-loadShops();
-loadCounts();
-loadJobCount();
-loadRevenue();
-loadAuditLogs();
+  /* 🔹 INIT */
+  loadShops();
+  loadCounts();
+  loadJobCount();
+  loadRevenue();
+  loadAuditLogs();
 </script>
 
 <script type="module">
-import { auth } from "../js/firebase.js";
-import { signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+  import { auth } from "../js/firebase.js";
+  import { signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-document.getElementById("logoutBtn").onclick = async () => {
-  await signOut(auth);
-  localStorage.removeItem("currentUser");
-  location.href = "/login.html";
-};
+  document.getElementById("logoutBtn").onclick = async () => {
+    await signOut(auth);
+    localStorage.removeItem("currentUser");
+    location.href = "/login.html";
+  };
 </script>
 
 </body>
