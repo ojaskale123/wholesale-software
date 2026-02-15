@@ -1,15 +1,16 @@
-export function requireAuth(requiredRole = null) {
-  const user = JSON.parse(localStorage.getItem("currentUser"));
+export function requireAuth(allowedRoles = []) {
 
-  if (!user) {
-    alert("Please login first");
-    location.href = "/login.html";
+  const raw = localStorage.getItem("currentUser");
+
+  if (!raw) {
+    window.location.href = "../login.html";
     return;
   }
 
-  if (requiredRole && user.role !== requiredRole) {
-    alert("Access denied");
-    history.back();
+  const user = JSON.parse(raw);
+
+  if (allowedRoles.length && !allowedRoles.includes(user.role)) {
+    window.location.href = "../login.html";
     return;
   }
 
