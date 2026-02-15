@@ -39,7 +39,7 @@ export async function login(email, password) {
 
     localStorage.setItem("currentUser", JSON.stringify(ownerSession));
 
-    window.location.href = "owner/index.html";
+    window.location.replace("owner/index.html");
     return;
   }
 
@@ -79,19 +79,18 @@ export async function login(email, password) {
       shopId: userData.shopId || null
     });
 
-    switch (userData.role) {
-      case "OWNER":
-        window.location.href = "owner/index.html";
-        break;
-      case "SHOPKEEPER":
-        window.location.href = "shop/index.html";
-        break;
-      case "WORKER":
-        window.location.href = "worker/index.html";
-        break;
-      default:
-        localStorage.removeItem("currentUser");
-        throw new Error("Invalid role");
+    if (userData.role === "OWNER") {
+      window.location.replace("owner/index.html");
+    }
+    else if (userData.role === "SHOPKEEPER") {
+      window.location.replace("shop/index.html");
+    }
+    else if (userData.role === "WORKER") {
+      window.location.replace("worker/index.html");
+    }
+    else {
+      localStorage.removeItem("currentUser");
+      throw new Error("Invalid role");
     }
 
   } catch (err) {
