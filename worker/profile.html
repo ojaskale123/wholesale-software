@@ -1,223 +1,213 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>My Profile</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>My Profile</title>
 
-  <style>
-    :root {
-      --bg: #0f172a;
-      --card-bg: rgba(30, 41, 59, 0.85);
-      --border: rgba(148, 163, 184, 0.22);
-      --text: #e2e8f0;
-      --text-muted: #94a3b8;
-      --accent-purple: #8b5cf6;
-      --danger: #ef4444;
-      --radius: 20px;
-      --shadow: 0 12px 32px rgba(0,0,0,0.4);
-    }
+<style>
+:root {
+  --bg:#0f172a;
+  --card-bg:rgba(30,41,59,.85);
+  --border:rgba(148,163,184,.22);
+  --text:#e2e8f0;
+  --text-muted:#94a3b8;
+  --accent-purple:#8b5cf6;
+  --danger:#ef4444;
+  --radius:20px;
+  --shadow:0 12px 32px rgba(0,0,0,.4);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:system-ui;background:var(--bg);color:var(--text);min-height:100vh}
 
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+.app-header{
+  background:linear-gradient(135deg,#1e293b,#0f172a);
+  border-bottom:1px solid var(--border);
+  padding:1rem 1.5rem;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  position:sticky;
+  top:0;
+}
 
-    body {
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      min-height: 100vh;
-      line-height: 1.5;
-    }
+.header-btn{
+  background:#ef4444;
+  color:white;
+  border:none;
+  padding:.6rem 1.3rem;
+  border-radius:10px;
+  cursor:pointer;
+}
 
-    .app-header {
-      background: linear-gradient(135deg, #1e293b, #0f172a);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      border-bottom: 1px solid var(--border);
-      padding: 1rem 1.5rem;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      position: sticky;
-      top: 0;
-      z-index: 10;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.35);
-    }
+.app-header h2{
+  font-size:1.45rem;
+  background:linear-gradient(90deg,#93c5fd,#c7d2fe);
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+}
 
-    .header-btn {
-      background: rgba(239, 68, 68, 0.9);
-      color: white;
-      border: none;
-      padding: 0.6rem 1.3rem;
-      border-radius: 10px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.22s ease;
-    }
+.container{
+  max-width:480px;
+  margin:auto;
+  padding:3rem 1.5rem 2rem;
+}
 
-    .header-btn:hover {
-      background: #dc2626;
-      transform: translateY(-1px);
-    }
+.card{
+  background:var(--card-bg);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  padding:2.5rem 2rem;
+  box-shadow:var(--shadow);
+  text-align:center;
+}
 
-    .app-header h2 {
-      font-size: 1.45rem;
-      font-weight: 600;
-      margin: 0;
-      background: linear-gradient(90deg, #93c5fd, #c7d2fe);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
+.avatar{
+  width:110px;
+  height:110px;
+  border-radius:50%;
+  background:linear-gradient(135deg,var(--accent-purple),#6d28d9);
+  color:white;
+  font-size:3.2rem;
+  font-weight:bold;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  margin:0 auto 1.2rem;
+}
 
-    .container {
-      max-width: 480px;
-      margin: 0 auto;
-      padding: 3rem 1.5rem 2rem;
-      display: flex;
-      justify-content: center;
-    }
+h3{font-size:1.6rem;margin:.5rem 0;color:white}
 
-    .card {
-      background: var(--card-bg);
-      backdrop-filter: blur(14px);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 2.5rem 2rem;
-      box-shadow: var(--shadow);
-      width: 100%;
-      text-align: center;
-      animation: fadeUp 0.5s ease-out;
-    }
+.role{
+  font-size:1rem;
+  color:var(--text-muted);
+  margin-bottom:2rem;
+  text-transform:capitalize;
+}
 
-    @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(20px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
+.row{
+  margin:1.2rem 0;
+  font-size:1.05rem;
+  text-align:left;
+}
 
-    .avatar {
-      width: 110px;
-      height: 110px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, var(--accent-purple), #6d28d9);
-      color: white;
-      font-size: 3.2rem;
-      font-weight: bold;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin: 0 auto 1.2rem;
-      box-shadow: 0 8px 24px rgba(139, 92, 246, 0.35);
-      border: 3px solid rgba(255,255,255,0.15);
-    }
+.row b{
+  display:inline-block;
+  min-width:90px;
+  color:white;
+}
 
-    h3 {
-      font-size: 1.6rem;
-      font-weight: 700;
-      margin: 0.5rem 0 0.3rem;
-      color: white;
-    }
-
-    .role {
-      font-size: 1rem;
-      color: var(--text-muted);
-      margin-bottom: 2rem;
-      text-transform: capitalize;
-    }
-
-    .row {
-      margin: 1.2rem 0;
-      font-size: 1.05rem;
-      text-align: left;
-    }
-
-    .row b {
-      color: white;
-      display: inline-block;
-      min-width: 90px;
-      font-weight: 600;
-    }
-
-    .logout {
-      margin-top: 2.5rem;
-      width: 100%;
-      padding: 1.1rem;
-      background: linear-gradient(135deg, var(--danger), #b91c1c);
-      color: white;
-      border: none;
-      border-radius: 12px;
-      font-size: 1.1rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.28s ease;
-      box-shadow: 0 4px 14px rgba(239,68,68,0.3);
-    }
-
-    .logout:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 10px 28px rgba(239,68,68,0.45);
-    }
-
-    @media (max-width: 480px) {
-      .container { padding: 2rem 1rem 1.5rem; }
-      .card { padding: 2rem 1.5rem; }
-      .avatar { width: 90px; height: 90px; font-size: 2.8rem; }
-      h3 { font-size: 1.45rem; }
-    }
-  </style>
+.logout{
+  margin-top:2.5rem;
+  width:100%;
+  padding:1.1rem;
+  background:linear-gradient(135deg,var(--danger),#b91c1c);
+  color:white;
+  border:none;
+  border-radius:12px;
+  font-size:1.1rem;
+  font-weight:600;
+  cursor:pointer;
+}
+</style>
 </head>
 
 <body>
 
 <header class="app-header">
-  <button class="header-btn" onclick="location.href='index.html'">← Back</button>
-  <h2>My Profile</h2>
-  <span></span>
+<button class="header-btn" onclick="location.href='index.html'">← Back</button>
+<h2>My Profile</h2>
+<span></span>
 </header>
 
 <div class="container">
-  <div class="card">
+<div class="card">
 
-    <div class="avatar" id="avatar"></div>
+<div class="avatar" id="avatar">W</div>
 
-    <h3 id="name"></h3>
-    <div class="role" id="role"></div>
+<h3 id="name">Loading...</h3>
+<div class="role" id="role">Loading...</div>
 
-    <div class="row"><b>Phone:</b> <span id="phone"></span></div>
-    <div class="row"><b>Shop:</b> <span id="shop"></span></div>
-    <div class="row"><b>User ID:</b> <span id="uid"></span></div>
+<div class="row"><b>Phone:</b> <span id="phone">—</span></div>
+<div class="row"><b>Shop:</b> <span id="shop">—</span></div>
+<div class="row"><b>User ID:</b> <span id="uid">—</span></div>
 
-    <button class="logout" onclick="logout()">LOG OUT</button>
+<button class="logout" onclick="logout()">LOG OUT</button>
 
-  </div>
+</div>
 </div>
 
 <script type="module">
-import { requireAuth } from "../auth/guard.js";
-import { DB } from "../db/fakeDB.js";
+import { db } from "../js/firebase.js";
+import {
+  doc,
+  getDoc
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-/* AUTH */
-const user = requireAuth(["WORKER"]);
+/* 🔐 AUTH SAFE */
+const currentUser = JSON.parse(localStorage.getItem("currentUser"));
 
-/* DATA */
-name.innerText = user.name || "Worker";
-role.innerText = user.role || "—";
-phone.innerText = user.phone || "—";
-uid.innerText = user.id || "—";
+if (!currentUser || currentUser.role !== "WORKER") {
+  location.href = "/login.html";
+}
 
-const shopObj = DB.shops.find(s => s.id === user.shopId);
-shop.innerText = shopObj?.name || "—";
+const userId = currentUser.uid || currentUser.id;
+const shopId = currentUser.shopId;
 
-/* AVATAR */
-avatar.innerText = (user.name || "W")[0].toUpperCase();
+const nameEl = document.getElementById("name");
+const roleEl = document.getElementById("role");
+const phoneEl = document.getElementById("phone");
+const uidEl = document.getElementById("uid");
+const shopEl = document.getElementById("shop");
+const avatarEl = document.getElementById("avatar");
+
+/* LOAD PROFILE */
+async function loadProfile() {
+  try {
+
+    uidEl.innerText = userId || "—";
+
+    /* USER DOC */
+    const userSnap = await getDoc(doc(db, "users", userId));
+
+    if (userSnap.exists()) {
+      const userData = userSnap.data();
+
+      nameEl.innerText = userData.name || "Worker";
+      roleEl.innerText = userData.role || "WORKER";
+      phoneEl.innerText = userData.phone || "—";
+
+      avatarEl.innerText = (userData.name || "W")[0].toUpperCase();
+    } else {
+      nameEl.innerText = currentUser.name || "Worker";
+      roleEl.innerText = currentUser.role || "WORKER";
+      phoneEl.innerText = currentUser.phone || "—";
+      avatarEl.innerText = (currentUser.name || "W")[0].toUpperCase();
+    }
+
+    /* SHOP DOC */
+    if (shopId) {
+      const shopSnap = await getDoc(doc(db, "shops", shopId));
+      if (shopSnap.exists()) {
+        shopEl.innerText = shopSnap.data().name || "—";
+      } else {
+        shopEl.innerText = "—";
+      }
+    }
+
+  } catch (error) {
+    console.error("Profile load error:", error);
+    alert("Failed to load profile data");
+  }
+}
 
 /* LOGOUT */
 window.logout = () => {
   localStorage.removeItem("currentUser");
   location.href = "/login.html";
 };
+
+loadProfile();
 </script>
 
 </body>

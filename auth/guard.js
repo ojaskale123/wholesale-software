@@ -1,17 +1,17 @@
 export function requireAuth(allowedRoles = []) {
 
-  const raw = localStorage.getItem("currentUser");
+  const userStr = localStorage.getItem("currentUser");
 
-  if (!raw) {
-    window.location.href = "../login.html";
-    return;
+  if (!userStr) {
+    window.location.href = "/login.html";
+    return null;
   }
 
-  const user = JSON.parse(raw);
+  const user = JSON.parse(userStr);
 
   if (allowedRoles.length && !allowedRoles.includes(user.role)) {
-    window.location.href = "../login.html";
-    return;
+    window.location.href = "/login.html";
+    return null;
   }
 
   return user;

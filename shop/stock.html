@@ -17,24 +17,17 @@
       --shadow: 0 8px 24px rgba(0,0,0,0.35);
     }
 
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+    * { margin:0; padding:0; box-sizing:border-box; }
 
     body {
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      font-family: system-ui;
       background: var(--bg);
       color: var(--text);
       min-height: 100vh;
-      line-height: 1.5;
     }
 
     .header {
       background: linear-gradient(135deg, #1e293b, #0f172a);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
       border-bottom: 1px solid var(--border);
       padding: 1.2rem 1.5rem;
       display: flex;
@@ -46,34 +39,19 @@
       box-shadow: 0 4px 16px rgba(0,0,0,0.35);
     }
 
-    .header-title {
-      font-size: 1.55rem;
-      font-weight: 700;
-      background: linear-gradient(90deg, #93c5fd, #c7d2fe);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-
     .add-btn {
-      background: linear-gradient(135deg, var(--accent-green), #059669);
+      background: linear-gradient(135deg, #10b981, #059669);
       color: white;
       border: none;
       padding: 0.75rem 1.5rem;
       border-radius: 12px;
       font-weight: 600;
       cursor: pointer;
-      transition: all 0.25s ease;
-      box-shadow: 0 4px 14px rgba(16,185,129,0.3);
-    }
-
-    .add-btn:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 10px 28px rgba(16,185,129,0.45);
     }
 
     .stock-grid {
       max-width: 1400px;
-      margin: 0 auto;
+      margin: auto;
       padding: 2rem 1.5rem;
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -82,63 +60,58 @@
 
     .stock-card {
       background: var(--card-bg);
-      backdrop-filter: blur(10px);
       border: 1px solid var(--border);
       border-radius: var(--radius);
-      padding: 1.5rem 1.6rem;
+      padding: 1.5rem;
       box-shadow: var(--shadow);
       cursor: pointer;
-      transition: all 0.25s ease;
+      transition: .25s;
     }
 
     .stock-card:hover {
       transform: translateY(-6px);
-      box-shadow: 0 16px 40px rgba(0,0,0,0.45);
-      border-color: rgba(16, 185, 129, 0.35);
     }
 
     .stock-name {
       font-size: 1.35rem;
       font-weight: 700;
-      color: white;
-      margin-bottom: 0.6rem;
+      margin-bottom: .6rem;
     }
 
     .stock-meta {
-      font-size: 0.95rem;
+      font-size: .95rem;
       color: var(--text-muted);
-      margin: 0.35rem 0;
     }
 
     .price {
       font-size: 1.25rem;
       font-weight: 700;
       color: var(--accent-green);
-      margin-top: 0.8rem;
+      margin-top: .8rem;
     }
 
     /* MODAL */
     .overlay {
       position: fixed;
       inset: 0;
-      background: rgba(15, 23, 42, 0.85);
-      backdrop-filter: blur(4px);
+      background: rgba(15,23,42,.85);
       display: none;
-      align-items: center;
-      justify-content: center;
-      z-index: 999;
+      z-index: 998;
     }
 
     .modal {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%,-50%);
       background: var(--card-bg);
-      backdrop-filter: blur(12px);
       border: 1px solid var(--border);
       border-radius: var(--radius);
       padding: 2rem;
       width: 90%;
       max-width: 480px;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.5);
-      color: var(--text);
+      display: none;
+      z-index: 999;
     }
 
     .modal input {
@@ -147,46 +120,19 @@
       margin-bottom: 1.2rem;
       border-radius: 12px;
       border: 1px solid var(--border);
-      background: rgba(51, 65, 85, 0.6);
+      background: rgba(51,65,85,.6);
       color: var(--text);
-      font-size: 1rem;
-      backdrop-filter: blur(6px);
-      transition: all 0.2s ease;
-    }
-
-    .modal input:focus {
-      outline: none;
-      border-color: var(--accent-green);
-      box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.25);
-    }
-
-    .modal input::placeholder {
-      color: var(--text-muted);
     }
 
     .modal button {
       width: 100%;
       padding: 1rem;
-      background: linear-gradient(135deg, var(--accent-green), #059669);
+      background: linear-gradient(135deg,#10b981,#059669);
       color: white;
       border: none;
       border-radius: 12px;
-      font-size: 1.05rem;
       font-weight: 600;
       cursor: pointer;
-      transition: all 0.28s ease;
-      box-shadow: 0 4px 14px rgba(16,185,129,0.3);
-    }
-
-    .modal button:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 10px 28px rgba(16,185,129,0.45);
-    }
-
-    @media (max-width: 640px) {
-      .stock-grid { padding: 1.5rem 1rem; grid-template-columns: 1fr; }
-      .header { font-size: 1.4rem; padding: 1.2rem 1rem; }
-      .modal { padding: 1.5rem; }
     }
   </style>
 </head>
@@ -200,109 +146,105 @@
 
 <div class="stock-grid" id="stockGrid"></div>
 
-<!-- MODAL -->
 <div class="overlay" id="overlay"></div>
+
 <div class="modal" id="modal">
-  <input id="name" placeholder="Item name" required />
-  <input id="category" placeholder="Category (e.g. Spare Parts, Electronics)" required />
-  <input id="quantity" type="number" placeholder="Quantity in stock" min="0" required />
-  <input id="sellPrice" type="number" placeholder="Selling price (₹)" min="0" step="0.01" required />
+  <input id="name" placeholder="Item name" />
+  <input id="category" placeholder="Category" />
+  <input id="quantity" type="number" placeholder="Quantity" min="0" />
+  <input id="sellPrice" type="number" placeholder="Selling price (₹)" min="0" />
   <button id="saveBtn">Save Item</button>
 </div>
 
 <script type="module">
 import { db } from "../js/firebase.js";
 import {
-  collection,
-  addDoc,
-  getDocs,
-  query,
-  where,
-  serverTimestamp,
-  doc,
-  updateDoc
+  collection, addDoc, getDocs, query, where,
+  serverTimestamp, doc, updateDoc
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-/* 🔐 AUTH */
-const currentUser = JSON.parse(localStorage.getItem("currentUser"));
-if (!currentUser || currentUser.role !== "SHOPKEEPER") {
-  alert("Access denied");
+/* 🔐 AUTH SAFE */
+const user = JSON.parse(localStorage.getItem("currentUser"));
+if (!user || user.role !== "SHOPKEEPER") {
   location.href = "/login.html";
 }
-const shopId = currentUser.shopId;
+const shopId = user.shopId;
 
 /* UI */
 const stockGrid = document.getElementById("stockGrid");
 const modal = document.getElementById("modal");
 const overlay = document.getElementById("overlay");
+const name = document.getElementById("name");
+const category = document.getElementById("category");
+const quantity = document.getElementById("quantity");
+const sellPrice = document.getElementById("sellPrice");
+const saveBtn = document.getElementById("saveBtn");
+const addBtn = document.getElementById("addBtn");
 
 let editId = null;
 
 /* LOAD STOCK */
 async function loadStock() {
   stockGrid.innerHTML = "";
-  const q = query(collection(db, "stock"), where("shopId", "==", shopId));
+  const q = query(collection(db,"stock"), where("shopId","==",shopId));
   const snap = await getDocs(q);
 
-  snap.forEach(d => {
-    const item = d.data();
-    const card = document.createElement("div");
-    card.className = "stock-card";
-    card.innerHTML = `
-      <div class="stock-name">${item.name}</div>
-      <div class="stock-meta">Category: ${item.category}</div>
-      <div class="stock-meta">Quantity: ${item.quantity}</div>
-      <div class="price">₹${Number(item.sellPrice).toLocaleString()}</div>
+  snap.forEach(d=>{
+    const i = d.data();
+    const div = document.createElement("div");
+    div.className = "stock-card";
+    div.innerHTML = `
+      <div class="stock-name">${i.name}</div>
+      <div class="stock-meta">Category: ${i.category}</div>
+      <div class="stock-meta">Quantity: ${i.quantity}</div>
+      <div class="price">₹${Number(i.sellPrice||0).toLocaleString()}</div>
     `;
-
-    card.onclick = () => openEdit(d.id, item);
-    stockGrid.appendChild(card);
+    div.onclick = ()=>openEdit(d.id,i);
+    stockGrid.appendChild(div);
   });
 }
 
-/* OPEN EDIT */
-function openEdit(id, item) {
+/* OPEN MODAL */
+function openEdit(id,item){
   editId = id;
   name.value = item.name || "";
   category.value = item.category || "";
-  quantity.value = item.quantity || "";
-  sellPrice.value = item.sellPrice || "";
+  quantity.value = item.quantity ?? 0;
+  sellPrice.value = item.sellPrice ?? 0;
   modal.style.display = "block";
   overlay.style.display = "block";
 }
 
 /* SAVE */
-saveBtn.onclick = async () => {
+saveBtn.onclick = async ()=>{
   const data = {
     name: name.value.trim(),
     category: category.value.trim(),
-    quantity: Number(quantity.value),
-    sellPrice: Number(sellPrice.value)
+    quantity: Number(quantity.value) || 0,
+    sellPrice: Number(sellPrice.value) || 0
   };
 
-  if (!data.name || !data.category) {
-    alert("Please fill item name and category");
+  if(!data.name || !data.category){
+    alert("Name & category required");
     return;
   }
 
-  if (editId) {
-    await updateDoc(doc(db, "stock", editId), data);
+  if(editId){
+    await updateDoc(doc(db,"stock",editId),data);
   } else {
-    await addDoc(collection(db, "stock"), {
+    await addDoc(collection(db,"stock"),{
       ...data,
       shopId,
       createdAt: serverTimestamp()
     });
   }
 
-  editId = null;
-  modal.style.display = "none";
-  overlay.style.display = "none";
+  closeModal();
   loadStock();
 };
 
 /* ADD NEW */
-addBtn.onclick = () => {
+addBtn.onclick = ()=>{
   editId = null;
   name.value = "";
   category.value = "";
@@ -312,10 +254,12 @@ addBtn.onclick = () => {
   overlay.style.display = "block";
 };
 
-overlay.onclick = () => {
+overlay.onclick = closeModal;
+
+function closeModal(){
   modal.style.display = "none";
   overlay.style.display = "none";
-};
+}
 
 loadStock();
 </script>

@@ -97,9 +97,9 @@ header{
 <body>
 
 <header>
-<button class="header-btn" onclick="location.href='index.html'">← Back</button>
-<h2>Retailer Management</h2>
-<span></span>
+  <button class="header-btn" onclick="location.href='index.html'">← Back</button>
+  <h2>Retailer Management</h2>
+  <span></span>
 </header>
 
 <div class="container">
@@ -107,8 +107,8 @@ header{
 <input id="search" placeholder="Search by name or phone...">
 
 <div class="summary">
-<h1>₹<span id="totalPending">0</span></h1>
-<p>Total Pending Payments</p>
+  <h1>₹<span id="totalPending">0</span></h1>
+  <p>Total Pending Payments</p>
 </div>
 
 <div id="retailerList"></div>
@@ -116,7 +116,7 @@ header{
 </div>
 
 <script type="module">
-
+import { requireAuth } from "../auth/guard.js";
 import { db } from "../js/firebase.js";
 import {
   collection,
@@ -130,9 +130,8 @@ import {
   increment
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-import { requireAuth } from "../auth/guard.js";
-
-const user = requireAuth(["OWNER"]);
+/* 🔒 OWNER ONLY */
+const user = requireAuth("OWNER");
 
 const searchInput = document.getElementById("search");
 const totalPendingEl = document.getElementById("totalPending");
@@ -141,23 +140,19 @@ const retailerList = document.getElementById("retailerList");
 let retailers = [];
 
 /* LOAD RETAILERS */
-
 async function loadRetailers(){
-
   const snap = await getDocs(collection(db,"retailers"));
   retailers = snap.docs.map(d=>({id:d.id,...d.data()}));
 
   let total = 0;
-  retailers.forEach(r => total += r.pendingAmount || 0);
+  retailers.forEach(r => total += Number(r.pendingAmount || 0));
   totalPendingEl.innerText = total.toLocaleString();
 
   renderRetailers(retailers);
 }
 
 /* RENDER */
-
 function renderRetailers(list){
-
   retailerList.innerHTML="";
 
   if(!list.length){
@@ -166,14 +161,16 @@ function renderRetailers(list){
   }
 
   list.forEach(r=>{
-
     retailerList.innerHTML += `
       <div class="retailer-card">
         <h3>${r.name}</h3>
         <div>Phone: ${r.phone}</div>
-        <div class="pending-amount">Pending: ₹${(r.pendingAmount||0).toLocaleString()}</div>
+        <div class="pending-amount">
+          Pending: ₹${Number(r.pendingAmount||0).toLocaleString()}
+        </div>
 
-        <button class="settle-btn" onclick="settlePayment('${r.id}',${r.pendingAmount||0})">
+        <button class="settle-btn"
+          onclick="settlePayment('${r.id}',${Number(r.pendingAmount||0)})">
           Settle Payment
         </button>
 
@@ -187,14 +184,14 @@ function renderRetailers(list){
   });
 }
 
-/* LOAD HISTORY */
-
+/* LOAD PAYMENT HISTORY */
 async function loadHistory(retailerId){
-
   const box = document.getElementById("history-"+retailerId);
 
   const snap = await getDocs(
-    query(collection(db,"settlements"), where("retailerId","==",retailerId))
+    query(collection(db,"settlements"),
+      where("retailerId","==",retailerId)
+    )
   );
 
   if(snap.empty){
@@ -208,16 +205,15 @@ async function loadHistory(retailerId){
     const s=d.data();
     box.innerHTML += `
       <div class="history-item">
-        ₹${s.amount.toLocaleString()} — ${s.paidAt.toDate().toLocaleString()}
+        ₹${Number(s.amount).toLocaleString()} —
+        ${s.paidAt?.toDate().toLocaleString() || "-"}
       </div>
     `;
   });
 }
 
-/* SETTLE */
-
+/* SETTLE PAYMENT */
 window.settlePayment = async(id,maxPending)=>{
-
   const amount = Number(prompt(`Enter amount (max ₹${maxPending})`));
 
   if(!amount || amount<=0 || amount>maxPending){
@@ -248,18 +244,19 @@ window.settlePayment = async(id,maxPending)=>{
 };
 
 /* SEARCH */
-
 searchInput.addEventListener("input",()=>{
   const q = searchInput.value.toLowerCase();
   renderRetailers(
     retailers.filter(r =>
-      r.name.toLowerCase().includes(q) || r.phone.includes(q)
+      r.name.toLowerCase().includes(q) ||
+      r.phone.includes(q)
     )
   );
 });
 
+/* INIT */
 loadRetailers();
-
 </script>
+
 </body>
 </html>

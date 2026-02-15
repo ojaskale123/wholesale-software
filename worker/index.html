@@ -4,7 +4,6 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Worker Panel</title>
-  <link rel="stylesheet" href="../css/style.css">
 
   <style>
     :root {
@@ -17,147 +16,157 @@
       --shadow: 0 10px 30px rgba(0,0,0,0.4);
     }
 
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+    * { margin:0; padding:0; box-sizing:border-box; }
 
     body {
       font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
       background: var(--bg);
       color: var(--text);
       min-height: 100vh;
-      line-height: 1.5;
     }
 
-    .top-header {
+    /* HEADER */
+    .app-header {
       background: linear-gradient(135deg, #1e293b, #0f172a);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
       border-bottom: 1px solid var(--border);
-      padding: 1.2rem 1.5rem;
-      text-align: center;
+      padding: 1.2rem 1.8rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
       position: sticky;
       top: 0;
       z-index: 100;
       box-shadow: 0 4px 16px rgba(0,0,0,0.35);
     }
 
-    .top-header h2 {
-      font-size: 1.55rem;
+    .header-left h2 {
+      font-size: 1.5rem;
       font-weight: 700;
-      margin: 0;
       background: linear-gradient(90deg, #93c5fd, #c7d2fe);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
     }
 
-    .dashboard {
-      max-width: 1400px;
-      margin: 0 auto;
-      padding: 2rem 1.5rem;
+    .header-left span {
+      font-size: 0.9rem;
+      color: var(--text-muted);
     }
 
-    .card-grid {
+    .logout-btn {
+      background: #ef4444;
+      color: white;
+      border: none;
+      padding: 0.6rem 1.3rem;
+      border-radius: 10px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: .2s ease;
+    }
+
+    .logout-btn:hover {
+      background: #dc2626;
+      transform: translateY(-2px);
+    }
+
+    /* DASHBOARD */
+    .dashboard {
+      max-width: 1100px;
+      margin: auto;
+      padding: 2rem 1.5rem;
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
       gap: 1.4rem;
     }
 
     .card {
       background: var(--card-bg);
-      backdrop-filter: blur(12px);
       border: 1px solid var(--border);
       border-radius: var(--radius);
-      padding: 2rem 1.6rem;
-      box-shadow: var(--shadow);
+      padding: 2rem 1.8rem;
       cursor: pointer;
-      transition: all 0.28s ease;
-      text-align: center;
-      position: relative;
-      overflow: hidden;
+      box-shadow: var(--shadow);
+      transition: .25s ease;
     }
 
     .card:hover {
-      transform: translateY(-8px);
+      transform: translateY(-6px);
       box-shadow: 0 20px 48px rgba(0,0,0,0.5);
-      border-color: rgba(147, 197, 253, 0.35);
+      border-color: rgba(147,197,253,0.35);
     }
 
-    .card h2 {
-      font-size: 2.8rem;
-      margin: 0 0 1rem;
-      line-height: 1;
-      color: white;
+    .card h3 {
+      font-size: 1.4rem;
+      margin-bottom: .8rem;
     }
 
     .card p {
-      font-size: 1.05rem;
+      font-size: .95rem;
       color: var(--text-muted);
-      margin: 0;
     }
 
-    @media (max-width: 640px) {
-      .dashboard { padding: 1.5rem 1rem; }
-      .card { padding: 1.8rem 1.4rem; }
-      .card h2 { font-size: 2.4rem; }
-      .card-grid { gap: 1.2rem; }
+    @media(max-width:640px){
+      .dashboard { padding:1.5rem 1rem; }
+      .card { padding:1.6rem; }
     }
+
   </style>
 </head>
 
 <body>
 
-<header class="top-header">
-  <h2>Worker Panel</h2>
+<header class="app-header">
+  <div class="header-left">
+    <h2>Worker Panel</h2>
+    <span id="workerInfo"></span>
+  </div>
+  <button class="logout-btn" onclick="logout()">Logout</button>
 </header>
 
 <div class="dashboard">
-  <div class="card-grid">
 
-    <!-- SELL -->
-    <div class="card" onclick="location.href='sell.html'">
-      <h2>💰</h2>
-      <p>Sell Products</p>
-    </div>
-
-    <!-- MY JOBS -->
-    <div class="card" onclick="location.href='jobs.html'">
-      <h2>🛠</h2>
-      <p>My Jobs</p>
-    </div>
-
-    <!-- AVAILABLE JOBS -->
-    <div class="card" onclick="location.href='available-jobs.html'">
-      <h2>📋</h2>
-      <p>Available Jobs</p>
-    </div>
-
-    <!-- ATTENDANCE -->
-    <div class="card" onclick="location.href='attendance.html'">
-      <h2>🕒</h2>
-      <p>Attendance</p>
-    </div>
-
-    <!-- HISTORY -->
-    <div class="card" onclick="location.href='history.html'">
-      <h2>🕘</h2>
-      <p>My History</p>
-    </div>
-
-    <!-- PROFILE (FUTURE) -->
-    <div class="card" onclick="location.href='profile.html'">
-      <h2>👤</h2>
-      <p>My Profile</p>
-    </div>
-
+  <div class="card" onclick="location.href='available-jobs.html'">
+    <h3>Available Jobs</h3>
+    <p>Accept new repair jobs assigned to your shop</p>
   </div>
+
+  <div class="card" onclick="location.href='jobs.html'">
+    <h3>My Active Jobs</h3>
+    <p>View & update your assigned repair jobs</p>
+  </div>
+
+  <div class="card" onclick="location.href='attendance.html'">
+    <h3>My Attendance</h3>
+    <p>Check-in & check-out for today</p>
+  </div>
+
+  <div class="card" onclick="location.href='history.html'">
+    <h3>My History</h3>
+    <p>View your sales & completed job history</p>
+  </div>
+
 </div>
 
 <script type="module">
-  import { requireAuth } from "../auth/guard.js";
-  requireAuth(["WORKER"]);
+
+/* 🔐 AUTH CHECK */
+const currentUser = JSON.parse(localStorage.getItem("currentUser"));
+
+if (!currentUser || currentUser.role !== "WORKER") {
+  location.href = "/login.html";
+}
+
+/* SHOW WORKER INFO */
+const name = currentUser.name || "Worker";
+const shopId = currentUser.shopId || "";
+document.getElementById("workerInfo").innerText =
+  `Logged in as ${name} • Shop ID: ${shopId}`;
+
+/* LOGOUT */
+window.logout = function(){
+  localStorage.removeItem("currentUser");
+  location.href = "/login.html";
+};
+
 </script>
 
 </body>

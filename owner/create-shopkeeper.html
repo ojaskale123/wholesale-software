@@ -7,8 +7,6 @@
 
   <style>
     :root {
-      --primary: #1e40af;
-      --primary-dark: #1e3a8a;
       --accent: #10b981;
       --bg: #0f172a;
       --card-bg: rgba(30, 41, 59, 0.75);
@@ -18,15 +16,11 @@
       --radius: 16px;
     }
 
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
 
     body {
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
-      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+      font-family: system-ui, sans-serif;
+      background: linear-gradient(135deg, #0f172a, #1e293b);
       min-height: 100vh;
       display: flex;
       align-items: center;
@@ -38,20 +32,12 @@
     .card {
       background: var(--card-bg);
       backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
       border: 1px solid var(--border);
       border-radius: var(--radius);
       padding: 2.5rem 2rem;
       width: 100%;
       max-width: 480px;
       box-shadow: 0 20px 40px rgba(0,0,0,0.4);
-      animation: fadeInUp 0.7s ease-out forwards;
-      opacity: 0;
-    }
-
-    @keyframes fadeInUp {
-      from { opacity: 0; transform: translateY(30px); }
-      to   { opacity: 1; transform: translateY(0); }
     }
 
     h2 {
@@ -64,7 +50,6 @@
       -webkit-text-fill-color: transparent;
     }
 
-    /* Floating Label Inputs */
     .form-group {
       position: relative;
       margin-bottom: 1.6rem;
@@ -78,42 +63,18 @@
       background: rgba(51,65,85,0.4);
       color: var(--text);
       font-size: 1rem;
-      transition: all 0.3s ease;
-    }
-
-    .form-group input:focus {
-      outline: none;
-      border-color: var(--primary);
-      box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.3);
-      background: rgba(51,65,85,0.55);
-    }
-
-    .form-group input::placeholder {
-      color: transparent;
     }
 
     .form-group label {
       position: absolute;
       left: 1rem;
-      top: 50%;
-      transform: translateY(-50%);
-      color: var(--text-muted);
-      font-size: 1rem;
-      pointer-events: none;
-      transition: all 0.3s ease;
-    }
-
-    .form-group input:focus + label,
-    .form-group input:not(:placeholder-shown) + label {
       top: -0.6rem;
-      left: 0.9rem;
-      font-size: 0.82rem;
+      font-size: 0.8rem;
       background: var(--bg);
       padding: 0 0.5rem;
-      color: var(--primary);
+      color: var(--accent);
     }
 
-    /* Password Visibility Toggle */
     .password-wrapper {
       position: relative;
     }
@@ -128,10 +89,8 @@
       color: var(--text-muted);
       cursor: pointer;
       font-size: 1.1rem;
-      padding: 0.4rem;
     }
 
-    /* Button */
     #createBtn {
       width: 100%;
       padding: 1.1rem;
@@ -142,24 +101,7 @@
       font-size: 1.1rem;
       font-weight: 600;
       cursor: pointer;
-      transition: all 0.3s ease;
-      box-shadow: 0 6px 20px rgba(16,185,129,0.3);
       margin-top: 1.5rem;
-    }
-
-    #createBtn:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 12px 32px rgba(16,185,129,0.45);
-    }
-
-    #createBtn:active {
-      transform: translateY(0);
-      box-shadow: 0 4px 12px rgba(16,185,129,0.25);
-    }
-
-    @media (max-width: 480px) {
-      .card { padding: 2rem 1.5rem; }
-      h2 { font-size: 1.7rem; }
     }
   </style>
 </head>
@@ -170,34 +112,34 @@
   <h2>Create Shop & Shopkeeper</h2>
 
   <div class="form-group">
-    <input id="shopName" placeholder=" " required />
-    <label for="shopName">Shop Name</label>
+    <label>Shop Name</label>
+    <input id="shopName" />
   </div>
 
   <div class="form-group">
-    <input id="city" placeholder=" " required />
-    <label for="city">City</label>
+    <label>City</label>
+    <input id="city" />
   </div>
 
   <div class="form-group">
-    <input id="keeperName" placeholder=" " required />
-    <label for="keeperName">Shopkeeper Name</label>
+    <label>Shopkeeper Name</label>
+    <input id="keeperName" />
   </div>
 
   <div class="form-group">
-    <input id="email" type="email" placeholder=" " required autocomplete="email" />
-    <label for="email">Email (Login ID)</label>
+    <label>Email (Login)</label>
+    <input id="email" type="email" />
   </div>
 
   <div class="form-group password-wrapper">
-    <input id="password" type="password" placeholder=" " required autocomplete="new-password" />
-    <label for="password">Password</label>
+    <label>Password</label>
+    <input id="password" type="password" />
     <button type="button" onclick="togglePassword('password')">👁️</button>
   </div>
 
   <div class="form-group password-wrapper">
-    <input id="confirmPassword" type="password" placeholder=" " required autocomplete="new-password" />
-    <label for="confirmPassword">Confirm Password</label>
+    <label>Confirm Password</label>
+    <input id="confirmPassword" type="password" />
     <button type="button" onclick="togglePassword('confirmPassword')">👁️</button>
   </div>
 
@@ -205,6 +147,7 @@
 </div>
 
 <script type="module">
+import { requireAuth } from "../auth/guard.js";
 import { auth, db } from "../js/firebase.js";
 import {
   createUserWithEmailAndPassword
@@ -212,8 +155,12 @@ import {
 import {
   doc,
   setDoc,
+  addDoc,
   serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+/* 🔒 OWNER ONLY */
+const currentUser = requireAuth("OWNER");
 
 const shopNameEl = document.getElementById("shopName");
 const cityEl = document.getElementById("city");
@@ -226,12 +173,12 @@ const btn = document.getElementById("createBtn");
 btn.onclick = async () => {
   const shopName = shopNameEl.value.trim();
   const city = cityEl.value.trim();
-  const name = keeperNameEl.value.trim();
+  const keeperName = keeperNameEl.value.trim();
   const email = emailEl.value.trim();
   const password = passwordEl.value;
   const confirmPassword = confirmPasswordEl.value;
 
-  if (!shopName || !name || !email || !password || !confirmPassword) {
+  if (!shopName || !city || !keeperName || !email || !password || !confirmPassword) {
     alert("All fields are required");
     return;
   }
@@ -242,45 +189,49 @@ btn.onclick = async () => {
   }
 
   try {
-    // 1️⃣ Create Shopkeeper Auth account
+    /* 1️⃣ CREATE SHOPKEEPER AUTH */
     const cred = await createUserWithEmailAndPassword(auth, email, password);
     const uid = cred.user.uid;
 
-    const shopId = "SHOP_" + Date.now();
-
-    // 2️⃣ Create Shop
-    await setDoc(doc(db, "shops", shopId), {
-      name: shopName,
+    /* 2️⃣ CREATE SHOP */
+    const shopRef = doc(db, "shops", "SHOP_" + Date.now());
+    await setDoc(shopRef, {
+      shopName,
       city,
+      ownerId: currentUser.uid,
       shopkeeperId: uid,
       createdAt: serverTimestamp()
     });
 
-    // 3️⃣ Create Shopkeeper user record
+    /* 3️⃣ CREATE SHOPKEEPER PROFILE */
     await setDoc(doc(db, "users", uid), {
-      name,
+      name: keeperName,
       role: "SHOPKEEPER",
-      shopId,
+      shopId: shopRef.id,
       createdAt: serverTimestamp()
+    });
+
+    /* 4️⃣ AUDIT LOG */
+    await addDoc(collection(db, "auditLogs"), {
+      actionType: "CREATE_SHOP",
+      action: `Shop ${shopName} created with shopkeeper ${keeperName}`,
+      createdBy: currentUser.uid,
+      shopId: shopRef.id,
+      timestamp: serverTimestamp()
     });
 
     alert("Shop & Shopkeeper created successfully");
     location.href = "index.html";
 
   } catch (err) {
-    alert(err.message);
     console.error(err);
+    alert(err.message);
   }
 };
 
-// Password visibility toggle
 function togglePassword(id) {
-  const input = document.getElementById(id);
-  if (input.type === "password") {
-    input.type = "text";
-  } else {
-    input.type = "password";
-  }
+  const i = document.getElementById(id);
+  i.type = i.type === "password" ? "text" : "password";
 }
 </script>
 

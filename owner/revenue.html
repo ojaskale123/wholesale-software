@@ -16,36 +16,27 @@
       --radius: 16px;
     }
 
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
 
     body {
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      font-family: system-ui, sans-serif;
       background: var(--bg);
       color: var(--text);
       min-height: 100vh;
-      line-height: 1.5;
     }
 
     header {
       background: linear-gradient(135deg, #1e293b, #0f172a);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
       border-bottom: 1px solid var(--border);
-      padding: 1.5rem 1.8rem;
+      padding: 1.5rem;
       position: sticky;
       top: 0;
-      z-index: 10;
+      text-align: center;
     }
 
     header h2 {
       font-size: 1.6rem;
       font-weight: 600;
-      margin: 0;
-      text-align: center;
       background: linear-gradient(90deg, #93c5fd, #c7d2fe);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
@@ -53,39 +44,28 @@
 
     .container {
       max-width: 900px;
-      margin: 0 auto;
+      margin: auto;
       padding: 2rem 1.5rem;
     }
 
     .summary {
       background: var(--card-bg);
-      backdrop-filter: blur(12px);
       border: 1px solid var(--border);
       border-radius: var(--radius);
-      padding: 2.5rem 2rem;
-      margin-bottom: 2.5rem;
+      padding: 2.5rem;
       text-align: center;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.35);
-      animation: fadeIn 0.8s ease-out;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(20px); }
-      to   { opacity: 1; transform: translateY(0); }
+      margin-bottom: 2.5rem;
     }
 
     .summary h1 {
       font-size: 3.2rem;
       font-weight: 800;
-      margin: 0 0 0.5rem;
       color: var(--accent-green);
-      line-height: 1;
+      margin-bottom: .4rem;
     }
 
     .summary p {
-      font-size: 1.1rem;
       color: var(--text-muted);
-      margin: 0;
     }
 
     #shopWise {
@@ -96,46 +76,27 @@
 
     .shop {
       background: var(--card-bg);
-      backdrop-filter: blur(10px);
       border: 1px solid var(--border);
       border-radius: var(--radius);
-      padding: 1.6rem 1.8rem;
-      transition: all 0.25s ease;
-      box-shadow: 0 6px 20px rgba(0,0,0,0.25);
-    }
-
-    .shop:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 12px 32px rgba(0,0,0,0.35);
-      border-color: rgba(16, 185, 129, 0.3);
+      padding: 1.6rem;
     }
 
     .shop h3 {
       font-size: 1.35rem;
-      font-weight: 600;
-      margin: 0 0 0.8rem;
       color: white;
+      margin-bottom: .6rem;
     }
 
     .amount {
       font-size: 1.9rem;
       font-weight: 700;
       color: var(--accent-green);
-      margin: 0;
     }
 
     .empty {
       text-align: center;
       color: var(--text-muted);
-      font-size: 1.15rem;
-      padding: 4rem 1rem;
-      opacity: 0.9;
-    }
-
-    @media (max-width: 640px) {
-      .summary { padding: 2rem 1.5rem; }
-      .summary h1 { font-size: 2.6rem; }
-      .shop { padding: 1.4rem; }
+      padding: 3rem;
     }
   </style>
 </head>
@@ -143,14 +104,14 @@
 <body>
 
 <header>
-  <h2>Total Profit (Revenue)</h2>
+  <h2>Total Revenue</h2>
 </header>
 
 <div class="container">
 
   <div class="summary">
-    <h1 id="totalProfit">₹0</h1>
-    <p>Total profit across all shops</p>
+    <h1 id="totalRevenue">₹0</h1>
+    <p>Total revenue across all shops</p>
   </div>
 
   <div id="shopWise"></div>
@@ -158,43 +119,61 @@
 </div>
 
 <script type="module">
-  import { requireAuth } from "../auth/guard.js";
-  import { DB } from "../db/fakeDB.js";
+import { requireAuth } from "../auth/guard.js";
+import { db } from "../js/firebase.js";
+import {
+  collection,
+  getDocs
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-  requireAuth(["OWNER"]);
+/* 🔒 OWNER ONLY */
+requireAuth("OWNER");
 
-  let totalProfit = 0;
-  const shopMap = {};
+const totalRevenueEl = document.getElementById("totalRevenue");
+const shopWiseEl = document.getElementById("shopWise");
 
-  DB.sales.forEach(sale => {
-    const amount = Number(sale.total || 0);
-    totalProfit += amount;
+let shopMap = {};
+let total = 0;
 
-    if (!shopMap[sale.shopId]) {
-      shopMap[sale.shopId] = 0;
-    }
-    shopMap[sale.shopId] += amount;
+/* LOAD DATA */
+async function loadRevenue() {
+  const [salesSnap, shopsSnap] = await Promise.all([
+    getDocs(collection(db, "sales")),
+    getDocs(collection(db, "shops"))
+  ]);
+
+  /* CALCULATE TOTAL + SHOP WISE */
+  salesSnap.forEach(d => {
+    const s = d.data();
+    const amount = Number(s.amount || 0);
+    total += amount;
+
+    if (!shopMap[s.shopId]) shopMap[s.shopId] = 0;
+    shopMap[s.shopId] += amount;
   });
 
-  document.getElementById("totalProfit").innerText = `₹${totalProfit}`;
+  totalRevenueEl.innerText = "₹" + total.toLocaleString();
 
-  const container = document.getElementById("shopWise");
-
-  if (!Object.keys(shopMap).length) {
-    container.innerHTML = `<div class="empty">No sales recorded yet</div>`;
+  if (salesSnap.empty) {
+    shopWiseEl.innerHTML = `<div class="empty">No sales recorded yet</div>`;
+    return;
   }
 
-  DB.shops.forEach(shop => {
-    const amount = shopMap[shop.id] || 0;
+  shopsSnap.forEach(d => {
+    const shop = d.data();
+    const amount = shopMap[d.id] || 0;
 
     const div = document.createElement("div");
     div.className = "shop";
     div.innerHTML = `
-      <h3>${shop.name}</h3>
-      <div class="amount">₹${amount}</div>
+      <h3>${shop.shopName}</h3>
+      <div class="amount">₹${amount.toLocaleString()}</div>
     `;
-    container.appendChild(div);
+    shopWiseEl.appendChild(div);
   });
+}
+
+loadRevenue();
 </script>
 
 </body>

@@ -7,8 +7,6 @@
 
   <style>
     :root {
-      --primary: #1e40af;
-      --primary-dark: #1e3a8a;
       --accent: #3b82f6;
       --bg: #0f172a;
       --card-bg: rgba(30, 41, 59, 0.75);
@@ -18,15 +16,11 @@
       --radius: 16px;
     }
 
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
 
     body {
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
-      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+      font-family: system-ui, sans-serif;
+      background: linear-gradient(135deg, #0f172a, #1e293b);
       min-height: 100vh;
       display: flex;
       align-items: center;
@@ -38,20 +32,12 @@
     .card {
       background: var(--card-bg);
       backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
       border: 1px solid var(--border);
       border-radius: var(--radius);
       padding: 2.5rem 2rem;
       width: 100%;
       max-width: 480px;
       box-shadow: 0 20px 40px rgba(0,0,0,0.4);
-      animation: fadeInUp 0.7s ease-out forwards;
-      opacity: 0;
-    }
-
-    @keyframes fadeInUp {
-      from { opacity: 0; transform: translateY(30px); }
-      to   { opacity: 1; transform: translateY(0); }
     }
 
     h2 {
@@ -64,7 +50,6 @@
       -webkit-text-fill-color: transparent;
     }
 
-    /* Floating Label Inputs + Select */
     .form-group {
       position: relative;
       margin-bottom: 1.6rem;
@@ -79,54 +64,18 @@
       background: rgba(51,65,85,0.4);
       color: var(--text);
       font-size: 1rem;
-      transition: all 0.3s ease;
-      appearance: none;
-    }
-
-    .form-group select {
-      padding-right: 2.5rem;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2394a3b8' d='M6 8.825L1.175 4 2.238 2.938 6 6.7l3.763-3.762L10.825 4z'/%3E%3C/svg%3E");
-      background-repeat: no-repeat;
-      background-position: right 1rem center;
-    }
-
-    .form-group input:focus,
-    .form-group select:focus {
-      outline: none;
-      border-color: var(--accent);
-      box-shadow: 0 0 0 3px rgba(59,130,246,0.25);
-      background: rgba(51,65,85,0.55);
-    }
-
-    .form-group input::placeholder,
-    .form-group select option[value=""] {
-      color: transparent;
     }
 
     .form-group label {
       position: absolute;
       left: 1rem;
-      top: 50%;
-      transform: translateY(-50%);
-      color: var(--text-muted);
-      font-size: 1rem;
-      pointer-events: none;
-      transition: all 0.3s ease;
-    }
-
-    .form-group input:focus + label,
-    .form-group input:not(:placeholder-shown) + label,
-    .form-group select:focus + label,
-    .form-group select:not([value=""]) + label {
       top: -0.6rem;
-      left: 0.9rem;
-      font-size: 0.82rem;
+      font-size: 0.8rem;
       background: var(--bg);
       padding: 0 0.5rem;
       color: var(--accent);
     }
 
-    /* Password Visibility Toggle */
     .password-wrapper {
       position: relative;
     }
@@ -141,10 +90,8 @@
       color: var(--text-muted);
       cursor: pointer;
       font-size: 1.1rem;
-      padding: 0.4rem;
     }
 
-    /* Button */
     #createBtn {
       width: 100%;
       padding: 1.1rem;
@@ -155,24 +102,7 @@
       font-size: 1.1rem;
       font-weight: 600;
       cursor: pointer;
-      transition: all 0.3s ease;
-      box-shadow: 0 6px 20px rgba(59,130,246,0.3);
       margin-top: 1.5rem;
-    }
-
-    #createBtn:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 12px 32px rgba(59,130,246,0.45);
-    }
-
-    #createBtn:active {
-      transform: translateY(0);
-      box-shadow: 0 4px 12px rgba(59,130,246,0.25);
-    }
-
-    @media (max-width: 480px) {
-      .card { padding: 2rem 1.5rem; }
-      h2 { font-size: 1.7rem; }
     }
   </style>
 </head>
@@ -183,31 +113,31 @@
   <h2>Create Worker</h2>
 
   <div class="form-group">
+    <label>Shop</label>
     <select id="shopSelect">
       <option value="">Select Shop</option>
     </select>
-    <label for="shopSelect">Shop</label>
   </div>
 
   <div class="form-group">
-    <input id="workerName" placeholder=" " required />
-    <label for="workerName">Worker Name</label>
+    <label>Worker Name</label>
+    <input id="workerName" />
   </div>
 
   <div class="form-group">
-    <input id="email" type="email" placeholder=" " required autocomplete="email" />
-    <label for="email">Email (Login ID)</label>
+    <label>Email (Login)</label>
+    <input id="email" type="email" />
   </div>
 
   <div class="form-group password-wrapper">
-    <input id="password" type="password" placeholder=" " required autocomplete="new-password" />
-    <label for="password">Password</label>
+    <label>Password</label>
+    <input id="password" type="password" />
     <button type="button" onclick="togglePassword('password')">👁️</button>
   </div>
 
   <div class="form-group password-wrapper">
-    <input id="confirmPassword" type="password" placeholder=" " required autocomplete="new-password" />
-    <label for="confirmPassword">Confirm Password</label>
+    <label>Confirm Password</label>
+    <input id="confirmPassword" type="password" />
     <button type="button" onclick="togglePassword('confirmPassword')">👁️</button>
   </div>
 
@@ -215,6 +145,7 @@
 </div>
 
 <script type="module">
+import { requireAuth } from "../auth/guard.js";
 import { auth, db } from "../js/firebase.js";
 import {
   createUserWithEmailAndPassword
@@ -224,8 +155,12 @@ import {
   getDocs,
   doc,
   setDoc,
+  addDoc,
   serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+/* 🔒 OWNER ONLY */
+const currentUser = requireAuth("OWNER");
 
 const shopSelect = document.getElementById("shopSelect");
 const workerNameEl = document.getElementById("workerName");
@@ -234,16 +169,17 @@ const passwordEl = document.getElementById("password");
 const confirmPasswordEl = document.getElementById("confirmPassword");
 const btn = document.getElementById("createBtn");
 
-/* 🔹 LOAD SHOPS FROM FIREBASE */
+/* LOAD SHOPS (Firestore-safe) */
 const shopsSnap = await getDocs(collection(db, "shops"));
-shopsSnap.forEach(docSnap => {
-  const shop = docSnap.data();
-  shopSelect.innerHTML += `
-    <option value="${docSnap.id}">${shop.name}</option>
-  `;
+shopsSnap.forEach(snap => {
+  const shop = snap.data();
+  const opt = document.createElement("option");
+  opt.value = snap.id;
+  opt.textContent = shop.shopName; // ✅ FIXED
+  shopSelect.appendChild(opt);
 });
 
-/* 🔹 CREATE WORKER */
+/* CREATE WORKER */
 btn.onclick = async () => {
   const shopId = shopSelect.value;
   const name = workerNameEl.value.trim();
@@ -262,11 +198,11 @@ btn.onclick = async () => {
   }
 
   try {
-    // 1️⃣ Create worker auth account
+    /* 1️⃣ CREATE AUTH ACCOUNT */
     const cred = await createUserWithEmailAndPassword(auth, email, password);
     const uid = cred.user.uid;
 
-    // 2️⃣ Save worker in Firestore
+    /* 2️⃣ SAVE USER PROFILE */
     await setDoc(doc(db, "users", uid), {
       name,
       role: "WORKER",
@@ -274,23 +210,28 @@ btn.onclick = async () => {
       createdAt: serverTimestamp()
     });
 
+    /* 3️⃣ AUDIT LOG */
+    await addDoc(collection(db, "auditLogs"), {
+      actionType: "CREATE_WORKER",
+      action: `Worker ${name} created`,
+      createdBy: currentUser.uid,
+      shopId,
+      timestamp: serverTimestamp()
+    });
+
     alert("Worker created successfully");
     location.href = "index.html";
 
   } catch (err) {
-    alert(err.message);
     console.error(err);
+    alert(err.message);
   }
 };
 
-// Password visibility toggle
+/* PASSWORD TOGGLE */
 function togglePassword(id) {
-  const input = document.getElementById(id);
-  if (input.type === "password") {
-    input.type = "text";
-  } else {
-    input.type = "password";
-  }
+  const i = document.getElementById(id);
+  i.type = i.type === "password" ? "text" : "password";
 }
 </script>
 

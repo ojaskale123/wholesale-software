@@ -104,8 +104,7 @@ th{
   background:rgba(29,78,216,.35);
 }
 
-/* 🔽 MINI SHOP PANEL */
-
+/* MINI SHOP PANEL */
 .shop-panel{
   position:fixed;
   left:0;
@@ -119,16 +118,9 @@ th{
   transition:.35s ease;
   z-index:999;
 }
-
 .shop-panel.active{bottom:0}
-
-.panel-row{
-  margin:.6rem 0;
-  color:var(--text-light);
-}
-
+.panel-row{margin:.6rem 0;color:var(--text-light)}
 .panel-row strong{color:var(--text)}
-
 .panel-close{
   margin-top:1.2rem;
   text-align:center;
@@ -142,10 +134,10 @@ th{
 <body>
 
 <header class="hero">
-<div class="hero-inner">
-<h1>Owner Dashboard</h1>
-<p>All shops • staff • sales • activity at a glance</p>
-</div>
+  <div class="hero-inner">
+    <h1>Owner Dashboard</h1>
+    <p>All shops • staff • revenue • activity</p>
+  </div>
 </header>
 
 <main class="dashboard">
@@ -158,8 +150,8 @@ th{
 </div>
 
 <div class="retailer-card" onclick="location.href='retailers.html'">
-<h3>Retailer Credit</h3>
-<p>Monitor pending payments & settlements</p>
+  <h3>Retailer Credit</h3>
+  <p>Monitor pending payments & settlements</p>
 </div>
 
 <h2>Your Shops</h2>
@@ -179,13 +171,13 @@ th{
 
 </main>
 
-<!-- MINI INFO PANEL -->
 <div id="shopPanel" class="shop-panel">
   <div id="panelContent"></div>
   <div class="panel-close" onclick="closePanel()">Close</div>
 </div>
 
 <script type="module">
+import { requireAuth } from "../auth/guard.js";
 import { db } from "../js/firebase.js";
 import {
   collection,
@@ -195,33 +187,29 @@ import {
   orderBy
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
+/* 🔒 OWNER ONLY */
+requireAuth("OWNER");
+
 const shopStrip = document.getElementById("shopStrip");
+const panel = document.getElementById("shopPanel");
+const panelContent = document.getElementById("panelContent");
 
-/* LOAD SHOPS (CLICKABLE) */
-
+/* LOAD SHOPS */
 async function loadShops(){
   const snap = await getDocs(collection(db,"shops"));
   shopStrip.innerHTML="";
-
   snap.forEach(docSnap=>{
     const shop = docSnap.data();
-    const shopId = docSnap.id;
-
     shopStrip.innerHTML += `
-      <div class="shop-card" onclick="openPanel('${shopId}','${shop.name}')">
-        <h3>${shop.name}</h3>
+      <div class="shop-card" onclick="openPanel('${docSnap.id}','${shop.shopName}')">
+        <h3>${shop.shopName}</h3>
       </div>
     `;
   });
 }
 
-/* MINI PANEL LOGIC */
-
-const panel = document.getElementById("shopPanel");
-const panelContent = document.getElementById("panelContent");
-
-window.openPanel = async (shopId, name) => {
-
+/* MINI PANEL */
+window.openPanel = async (shopId, shopName) => {
   const jobsSnap = await getDocs(query(
     collection(db,"jobs"),
     where("shopId","==",shopId)
@@ -236,28 +224,27 @@ window.openPanel = async (shopId, name) => {
   let revenue = 0;
   jobsSnap.forEach(d=>{
     const j=d.data();
-    if(j.status==="DONE_DELIVERED"){
-      revenue += Number(j.expectedCost || 0);
+    if(j.status==="DELIVERED"){
+      revenue += Number(j.finalCost || 0);
     }
   });
 
   panelContent.innerHTML = `
-    <div class="panel-row"><strong>Shop:</strong> ${name}</div>
+    <div class="panel-row"><strong>Shop:</strong> ${shopName}</div>
     <div class="panel-row"><strong>Total Jobs:</strong> ${jobsSnap.size}</div>
     <div class="panel-row"><strong>Workers:</strong> ${workersSnap.size}</div>
     <div class="panel-row"><strong>Revenue:</strong> ₹${revenue}</div>
   `;
-
   panel.classList.add("active");
 };
-
 window.closePanel = () => panel.classList.remove("active");
 
-/* STATS + ACTIVITY */
-
+/* STATS */
 async function loadCounts(){
-  shopkeeperCount.innerText = (await getDocs(query(collection(db,"users"),where("role","==","SHOPKEEPER")))).size;
-  workerCount.innerText = (await getDocs(query(collection(db,"users"),where("role","==","WORKER")))).size;
+  shopkeeperCount.innerText =
+    (await getDocs(query(collection(db,"users"),where("role","==","SHOPKEEPER")))).size;
+  workerCount.innerText =
+    (await getDocs(query(collection(db,"users"),where("role","==","WORKER")))).size;
 }
 
 async function loadJobCount(){
@@ -272,7 +259,9 @@ async function loadRevenue(){
 }
 
 async function loadAuditLogs(){
-  const snap = await getDocs(query(collection(db,"auditLogs"),orderBy("timestamp","desc")));
+  const snap = await getDocs(
+    query(collection(db,"auditLogs"),orderBy("timestamp","desc"))
+  );
   auditTable.innerHTML="";
   snap.forEach(d=>{
     const log=d.data();
@@ -281,12 +270,13 @@ async function loadAuditLogs(){
         <td>${log.userId}</td>
         <td>${log.role}</td>
         <td>${log.action}</td>
-        <td>${log.timestamp?.toDate().toLocaleString()}</td>
+        <td>${log.timestamp?.toDate().toLocaleString()||"-"}</td>
       </tr>
     `;
   });
 }
 
+/* INIT */
 loadShops();
 loadCounts();
 loadJobCount();

@@ -95,7 +95,8 @@ import {
   doc,
   updateDoc,
   addDoc,
-  serverTimestamp
+  serverTimestamp,
+  getDoc
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 const container = document.getElementById("jobs");
@@ -105,71 +106,85 @@ if (!currentUser || currentUser.role !== "WORKER") {
   location.href = "/login.html";
 }
 
-/* ✅ LOAD AVAILABLE JOBS FROM FIREBASE */
+const workerId = currentUser.uid || currentUser.id;
 
-async function loadJobs(){
+/* ✅ LOAD AVAILABLE JOBS */
+
+async function loadJobs() {
 
   const q = query(
-    collection(db,"jobs"),
-    where("type","==","REPAIR"),
-    where("status","==","OPEN"),
-    where("shopId","==",currentUser.shopId)
+    collection(db, "jobs"),
+    where("type", "==", "REPAIR"),
+    where("status", "==", "OPEN"),
+    where("shopId", "==", currentUser.shopId)
   );
 
   const snap = await getDocs(q);
 
-  if(snap.empty){
+  if (snap.empty) {
     container.innerHTML = `<div class="empty">No available repair jobs right now</div>`;
     return;
   }
 
-  container.innerHTML="";
+  container.innerHTML = "";
 
-  snap.forEach(docSnap=>{
+  snap.forEach(docSnap => {
     const job = docSnap.data();
     const jobId = docSnap.id;
 
     const div = document.createElement("div");
-    div.className="job";
+    div.className = "job";
 
-    div.innerHTML=`
+    div.innerHTML = `
       <h4>${job.device}</h4>
       <p><strong>Issue:</strong> ${job.issue || "—"}</p>
       <p><strong>Expected Cost:</strong> ₹${job.expectedCost || "—"}</p>
       <p><strong>Customer:</strong> ${job.customerName}</p>
 
-      <button class="accept-btn" onclick="acceptJob('${jobId}')">
+      <button class="accept-btn" data-id="${jobId}">
         ACCEPT JOB
       </button>
     `;
+
+    div.querySelector(".accept-btn").onclick = () =>
+      acceptJob(jobId, div.querySelector(".accept-btn"));
 
     container.appendChild(div);
   });
 }
 
-/* ✅ ACCEPT JOB */
+/* ✅ ACCEPT JOB (SAFE) */
 
-window.acceptJob = async function(jobId){
+async function acceptJob(jobId, btn) {
+  btn.disabled = true;
+  btn.innerText = "ACCEPTING...";
 
-  const jobRef = doc(db,"jobs",jobId);
+  const jobRef = doc(db, "jobs", jobId);
+  const snap = await getDoc(jobRef);
 
-  await updateDoc(jobRef,{
-    status:"COLLECTED",
-    assignedTo:currentUser.uid,
-    acceptedAt:serverTimestamp()
+  if (!snap.exists() || snap.data().status !== "OPEN") {
+    alert("Job already taken by another worker");
+    loadJobs();
+    return;
+  }
+
+  await updateDoc(jobRef, {
+    status: "COLLECTED",
+    assignedTo: workerId,
+    acceptedAt: serverTimestamp()
   });
 
-  await addDoc(collection(db,"auditLogs"),{
-    userId:currentUser.uid,
-    role:"WORKER",
-    shopId:currentUser.shopId,
-    actionType:"WORK_ACCEPTED",
-    action:`Accepted repair job (${jobId})`,
-    timestamp:serverTimestamp()
+  await addDoc(collection(db, "auditLogs"), {
+    userId: workerId,
+    role: "WORKER",
+    shopId: currentUser.shopId,
+    actionType: "WORK_ACCEPTED",
+    action: `Accepted repair job (${jobId})`,
+    timestamp: serverTimestamp()
   });
 
-  location.href="jobs.html";
-};
+  location.href = "jobs.html";
+}
 
 loadJobs();
 </script>

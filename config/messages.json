@@ -1,0 +1,11 @@
+{
+  "repair_ready": {
+    "text": "Hello {{customerName}}, your device ({{device}}) is repaired and ready for pickup. Expected cost: ₹{{amount}}. - {{shopName}}"
+  },
+  "repair_delivered": {
+    "text": "Hello {{customerName}}, your device ({{device}}) has been successfully delivered. Thank you for choosing {{shopName}}."
+  },
+  "sale_confirmation": {
+    "text": "Hello {{customerName}}, thank you for your purchase of ₹{{amount}} from {{shopName}}. We appreciate your business!"
+  }
+}

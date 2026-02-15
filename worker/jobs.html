@@ -84,11 +84,15 @@ import {
   serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
+/* 🔐 AUTH SAFE */
 const currentUser = JSON.parse(localStorage.getItem("currentUser"));
 
 if(!currentUser || currentUser.role !== "WORKER"){
   location.href="/login.html";
 }
+
+const userId = currentUser.uid || currentUser.id;
+const shopId = currentUser.shopId;
 
 const jobsContainer = document.getElementById("jobs");
 const loading = document.getElementById("loading");
@@ -100,7 +104,8 @@ async function loadMyJobs(){
   const q = query(
     collection(db,"jobs"),
     where("type","==","REPAIR"),
-    where("assignedTo","==",currentUser.uid),
+    where("assignedTo","==",userId),
+    where("shopId","==",shopId),
     where("status","in",["COLLECTED","IN_PROGRESS","DONE_NOT_DELIVERED"])
   );
 
@@ -122,12 +127,12 @@ async function loadMyJobs(){
 
     jobsContainer.innerHTML+=`
     <div class="job">
-      <b>${job.device}</b>
+      <b>${job.device || "Device"}</b>
 
-      <div>Customer: <strong>${job.customerName}</strong></div>
-      <div>Phone: ${job.customerPhone}</div>
-      <div>Expected Cost: <strong>₹${job.expectedCost}</strong></div>
-      <div>Issue: ${job.issue}</div>
+      <div>Customer: <strong>${job.customerName || "—"}</strong></div>
+      <div>Phone: ${job.customerPhone || "—"}</div>
+      <div>Expected Cost: <strong>₹${Number(job.expectedCost || 0)}</strong></div>
+      <div>Issue: ${job.issue || "—"}</div>
 
       <span class="status ${job.status}">
         ${job.status.replaceAll("_"," ")}
@@ -146,18 +151,18 @@ async function loadMyJobs(){
   });
 }
 
-/* ▶ START */
-
+/* ▶ START REPAIR */
 window.startRepair = async(jobId)=>{
+
   await updateDoc(doc(db,"jobs",jobId),{
     status:"IN_PROGRESS",
     startedAt:serverTimestamp()
   });
 
   await addDoc(collection(db,"auditLogs"),{
-    userId:currentUser.uid,
+    userId,
     role:"WORKER",
-    shopId:currentUser.shopId,
+    shopId,
     actionType:"WORK_STARTED",
     action:`Repair started (${jobId})`,
     timestamp:serverTimestamp()
@@ -166,18 +171,18 @@ window.startRepair = async(jobId)=>{
   location.reload();
 };
 
-/* ✅ READY */
-
+/* ✅ MARK READY */
 window.markReady = async(jobId)=>{
+
   await updateDoc(doc(db,"jobs",jobId),{
     status:"DONE_NOT_DELIVERED",
     finishedAt:serverTimestamp()
   });
 
   await addDoc(collection(db,"auditLogs"),{
-    userId:currentUser.uid,
+    userId,
     role:"WORKER",
-    shopId:currentUser.shopId,
+    shopId,
     actionType:"WORK_READY",
     action:`Job ready (${jobId})`,
     timestamp:serverTimestamp()
@@ -186,8 +191,7 @@ window.markReady = async(jobId)=>{
   location.reload();
 };
 
-/* 📦 DELIVER */
-
+/* 📦 MARK DELIVERED */
 window.markDelivered = async(jobId)=>{
 
   const jobRef = doc(db,"jobs",jobId);
@@ -202,16 +206,16 @@ window.markDelivered = async(jobId)=>{
   await addDoc(collection(db,"sales"),{
     type:"JOB",
     shopId:job.shopId,
-    userId:currentUser.uid,
-    amount:Number(job.expectedCost),
+    userId,
+    amount:Number(job.expectedCost || 0),
     jobId,
     createdAt:serverTimestamp()
   });
 
   await addDoc(collection(db,"auditLogs"),{
-    userId:currentUser.uid,
+    userId,
     role:"WORKER",
-    shopId:currentUser.shopId,
+    shopId,
     actionType:"WORK_DELIVERED",
     action:`Job delivered (${jobId})`,
     timestamp:serverTimestamp()

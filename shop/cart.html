@@ -7,182 +7,35 @@
 
   <style>
     :root {
-      --bg: #0f172a;
-      --card-bg: rgba(30, 41, 59, 0.8);
-      --border: rgba(148, 163, 184, 0.2);
-      --text: #e2e8f0;
-      --text-muted: #94a3b8;
-      --accent-green: #10b981;
-      --danger: #ef4444;
-      --radius: 14px;
+      --bg:#0f172a;
+      --card-bg:rgba(30,41,59,.8);
+      --border:rgba(148,163,184,.2);
+      --text:#e2e8f0;
+      --text-muted:#94a3b8;
+      --accent-green:#10b981;
+      --danger:#ef4444;
+      --radius:14px;
     }
-
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
-    body {
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      min-height: 100vh;
-      line-height: 1.5;
-    }
-
-    .app-header {
-      background: linear-gradient(135deg, #1e293b, #0f172a);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      border-bottom: 1px solid var(--border);
-      padding: 1rem 1.5rem;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      position: sticky;
-      top: 0;
-      z-index: 10;
-    }
-
-    .app-header h2 {
-      font-size: 1.45rem;
-      font-weight: 600;
-      margin: 0;
-      background: linear-gradient(90deg, #93c5fd, #c7d2fe);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-
-    .header-btn {
-      background: rgba(239, 68, 68, 0.9);
-      color: white;
-      border: none;
-      padding: 0.6rem 1.2rem;
-      border-radius: 10px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.22s ease;
-    }
-
-    .header-btn:hover {
-      background: #dc2626;
-      transform: translateY(-1px);
-    }
-
-    .container {
-      max-width: 720px;
-      margin: 0 auto;
-      padding: 1.8rem 1.5rem;
-    }
-
-    #cartItems {
-      margin-bottom: 2rem;
-    }
-
-    .item {
-      background: var(--card-bg);
-      backdrop-filter: blur(10px);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 1.3rem 1.4rem;
-      margin-bottom: 1rem;
-      box-shadow: 0 6px 20px rgba(0,0,0,0.25);
-      transition: all 0.22s ease;
-    }
-
-    .item:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 12px 32px rgba(0,0,0,0.35);
-    }
-
-    .item b {
-      font-size: 1.2rem;
-      color: white;
-      display: block;
-      margin-bottom: 0.6rem;
-    }
-
-    .item div {
-      font-size: 1rem;
-      color: var(--text-muted);
-      margin: 0.4rem 0;
-    }
-
-    .total {
-      font-size: 1.6rem;
-      font-weight: 700;
-      text-align: right;
-      margin: 1.5rem 0 2rem;
-      color: var(--accent-green);
-    }
-
-    input {
-      width: 100%;
-      padding: 1rem;
-      margin-bottom: 1rem;
-      border-radius: 12px;
-      border: 1px solid var(--border);
-      background: rgba(51, 65, 85, 0.55);
-      color: var(--text);
-      font-size: 1rem;
-      backdrop-filter: blur(6px);
-      transition: all 0.2s ease;
-    }
-
-    input:focus {
-      outline: none;
-      border-color: var(--accent-green);
-      box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.25);
-    }
-
-    input::placeholder {
-      color: var(--text-muted);
-    }
-
-    .btn {
-      width: 100%;
-      padding: 1.1rem;
-      border: none;
-      border-radius: 12px;
-      font-size: 1.1rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.28s ease;
-      margin-top: 0.8rem;
-    }
-
-    .confirm {
-      background: linear-gradient(135deg, var(--accent-green), #059669);
-      color: white;
-      box-shadow: 0 4px 14px rgba(16,185,129,0.3);
-    }
-
-    .confirm:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 10px 28px rgba(16,185,129,0.45);
-    }
-
-    .cancel {
-      background: #475569;
-      color: white;
-    }
-
-    .cancel:hover {
-      background: #334155;
-      transform: translateY(-2px);
-    }
-
-    @media (max-width: 640px) {
-      .container { padding: 1.4rem 1rem; }
-      .total { font-size: 1.45rem; }
-    }
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{font-family:system-ui;background:var(--bg);color:var(--text)}
+    header{background:linear-gradient(135deg,#1e293b,#0f172a);padding:1rem 1.5rem;display:flex;justify-content:space-between;align-items:center}
+    header h2{background:linear-gradient(90deg,#93c5fd,#c7d2fe);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+    .header-btn{background:#ef4444;color:white;border:none;padding:.6rem 1.2rem;border-radius:10px;font-weight:600;cursor:pointer}
+    .container{max-width:720px;margin:auto;padding:1.8rem}
+    .item{background:var(--card-bg);border:1px solid var(--border);border-radius:var(--radius);padding:1.3rem;margin-bottom:1rem}
+    .item b{font-size:1.2rem}
+    .item div{color:var(--text-muted);margin-top:.4rem}
+    .total{text-align:right;font-size:1.6rem;font-weight:700;color:var(--accent-green);margin:1.5rem 0}
+    input{width:100%;padding:1rem;margin-bottom:1rem;border-radius:12px;border:1px solid var(--border);background:#33415599;color:var(--text)}
+    .btn{width:100%;padding:1.1rem;border:none;border-radius:12px;font-size:1.1rem;font-weight:600;cursor:pointer;margin-top:.8rem}
+    .confirm{background:linear-gradient(135deg,#10b981,#059669);color:white}
+    .cancel{background:#475569;color:white}
   </style>
 </head>
 
 <body>
 
-<header class="app-header">
+<header>
   <button class="header-btn" onclick="location.href='sell.html'">← Back</button>
   <h2>Cart Summary</h2>
   <span></span>
@@ -190,93 +43,115 @@
 
 <div class="container">
   <div id="cartItems"></div>
-
   <div class="total">Total: ₹<span id="total">0</span></div>
 
-  <input id="custName" placeholder="Customer Name" required />
-  <input id="custPhone" placeholder="Customer Phone" required />
+  <input id="custName" placeholder="Customer Name" />
+  <input id="custPhone" placeholder="Customer Phone" />
 
   <button class="btn confirm" onclick="confirmSell()">CONFIRM SELL</button>
   <button class="btn cancel" onclick="cancelCart()">CANCEL</button>
 </div>
 
 <script type="module">
-  import { requireAuth } from "../auth/guard.js";
-  import { DB, saveDB } from "../db/fakeDB.js";
-  import { logAction } from "../core/audit.js";
+import { requireAuth } from "../auth/guard.js";
+import { db } from "../js/firebase.js";
+import {
+  collection,
+  addDoc,
+  doc,
+  updateDoc,
+  increment,
+  serverTimestamp
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-  const user = requireAuth(["SHOPKEEPER","WORKER"]);
+/* 🔒 SHOPKEEPER + WORKER */
+const user = requireAuth(["SHOPKEEPER","WORKER"]);
 
-  let cart = JSON.parse(localStorage.getItem("cart"));
-  if (!cart || !cart.items.length) {
-    alert("Cart is empty");
-    location.href = "sell.html";
-  }
+/* CART */
+const cart = JSON.parse(localStorage.getItem("cart"));
+if (!cart || !cart.items.length) {
+  alert("Cart is empty");
+  location.href = "sell.html";
+}
 
-  const div = document.getElementById("cartItems");
-  let total = 0;
+const list = document.getElementById("cartItems");
+let total = 0;
 
-  cart.items.forEach(i=>{
-    total += i.sellPrice * i.quantity;
-    const d = document.createElement("div");
-    d.className = "item";
-    d.innerHTML = `
+cart.items.forEach(i=>{
+  total += i.sellPrice * i.quantity;
+  list.innerHTML += `
+    <div class="item">
       <b>${i.name}</b>
       <div>Qty: ${i.quantity} × ₹${i.sellPrice}</div>
-      <div>Subtotal: ₹${(i.sellPrice * i.quantity).toLocaleString()}</div>
-    `;
-    div.appendChild(d);
+      <div>Subtotal: ₹${(i.sellPrice*i.quantity).toLocaleString()}</div>
+    </div>
+  `;
+});
+
+document.getElementById("total").innerText = total.toLocaleString();
+
+/* CONFIRM SELL */
+window.confirmSell = async () => {
+
+  if (!custName.value || !custPhone.value)
+    return alert("Enter customer details");
+
+  /* 1️⃣ CREATE SALE */
+  const saleRef = await addDoc(collection(db,"sales"),{
+    shopId: user.shopId,
+    amount: total,
+    soldBy: user.uid,
+    customerName: custName.value,
+    customerPhone: custPhone.value,
+    createdAt: serverTimestamp()
   });
 
-  document.getElementById("total").innerText = total.toLocaleString();
-
-  window.confirmSell = () => {
-    if (!custName.value || !custPhone.value)
-      return alert("Enter customer details");
-
-    const jobId = Date.now();
-
-    cart.items.forEach(i=>{
-      const p = DB.products.find(x=>x.id===i.productId);
-      p.quantity -= i.quantity;
+  /* 2️⃣ UPDATE STOCK */
+  for (const i of cart.items) {
+    await updateDoc(doc(db,"stock",i.productId),{
+      quantity: increment(-i.quantity)
     });
+  }
 
-    DB.sales.push({
-      id:Date.now(),
-      jobId,
-      shopId:user.shopId,
-      amount:total,
-      soldBy:user.id,
-      createdAt:new Date().toISOString()
-    });
+  /* 3️⃣ CREATE JOB (SELL) */
+  await addDoc(collection(db,"jobs"),{
+    shopId: user.shopId,
+    type: "SELL",
+    status: "DELIVERED",
+    saleId: saleRef.id,
+    customerName: custName.value,
+    customerPhone: custPhone.value,
+    totalAmount: total,
+    createdAt: serverTimestamp()
+  });
 
-    DB.jobs.push({
-      id:jobId,
-      shopId:user.shopId,
-      type:"SELL",
-      status:"DELIVERED",
-      createdAt:new Date().toISOString()
-    });
+  /* 4️⃣ AUDIT LOG */
+  await addDoc(collection(db,"auditLogs"),{
+    userId: user.uid,
+    role: user.role,
+    actionType: "SALE",
+    action: `Sold items worth ₹${total}`,
+    shopId: user.shopId,
+    timestamp: serverTimestamp()
+  });
 
-    DB.customers = DB.customers || [];
-    DB.customers.push({
-      name:custName.value,
-      phone:custPhone.value,
-      jobId
-    });
+  /* 5️⃣ MESSAGE HOOK (NO API) */
+  /*
+    NEXT STEP:
+    const msg = `Thank you ${custName.value}, your purchase of ₹${total} is confirmed.`;
+    window.open(`https://wa.me/${custPhone.value}?text=${encodeURIComponent(msg)}`);
+  */
 
-    localStorage.removeItem("cart");
-    saveDB();
-    logAction(`Sold items worth ₹${total}`);
+  localStorage.removeItem("cart");
+  alert("Sale completed");
+  location.href = "sell.html";
+};
 
-    alert("Sale completed");
-    location.href = "sell.html";
-  };
-
-  window.cancelCart = () => {
-    localStorage.removeItem("cart");
-    location.href = "sell.html";
-  };
+/* CANCEL */
+window.cancelCart = () => {
+  localStorage.removeItem("cart");
+  location.href = "sell.html";
+};
 </script>
 
 </body>
