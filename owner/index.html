@@ -14,53 +14,44 @@
   --text-light:#cbd5e1;
   --radius:16px;
 }
-
 *{margin:0;padding:0;box-sizing:border-box}
 body{
   font-family:system-ui;
   background:var(--bg);
   color:var(--text);
 }
-
 header.hero{
   padding:2.5rem 1.5rem 4rem;
   border-bottom:1px solid var(--border);
 }
-
 .hero-inner{
   max-width:1400px;
   margin:auto;
 }
-
 main.dashboard{
   max-width:1400px;
   margin:-3rem auto 0;
   padding:0 1.5rem 4rem;
 }
-
 .stats{
   display:grid;
   grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
   gap:1.5rem;
   margin:2.5rem 0 3.5rem;
 }
-
 .stat-card{
   background:var(--card);
   border:1px solid var(--border);
   border-radius:var(--radius);
   padding:1.6rem;
 }
-
 .stat-number{
   font-size:2.6rem;
   font-weight:800;
   color:#60a5fa;
 }
-
 .shop-container{overflow-x:auto;padding-bottom:1rem}
 .shop-strip{display:flex;gap:1.25rem}
-
 .shop-card{
   width:300px;
   background:var(--card);
@@ -70,12 +61,10 @@ main.dashboard{
   cursor:pointer;
   transition:.3s;
 }
-
 .shop-card:hover{
   transform:translateY(-6px);
   border-color:#60a5fa60;
 }
-
 .retailer-card{
   background:var(--card);
   border:1px solid var(--border);
@@ -84,9 +73,7 @@ main.dashboard{
   margin-bottom:2.5rem;
   cursor:pointer;
 }
-
 .activity-section{margin-top:4rem}
-
 table{
   width:100%;
   background:var(--card);
@@ -94,17 +81,13 @@ table{
   border-collapse:collapse;
   border:1px solid var(--border);
 }
-
 th,td{
   padding:1rem;
   border-top:1px solid var(--border);
 }
-
 th{
   background:rgba(29,78,216,.35);
 }
-
-/* MINI SHOP PANEL */
 .shop-panel{
   position:fixed;
   left:0;
@@ -177,7 +160,6 @@ th{
 </div>
 
 <script type="module">
-import { requireAuth } from "../auth/guard.js";
 import { db } from "../js/firebase.js";
 import {
   collection,
@@ -187,9 +169,14 @@ import {
   orderBy
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-/* 🔒 OWNER ONLY */
-requireAuth("OWNER");
+/* ✅ SIMPLE OWNER CHECK (NO GUARD.JS) */
+const user = JSON.parse(localStorage.getItem("currentUser"));
 
+if (!user || user.role !== "OWNER") {
+  window.location.href = "../login.html";
+}
+
+/* ELEMENTS */
 const shopStrip = document.getElementById("shopStrip");
 const panel = document.getElementById("shopPanel");
 const panelContent = document.getElementById("panelContent");
@@ -224,8 +211,8 @@ window.openPanel = async (shopId, shopName) => {
   let revenue = 0;
   jobsSnap.forEach(d=>{
     const j=d.data();
-    if(j.status==="DELIVERED"){
-      revenue += Number(j.finalCost || 0);
+    if(j.status==="DONE_DELIVERED"){
+      revenue += Number(j.expectedCost || 0);
     }
   });
 
@@ -237,6 +224,7 @@ window.openPanel = async (shopId, shopName) => {
   `;
   panel.classList.add("active");
 };
+
 window.closePanel = () => panel.classList.remove("active");
 
 /* STATS */
