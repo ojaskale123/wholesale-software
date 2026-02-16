@@ -8,7 +8,7 @@
 <style>
 :root {
   --bg:#0f172a;
-  --card:rgba(30,41,59,.7);
+  --card:rgba(30,41,59,.75);
   --border:rgba(148,163,184,.18);
   --text:#f1f5f9;
   --radius:16px;
@@ -19,6 +19,7 @@ body{
   background:var(--bg);
   color:var(--text);
 }
+
 header{
   padding:2rem;
   border-bottom:1px solid var(--border);
@@ -26,6 +27,7 @@ header{
   justify-content:space-between;
   align-items:center;
 }
+
 button{
   padding:.6rem 1rem;
   border:none;
@@ -33,62 +35,72 @@ button{
   cursor:pointer;
   background:#1d4ed8;
   color:white;
+  margin-left:.5rem;
 }
+
 main{
   max-width:1300px;
   margin:auto;
   padding:2rem;
 }
+
 .stats{
   display:grid;
   grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
   gap:1rem;
   margin-bottom:2rem;
 }
+
 .card{
   background:var(--card);
   border:1px solid var(--border);
   border-radius:var(--radius);
   padding:1.5rem;
 }
+
 .shop-grid{
   display:grid;
   grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
   gap:1rem;
 }
+
 .shop-card{
   background:var(--card);
   border:1px solid var(--border);
   border-radius:var(--radius);
   padding:1.2rem;
   cursor:pointer;
+  transition:.25s;
 }
+
+.shop-card:hover{
+  transform:translateY(-5px);
+  border-color:#60a5fa;
+}
+
 .panel{
   position:fixed;
   bottom:-100%;
   left:0;
   right:0;
   background:#1e293b;
-  padding:1.5rem;
+  padding:2rem;
   border-top-left-radius:20px;
   border-top-right-radius:20px;
-  transition:.3s;
+  transition:.35s;
+  z-index:999;
 }
-.panel.active{bottom:0}
+
+.panel.active{
+  bottom:0;
+}
+
 .close{
-  margin-top:1rem;
+  margin-top:1.5rem;
   text-align:center;
   cursor:pointer;
   color:#60a5fa;
-}
-input,select{
-  width:100%;
-  padding:.6rem;
-  margin:.5rem 0;
-  border-radius:8px;
-  border:1px solid #334155;
-  background:#0f172a;
-  color:white;
+  font-weight:600;
 }
 </style>
 </head>
@@ -98,15 +110,9 @@ input,select{
 <header>
   <h2>Owner Dashboard</h2>
   <div>
-
-<button onclick="location.href='create-shopkeeper.html'">
-  + Shopkeeper
-</button>
-
-<button onclick="location.href='create-worker.html'">
-  + Worker
-</button>
-
+    <button onclick="location.href='create-shopkeeper.html'">+ Shopkeeper</button>
+    <button onclick="location.href='create-worker.html'">+ Worker</button>
+  </div>
 </header>
 
 <main>
@@ -131,7 +137,12 @@ input,select{
 <script type="module">
 import { db } from "../js/firebase.js";
 import {
-  collection, getDocs, addDoc, query, where
+  collection,
+  getDocs,
+  query,
+  where,
+  doc,
+  getDoc
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 /* OWNER CHECK */
@@ -146,18 +157,23 @@ const panelContent = document.getElementById("panelContent");
 
 /* LOAD STATS */
 async function loadStats(){
-  document.getElementById("shopkeepers").innerText =
-    (await getDocs(query(collection(db,"users"),where("role","==","SHOPKEEPER")))).size;
 
-  document.getElementById("workers").innerText =
-    (await getDocs(query(collection(db,"users"),where("role","==","WORKER")))).size;
+  const shopkeepersSnap = await getDocs(
+    query(collection(db,"users"),where("role","==","SHOPKEEPER"))
+  );
+  document.getElementById("shopkeepers").innerText = shopkeepersSnap.size;
 
-  document.getElementById("jobs").innerText =
-    (await getDocs(collection(db,"jobs"))).size;
+  const workersSnap = await getDocs(
+    query(collection(db,"users"),where("role","==","WORKER"))
+  );
+  document.getElementById("workers").innerText = workersSnap.size;
+
+  const jobsSnap = await getDocs(collection(db,"jobs"));
+  document.getElementById("jobs").innerText = jobsSnap.size;
 
   let total=0;
-  const sales = await getDocs(collection(db,"sales"));
-  sales.forEach(d=> total+=Number(d.data().amount||0));
+  const salesSnap = await getDocs(collection(db,"sales"));
+  salesSnap.forEach(d=> total+=Number(d.data().amount||0));
   document.getElementById("revenue").innerText="₹"+total;
 }
 
@@ -165,107 +181,72 @@ async function loadStats(){
 async function loadShops(){
   const snap = await getDocs(collection(db,"shops"));
   shopList.innerHTML="";
+
   snap.forEach(docSnap=>{
     const shop = docSnap.data();
-    shopList.innerHTML += `
-      <div class="shop-card" onclick="viewShop('${docSnap.id}','${shop.shopName}')">
-        <b>${shop.shopName}</b><br>
-        Click to view details
-      </div>
+
+    const card = document.createElement("div");
+    card.className = "shop-card";
+    card.innerHTML = `
+      <b>${shop.shopName}</b><br>
+      ${shop.city || ""}
     `;
+
+    card.addEventListener("click", ()=>{
+      viewShop(docSnap.id);
+    });
+
+    shopList.appendChild(card);
   });
 }
 
-/* VIEW SHOP INFO */
-window.viewShop = async(id,name)=>{
-  const workers = await getDocs(query(collection(db,"users"),
-    where("shopId","==",id),
-    where("role","==","WORKER")
-  ));
+/* VIEW SHOP DETAILS */
+async function viewShop(id){
 
-  const jobs = await getDocs(query(collection(db,"jobs"),
-    where("shopId","==",id)
-  ));
+  const shopDoc = await getDoc(doc(db,"shops",id));
+  const shop = shopDoc.data();
+
+  const shopkeeperSnap = await getDocs(
+    query(collection(db,"users"),
+      where("shopId","==",id),
+      where("role","==","SHOPKEEPER"))
+  );
+
+  const workerSnap = await getDocs(
+    query(collection(db,"users"),
+      where("shopId","==",id),
+      where("role","==","WORKER"))
+  );
+
+  const jobsSnap = await getDocs(
+    query(collection(db,"jobs"),
+      where("shopId","==",id))
+  );
+
+  let revenue=0;
+  const salesSnap = await getDocs(
+    query(collection(db,"sales"),
+      where("shopId","==",id))
+  );
+  salesSnap.forEach(d=> revenue+=Number(d.data().amount||0));
 
   panelContent.innerHTML = `
-    <h3>${name}</h3>
-    <p>Workers: ${workers.size}</p>
-    <p>Total Jobs: ${jobs.size}</p>
+    <h3>${shop.shopName}</h3>
+    <p><b>City:</b> ${shop.city || "—"}</p>
+    <p><b>Shopkeeper:</b> ${shopkeeperSnap.docs[0]?.data()?.name || "Not Assigned"}</p>
+    <p><b>Total Workers:</b> ${workerSnap.size}</p>
+    <p><b>Total Jobs:</b> ${jobsSnap.size}</p>
+    <p><b>Total Revenue:</b> ₹${revenue}</p>
   `;
+
   panel.classList.add("active");
 }
 
 window.closePanel = ()=> panel.classList.remove("active");
 
-/* CREATE SHOP */
-window.openCreateShop = ()=>{
-  panelContent.innerHTML = `
-    <h3>Create Shop</h3>
-    <input id="shopName" placeholder="Shop Name"/>
-    <button onclick="createShop()">Create</button>
-  `;
-  panel.classList.add("active");
-}
-window.createShop = async()=>{
-  const name = document.getElementById("shopName").value;
-  if(!name) return alert("Enter name");
-  await addDoc(collection(db,"shops"),{shopName:name});
-  closePanel();
-  loadShops();
-}
-
-/* CREATE SHOPKEEPER */
-window.openCreateShopkeeper = async()=>{
-  const shops = await getDocs(collection(db,"shops"));
-  let options="";
-  shops.forEach(s=> options+=`<option value="${s.id}">${s.data().shopName}</option>`);
-
-  panelContent.innerHTML = `
-    <h3>Create Shopkeeper</h3>
-    <input id="skName" placeholder="Name"/>
-    <select id="skShop">${options}</select>
-    <button onclick="createShopkeeper()">Create</button>
-  `;
-  panel.classList.add("active");
-}
-window.createShopkeeper = async()=>{
-  await addDoc(collection(db,"users"),{
-    name:document.getElementById("skName").value,
-    role:"SHOPKEEPER",
-    shopId:document.getElementById("skShop").value
-  });
-  closePanel();
-  loadStats();
-}
-
-/* CREATE WORKER */
-window.openCreateWorker = async()=>{
-  const shops = await getDocs(collection(db,"shops"));
-  let options="";
-  shops.forEach(s=> options+=`<option value="${s.id}">${s.data().shopName}</option>`);
-
-  panelContent.innerHTML = `
-    <h3>Create Worker</h3>
-    <input id="wName" placeholder="Name"/>
-    <select id="wShop">${options}</select>
-    <button onclick="createWorker()">Create</button>
-  `;
-  panel.classList.add("active");
-}
-window.createWorker = async()=>{
-  await addDoc(collection(db,"users"),{
-    name:document.getElementById("wName").value,
-    role:"WORKER",
-    shopId:document.getElementById("wShop").value
-  });
-  closePanel();
-  loadStats();
-}
-
 /* INIT */
 loadStats();
 loadShops();
-
 </script>
 
 </body>
