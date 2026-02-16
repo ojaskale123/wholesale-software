@@ -58,6 +58,9 @@ button{
   font-weight:600;
   cursor:pointer;
 }
+button:hover{
+  opacity:.9;
+}
 </style>
 </head>
 
@@ -95,10 +98,12 @@ button{
 </div>
 
 <script type="module">
-import { requireAuth } from "../auth/guard.js";
 import { auth, db } from "../js/firebase.js";
-import { createUserWithEmailAndPassword }
-from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import { 
+  createUserWithEmailAndPassword,
+  signOut
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
 import {
   doc,
   setDoc,
@@ -107,77 +112,82 @@ import {
   serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-/* OWNER ONLY */
-const currentUser = requireAuth("OWNER");
+/* 🔐 OWNER CHECK */
+const ownerSession = JSON.parse(localStorage.getItem("currentUser"));
 
+if (!ownerSession || ownerSession.role !== "OWNER") {
+  window.location.replace("../login.html");
+}
+
+/* BUTTON */
 const btn = document.getElementById("createBtn");
 
-btn.onclick = async () => {
+btn.addEventListener("click", async () => {
 
-  const shopName = shopName.value.trim();
-  const city = city.value.trim();
-  const keeperName = keeperName.value.trim();
+  const shopName = document.getElementById("shopName").value.trim();
+  const city = document.getElementById("city").value.trim();
+  const keeperName = document.getElementById("keeperName").value.trim();
   const email = document.getElementById("email").value.trim();
   const password = document.getElementById("password").value;
   const confirmPassword = document.getElementById("confirmPassword").value;
 
-  if(!shopName || !city || !keeperName || !email || !password || !confirmPassword){
+  if (!shopName || !city || !keeperName || !email || !password || !confirmPassword) {
     alert("All fields required");
     return;
   }
 
-  if(password !== confirmPassword){
+  if (password !== confirmPassword) {
     alert("Passwords do not match");
     return;
   }
 
-  try{
+  try {
 
-    const ownerSession = JSON.parse(localStorage.getItem("currentUser"));
-
-    /* Create Auth */
-    const cred = await createUserWithEmailAndPassword(auth,email,password);
+    /* 1️⃣ CREATE SHOPKEEPER AUTH */
+    const cred = await createUserWithEmailAndPassword(auth, email, password);
     const uid = cred.user.uid;
 
-    const shopId = "SHOP_"+Date.now();
+    const shopId = "SHOP_" + Date.now();
 
-    /* Create Shop */
-    await setDoc(doc(db,"shops",shopId),{
+    /* 2️⃣ CREATE SHOP */
+    await setDoc(doc(db, "shops", shopId), {
       shopName,
       city,
-      ownerId:ownerSession.uid,
-      shopkeeperId:uid,
-      createdAt:serverTimestamp()
+      ownerId: ownerSession.uid,
+      shopkeeperId: uid,
+      createdAt: serverTimestamp()
     });
 
-    /* Create User */
-    await setDoc(doc(db,"users",uid),{
-      name:keeperName,
-      role:"SHOPKEEPER",
+    /* 3️⃣ CREATE SHOPKEEPER PROFILE */
+    await setDoc(doc(db, "users", uid), {
+      name: keeperName,
+      role: "SHOPKEEPER",
       shopId,
-      createdAt:serverTimestamp()
+      createdAt: serverTimestamp()
     });
 
-    /* Audit */
-    await addDoc(collection(db,"auditLogs"),{
-      actionType:"CREATE_SHOP",
-      action:`Shop ${shopName} created`,
-      createdBy:ownerSession.uid,
+    /* 4️⃣ AUDIT LOG */
+    await addDoc(collection(db, "auditLogs"), {
+      actionType: "CREATE_SHOP",
+      action: `Shop ${shopName} created`,
+      createdBy: ownerSession.uid,
       shopId,
-      timestamp:serverTimestamp()
+      timestamp: serverTimestamp()
     });
 
-    localStorage.setItem("currentUser",JSON.stringify(ownerSession));
+    /* 🔥 IMPORTANT: Sign out new user */
+    await signOut(auth);
 
-    alert("Shop created successfully");
-    window.location.href="index.html";
+    alert("Shop & Shopkeeper created successfully");
 
-  }catch(err){
+    window.location.href = "index.html";
+
+  } catch (err) {
     console.error(err);
     alert(err.message);
   }
 
-};
+});
 </script>
 
 </body>
