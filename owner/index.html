@@ -2,11 +2,11 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Owner Dashboard</title>
 
 <style>
 :root {
-  --primary:#1d4ed8;
   --bg:#0f172a;
   --card:rgba(30,41,59,.7);
   --border:rgba(148,163,184,.18);
@@ -20,60 +20,61 @@ body{
   background:var(--bg);
   color:var(--text);
 }
-header.hero{
-  padding:2.5rem 1.5rem 4rem;
+
+header{
+  padding:2rem 1.5rem;
   border-bottom:1px solid var(--border);
 }
-.hero-inner{
+
+h1{
+  font-size:2rem;
+}
+
+main{
   max-width:1400px;
   margin:auto;
+  padding:2rem 1.5rem 4rem;
 }
-main.dashboard{
-  max-width:1400px;
-  margin:-3rem auto 0;
-  padding:0 1.5rem 4rem;
-}
+
 .stats{
   display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+  grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
   gap:1.5rem;
-  margin:2.5rem 0 3.5rem;
+  margin:2rem 0 3rem;
 }
+
 .stat-card{
   background:var(--card);
   border:1px solid var(--border);
   border-radius:var(--radius);
-  padding:1.6rem;
+  padding:1.5rem;
 }
+
 .stat-number{
-  font-size:2.6rem;
+  font-size:2.2rem;
   font-weight:800;
   color:#60a5fa;
 }
-.shop-container{overflow-x:auto;padding-bottom:1rem}
-.shop-strip{display:flex;gap:1.25rem}
+
+.shop-container{
+  display:flex;
+  gap:1.2rem;
+  overflow-x:auto;
+  margin-top:1.5rem;
+}
+
 .shop-card{
-  width:300px;
+  min-width:260px;
   background:var(--card);
   border:1px solid var(--border);
   border-radius:var(--radius);
-  padding:1.6rem;
-  cursor:pointer;
-  transition:.3s;
+  padding:1.5rem;
 }
-.shop-card:hover{
-  transform:translateY(-6px);
-  border-color:#60a5fa60;
+
+.activity-section{
+  margin-top:3rem;
 }
-.retailer-card{
-  background:var(--card);
-  border:1px solid var(--border);
-  border-radius:var(--radius);
-  padding:1.8rem;
-  margin-bottom:2.5rem;
-  cursor:pointer;
-}
-.activity-section{margin-top:4rem}
+
 table{
   width:100%;
   background:var(--card);
@@ -81,72 +82,59 @@ table{
   border-collapse:collapse;
   border:1px solid var(--border);
 }
+
 th,td{
   padding:1rem;
   border-top:1px solid var(--border);
+  font-size:0.9rem;
 }
+
 th{
   background:rgba(29,78,216,.35);
-}
-.shop-panel{
-  position:fixed;
-  left:0;
-  right:0;
-  bottom:-100%;
-  background:#1e293b;
-  border-top-left-radius:20px;
-  border-top-right-radius:20px;
-  padding:1.6rem;
-  box-shadow:0 -12px 30px rgba(0,0,0,.6);
-  transition:.35s ease;
-  z-index:999;
-}
-.shop-panel.active{bottom:0}
-.panel-row{margin:.6rem 0;color:var(--text-light)}
-.panel-row strong{color:var(--text)}
-.panel-close{
-  margin-top:1.2rem;
-  text-align:center;
-  color:#93c5fd;
-  font-weight:600;
-  cursor:pointer;
 }
 </style>
 </head>
 
 <body>
 
-<header class="hero">
-  <div class="hero-inner">
-    <h1>Owner Dashboard</h1>
-    <p>All shops • staff • revenue • activity</p>
-  </div>
+<header>
+  <h1>Owner Dashboard</h1>
 </header>
 
-<main class="dashboard">
+<main>
 
 <div class="stats">
-  <div class="stat-card"><div class="stat-number" id="totalRevenue">₹0</div>Total Revenue</div>
-  <div class="stat-card"><div class="stat-number" id="shopkeeperCount">0</div>Shopkeepers</div>
-  <div class="stat-card"><div class="stat-number" id="workerCount">0</div>Workers</div>
-  <div class="stat-card"><div class="stat-number" id="jobCount">0</div>Jobs</div>
-</div>
-
-<div class="retailer-card" onclick="location.href='retailers.html'">
-  <h3>Retailer Credit</h3>
-  <p>Monitor pending payments & settlements</p>
+  <div class="stat-card">
+    <div class="stat-number" id="totalRevenue">₹0</div>
+    Total Revenue
+  </div>
+  <div class="stat-card">
+    <div class="stat-number" id="shopkeeperCount">0</div>
+    Shopkeepers
+  </div>
+  <div class="stat-card">
+    <div class="stat-number" id="workerCount">0</div>
+    Workers
+  </div>
+  <div class="stat-card">
+    <div class="stat-number" id="jobCount">0</div>
+    Jobs
+  </div>
 </div>
 
 <h2>Your Shops</h2>
-<div class="shop-container">
-  <div class="shop-strip" id="shopStrip"></div>
-</div>
+<div class="shop-container" id="shopStrip"></div>
 
 <div class="activity-section">
 <h2>Recent Activity</h2>
 <table>
 <thead>
-<tr><th>User</th><th>Role</th><th>Activity</th><th>Time</th></tr>
+<tr>
+<th>User</th>
+<th>Role</th>
+<th>Action</th>
+<th>Time</th>
+</tr>
 </thead>
 <tbody id="auditTable"></tbody>
 </table>
@@ -154,12 +142,8 @@ th{
 
 </main>
 
-<div id="shopPanel" class="shop-panel">
-  <div id="panelContent"></div>
-  <div class="panel-close" onclick="closePanel()">Close</div>
-</div>
-
 <script type="module">
+
 import { db } from "../js/firebase.js";
 import {
   collection,
@@ -169,81 +153,55 @@ import {
   orderBy
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-/* ✅ SIMPLE OWNER CHECK (NO GUARD.JS) */
-const user = JSON.parse(localStorage.getItem("currentUser"));
+/* 🔐 OWNER CHECK */
+const currentUser = JSON.parse(localStorage.getItem("currentUser"));
 
-if (!user || user.role !== "OWNER") {
-  window.location.href = "../login.html";
+if (!currentUser || currentUser.role !== "OWNER") {
+  window.location.replace("../login.html");
 }
 
 /* ELEMENTS */
+const totalRevenue = document.getElementById("totalRevenue");
+const shopkeeperCount = document.getElementById("shopkeeperCount");
+const workerCount = document.getElementById("workerCount");
+const jobCount = document.getElementById("jobCount");
 const shopStrip = document.getElementById("shopStrip");
-const panel = document.getElementById("shopPanel");
-const panelContent = document.getElementById("panelContent");
+const auditTable = document.getElementById("auditTable");
 
-/* LOAD SHOPS */
+/* LOAD STATS */
+async function loadCounts(){
+  shopkeeperCount.innerText =
+    (await getDocs(query(collection(db,"users"),where("role","==","SHOPKEEPER")))).size;
+
+  workerCount.innerText =
+    (await getDocs(query(collection(db,"users"),where("role","==","WORKER")))).size;
+}
+
+async function loadJobCount(){
+  jobCount.innerText =
+    (await getDocs(collection(db,"jobs"))).size;
+}
+
+async function loadRevenue(){
+  let total = 0;
+  const snap = await getDocs(collection(db,"sales"));
+  snap.forEach(d=>{
+    total += Number(d.data().amount || 0);
+  });
+  totalRevenue.innerText = "₹" + total;
+}
+
 async function loadShops(){
   const snap = await getDocs(collection(db,"shops"));
   shopStrip.innerHTML="";
   snap.forEach(docSnap=>{
     const shop = docSnap.data();
     shopStrip.innerHTML += `
-      <div class="shop-card" onclick="openPanel('${docSnap.id}','${shop.shopName}')">
-        <h3>${shop.shopName}</h3>
+      <div class="shop-card">
+        <h3>${shop.shopName || "Shop"}</h3>
       </div>
     `;
   });
-}
-
-/* MINI PANEL */
-window.openPanel = async (shopId, shopName) => {
-  const jobsSnap = await getDocs(query(
-    collection(db,"jobs"),
-    where("shopId","==",shopId)
-  ));
-
-  const workersSnap = await getDocs(query(
-    collection(db,"users"),
-    where("shopId","==",shopId),
-    where("role","==","WORKER")
-  ));
-
-  let revenue = 0;
-  jobsSnap.forEach(d=>{
-    const j=d.data();
-    if(j.status==="DONE_DELIVERED"){
-      revenue += Number(j.expectedCost || 0);
-    }
-  });
-
-  panelContent.innerHTML = `
-    <div class="panel-row"><strong>Shop:</strong> ${shopName}</div>
-    <div class="panel-row"><strong>Total Jobs:</strong> ${jobsSnap.size}</div>
-    <div class="panel-row"><strong>Workers:</strong> ${workersSnap.size}</div>
-    <div class="panel-row"><strong>Revenue:</strong> ₹${revenue}</div>
-  `;
-  panel.classList.add("active");
-};
-
-window.closePanel = () => panel.classList.remove("active");
-
-/* STATS */
-async function loadCounts(){
-  shopkeeperCount.innerText =
-    (await getDocs(query(collection(db,"users"),where("role","==","SHOPKEEPER")))).size;
-  workerCount.innerText =
-    (await getDocs(query(collection(db,"users"),where("role","==","WORKER")))).size;
-}
-
-async function loadJobCount(){
-  jobCount.innerText = (await getDocs(collection(db,"jobs"))).size;
-}
-
-async function loadRevenue(){
-  let total=0;
-  const snap = await getDocs(collection(db,"sales"));
-  snap.forEach(d=> total+=Number(d.data().amount||0));
-  totalRevenue.innerText="₹"+total;
 }
 
 async function loadAuditLogs(){
@@ -252,24 +210,25 @@ async function loadAuditLogs(){
   );
   auditTable.innerHTML="";
   snap.forEach(d=>{
-    const log=d.data();
-    auditTable.innerHTML+=`
+    const log = d.data();
+    auditTable.innerHTML += `
       <tr>
         <td>${log.userId}</td>
         <td>${log.role}</td>
         <td>${log.action}</td>
-        <td>${log.timestamp?.toDate().toLocaleString()||"-"}</td>
+        <td>${log.timestamp?.toDate().toLocaleString() || "-"}</td>
       </tr>
     `;
   });
 }
 
 /* INIT */
-loadShops();
 loadCounts();
 loadJobCount();
 loadRevenue();
+loadShops();
 loadAuditLogs();
+
 </script>
 
 </body>
