@@ -1,238 +1,183 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Create Shop & Shopkeeper</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Create Shop & Shopkeeper</title>
 
-  <style>
-    :root {
-      --accent: #10b981;
-      --bg: #0f172a;
-      --card-bg: rgba(30, 41, 59, 0.75);
-      --border: rgba(148, 163, 184, 0.2);
-      --text: #e2e8f0;
-      --text-muted: #94a3b8;
-      --radius: 16px;
-    }
-
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-
-    body {
-      font-family: system-ui, sans-serif;
-      background: linear-gradient(135deg, #0f172a, #1e293b);
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 2rem;
-      color: var(--text);
-    }
-
-    .card {
-      background: var(--card-bg);
-      backdrop-filter: blur(16px);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 2.5rem 2rem;
-      width: 100%;
-      max-width: 480px;
-      box-shadow: 0 20px 40px rgba(0,0,0,0.4);
-    }
-
-    h2 {
-      text-align: center;
-      font-size: 1.9rem;
-      font-weight: 700;
-      margin-bottom: 2.2rem;
-      background: linear-gradient(90deg, #93c5fd, #c7d2fe);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-
-    .form-group {
-      position: relative;
-      margin-bottom: 1.6rem;
-    }
-
-    .form-group input {
-      width: 100%;
-      padding: 1.1rem 1rem;
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      background: rgba(51,65,85,0.4);
-      color: var(--text);
-      font-size: 1rem;
-    }
-
-    .form-group label {
-      position: absolute;
-      left: 1rem;
-      top: -0.6rem;
-      font-size: 0.8rem;
-      background: var(--bg);
-      padding: 0 0.5rem;
-      color: var(--accent);
-    }
-
-    .password-wrapper {
-      position: relative;
-    }
-
-    .password-wrapper button {
-      position: absolute;
-      right: 1rem;
-      top: 50%;
-      transform: translateY(-50%);
-      background: transparent;
-      border: none;
-      color: var(--text-muted);
-      cursor: pointer;
-      font-size: 1.1rem;
-    }
-
-    #createBtn {
-      width: 100%;
-      padding: 1.1rem;
-      background: linear-gradient(135deg, var(--accent), #059669);
-      color: white;
-      border: none;
-      border-radius: 12px;
-      font-size: 1.1rem;
-      font-weight: 600;
-      cursor: pointer;
-      margin-top: 1.5rem;
-    }
-  </style>
+<style>
+:root{
+  --accent:#10b981;
+  --bg:#0f172a;
+  --card:rgba(30,41,59,.75);
+  --border:rgba(148,163,184,.2);
+  --text:#e2e8f0;
+  --radius:16px;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+  font-family:system-ui;
+  background:linear-gradient(135deg,#0f172a,#1e293b);
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:2rem;
+  color:var(--text);
+}
+.card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  padding:2.5rem;
+  width:100%;
+  max-width:480px;
+}
+h2{
+  text-align:center;
+  margin-bottom:2rem;
+}
+.form-group{
+  margin-bottom:1.4rem;
+}
+.form-group input{
+  width:100%;
+  padding:1rem;
+  border-radius:12px;
+  border:1px solid var(--border);
+  background:#1e293b;
+  color:white;
+}
+button{
+  width:100%;
+  padding:1rem;
+  background:linear-gradient(135deg,var(--accent),#059669);
+  border:none;
+  border-radius:12px;
+  color:white;
+  font-weight:600;
+  cursor:pointer;
+}
+</style>
 </head>
 
 <body>
 
 <div class="card">
-  <h2>Create Shop & Shopkeeper</h2>
+<h2>Create Shop & Shopkeeper</h2>
 
-  <div class="form-group">
-    <label>Shop Name</label>
-    <input id="shopName" />
-  </div>
+<div class="form-group">
+<input id="shopName" placeholder="Shop Name">
+</div>
 
-  <div class="form-group">
-    <label>City</label>
-    <input id="city" />
-  </div>
+<div class="form-group">
+<input id="city" placeholder="City">
+</div>
 
-  <div class="form-group">
-    <label>Shopkeeper Name</label>
-    <input id="keeperName" />
-  </div>
+<div class="form-group">
+<input id="keeperName" placeholder="Shopkeeper Name">
+</div>
 
-  <div class="form-group">
-    <label>Email (Login)</label>
-    <input id="email" type="email" />
-  </div>
+<div class="form-group">
+<input id="email" type="email" placeholder="Email">
+</div>
 
-  <div class="form-group password-wrapper">
-    <label>Password</label>
-    <input id="password" type="password" />
-    <button type="button" onclick="togglePassword('password')">👁️</button>
-  </div>
+<div class="form-group">
+<input id="password" type="password" placeholder="Password">
+</div>
 
-  <div class="form-group password-wrapper">
-    <label>Confirm Password</label>
-    <input id="confirmPassword" type="password" />
-    <button type="button" onclick="togglePassword('confirmPassword')">👁️</button>
-  </div>
+<div class="form-group">
+<input id="confirmPassword" type="password" placeholder="Confirm Password">
+</div>
 
-  <button id="createBtn">Create Shop & Shopkeeper</button>
+<button id="createBtn">Create Shop & Shopkeeper</button>
+
 </div>
 
 <script type="module">
 import { requireAuth } from "../auth/guard.js";
 import { auth, db } from "../js/firebase.js";
-import {
-  createUserWithEmailAndPassword
-} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import { createUserWithEmailAndPassword }
+from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 import {
   doc,
   setDoc,
   addDoc,
+  collection,
   serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-/* 🔒 OWNER ONLY */
+/* OWNER ONLY */
 const currentUser = requireAuth("OWNER");
 
-const shopNameEl = document.getElementById("shopName");
-const cityEl = document.getElementById("city");
-const keeperNameEl = document.getElementById("keeperName");
-const emailEl = document.getElementById("email");
-const passwordEl = document.getElementById("password");
-const confirmPasswordEl = document.getElementById("confirmPassword");
 const btn = document.getElementById("createBtn");
 
 btn.onclick = async () => {
-  const shopName = shopNameEl.value.trim();
-  const city = cityEl.value.trim();
-  const keeperName = keeperNameEl.value.trim();
-  const email = emailEl.value.trim();
-  const password = passwordEl.value;
-  const confirmPassword = confirmPasswordEl.value;
 
-  if (!shopName || !city || !keeperName || !email || !password || !confirmPassword) {
-    alert("All fields are required");
+  const shopName = shopName.value.trim();
+  const city = city.value.trim();
+  const keeperName = keeperName.value.trim();
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value;
+  const confirmPassword = document.getElementById("confirmPassword").value;
+
+  if(!shopName || !city || !keeperName || !email || !password || !confirmPassword){
+    alert("All fields required");
     return;
   }
 
-  if (password !== confirmPassword) {
+  if(password !== confirmPassword){
     alert("Passwords do not match");
     return;
   }
 
-  try {
-    /* 1️⃣ CREATE SHOPKEEPER AUTH */
-    const cred = await createUserWithEmailAndPassword(auth, email, password);
+  try{
+
+    const ownerSession = JSON.parse(localStorage.getItem("currentUser"));
+
+    /* Create Auth */
+    const cred = await createUserWithEmailAndPassword(auth,email,password);
     const uid = cred.user.uid;
 
-    /* 2️⃣ CREATE SHOP */
-    const shopRef = doc(db, "shops", "SHOP_" + Date.now());
-    await setDoc(shopRef, {
+    const shopId = "SHOP_"+Date.now();
+
+    /* Create Shop */
+    await setDoc(doc(db,"shops",shopId),{
       shopName,
       city,
-      ownerId: currentUser.uid,
-      shopkeeperId: uid,
-      createdAt: serverTimestamp()
+      ownerId:ownerSession.uid,
+      shopkeeperId:uid,
+      createdAt:serverTimestamp()
     });
 
-    /* 3️⃣ CREATE SHOPKEEPER PROFILE */
-    await setDoc(doc(db, "users", uid), {
-      name: keeperName,
-      role: "SHOPKEEPER",
-      shopId: shopRef.id,
-      createdAt: serverTimestamp()
+    /* Create User */
+    await setDoc(doc(db,"users",uid),{
+      name:keeperName,
+      role:"SHOPKEEPER",
+      shopId,
+      createdAt:serverTimestamp()
     });
 
-    /* 4️⃣ AUDIT LOG */
-    await addDoc(collection(db, "auditLogs"), {
-      actionType: "CREATE_SHOP",
-      action: `Shop ${shopName} created with shopkeeper ${keeperName}`,
-      createdBy: currentUser.uid,
-      shopId: shopRef.id,
-      timestamp: serverTimestamp()
+    /* Audit */
+    await addDoc(collection(db,"auditLogs"),{
+      actionType:"CREATE_SHOP",
+      action:`Shop ${shopName} created`,
+      createdBy:ownerSession.uid,
+      shopId,
+      timestamp:serverTimestamp()
     });
 
-    alert("Shop & Shopkeeper created successfully");
-    location.href = "index.html";
+    localStorage.setItem("currentUser",JSON.stringify(ownerSession));
 
-  } catch (err) {
+    alert("Shop created successfully");
+    window.location.href="index.html";
+
+  }catch(err){
     console.error(err);
     alert(err.message);
   }
-};
 
-function togglePassword(id) {
-  const i = document.getElementById(id);
-  i.type = i.type === "password" ? "text" : "password";
-}
+};
 </script>
 
 </body>

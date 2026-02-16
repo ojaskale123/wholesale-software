@@ -11,7 +11,6 @@
   --card:rgba(30,41,59,.7);
   --border:rgba(148,163,184,.18);
   --text:#f1f5f9;
-  --text-light:#cbd5e1;
   --radius:16px;
 }
 *{margin:0;padding:0;box-sizing:border-box}
@@ -20,77 +19,76 @@ body{
   background:var(--bg);
   color:var(--text);
 }
-
 header{
-  padding:2rem 1.5rem;
+  padding:2rem;
   border-bottom:1px solid var(--border);
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
 }
-
-h1{
-  font-size:2rem;
+button{
+  padding:.6rem 1rem;
+  border:none;
+  border-radius:10px;
+  cursor:pointer;
+  background:#1d4ed8;
+  color:white;
 }
-
 main{
-  max-width:1400px;
+  max-width:1300px;
   margin:auto;
-  padding:2rem 1.5rem 4rem;
+  padding:2rem;
 }
-
 .stats{
   display:grid;
   grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
-  gap:1.5rem;
-  margin:2rem 0 3rem;
+  gap:1rem;
+  margin-bottom:2rem;
 }
-
-.stat-card{
+.card{
   background:var(--card);
   border:1px solid var(--border);
   border-radius:var(--radius);
   padding:1.5rem;
 }
-
-.stat-number{
-  font-size:2.2rem;
-  font-weight:800;
+.shop-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+  gap:1rem;
+}
+.shop-card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  padding:1.2rem;
+  cursor:pointer;
+}
+.panel{
+  position:fixed;
+  bottom:-100%;
+  left:0;
+  right:0;
+  background:#1e293b;
+  padding:1.5rem;
+  border-top-left-radius:20px;
+  border-top-right-radius:20px;
+  transition:.3s;
+}
+.panel.active{bottom:0}
+.close{
+  margin-top:1rem;
+  text-align:center;
+  cursor:pointer;
   color:#60a5fa;
 }
-
-.shop-container{
-  display:flex;
-  gap:1.2rem;
-  overflow-x:auto;
-  margin-top:1.5rem;
-}
-
-.shop-card{
-  min-width:260px;
-  background:var(--card);
-  border:1px solid var(--border);
-  border-radius:var(--radius);
-  padding:1.5rem;
-}
-
-.activity-section{
-  margin-top:3rem;
-}
-
-table{
+input,select{
   width:100%;
-  background:var(--card);
-  border-radius:var(--radius);
-  border-collapse:collapse;
-  border:1px solid var(--border);
-}
-
-th,td{
-  padding:1rem;
-  border-top:1px solid var(--border);
-  font-size:0.9rem;
-}
-
-th{
-  background:rgba(29,78,216,.35);
+  padding:.6rem;
+  margin:.5rem 0;
+  border-radius:8px;
+  border:1px solid #334155;
+  background:#0f172a;
+  color:white;
 }
 </style>
 </head>
@@ -98,136 +96,175 @@ th{
 <body>
 
 <header>
-  <h1>Owner Dashboard</h1>
+  <h2>Owner Dashboard</h2>
+  <div>
+
+<button onclick="location.href='create-shopkeeper.html'">
+  + Shopkeeper
+</button>
+
+<button onclick="location.href='create-worker.html'">
+  + Worker
+</button>
+
 </header>
 
 <main>
 
 <div class="stats">
-  <div class="stat-card">
-    <div class="stat-number" id="totalRevenue">₹0</div>
-    Total Revenue
-  </div>
-  <div class="stat-card">
-    <div class="stat-number" id="shopkeeperCount">0</div>
-    Shopkeepers
-  </div>
-  <div class="stat-card">
-    <div class="stat-number" id="workerCount">0</div>
-    Workers
-  </div>
-  <div class="stat-card">
-    <div class="stat-number" id="jobCount">0</div>
-    Jobs
-  </div>
+  <div class="card">Total Revenue<br><b id="revenue">₹0</b></div>
+  <div class="card">Shopkeepers<br><b id="shopkeepers">0</b></div>
+  <div class="card">Workers<br><b id="workers">0</b></div>
+  <div class="card">Jobs<br><b id="jobs">0</b></div>
 </div>
 
-<h2>Your Shops</h2>
-<div class="shop-container" id="shopStrip"></div>
-
-<div class="activity-section">
-<h2>Recent Activity</h2>
-<table>
-<thead>
-<tr>
-<th>User</th>
-<th>Role</th>
-<th>Action</th>
-<th>Time</th>
-</tr>
-</thead>
-<tbody id="auditTable"></tbody>
-</table>
-</div>
+<h3>Your Shops</h3>
+<div class="shop-grid" id="shopList"></div>
 
 </main>
 
-<script type="module">
+<div id="panel" class="panel">
+  <div id="panelContent"></div>
+  <div class="close" onclick="closePanel()">Close</div>
+</div>
 
+<script type="module">
 import { db } from "../js/firebase.js";
 import {
-  collection,
-  getDocs,
-  query,
-  where,
-  orderBy
+  collection, getDocs, addDoc, query, where
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-/* 🔐 OWNER CHECK */
-const currentUser = JSON.parse(localStorage.getItem("currentUser"));
-
-if (!currentUser || currentUser.role !== "OWNER") {
+/* OWNER CHECK */
+const user = JSON.parse(localStorage.getItem("currentUser"));
+if (!user || user.role !== "OWNER") {
   window.location.replace("../login.html");
 }
 
-/* ELEMENTS */
-const totalRevenue = document.getElementById("totalRevenue");
-const shopkeeperCount = document.getElementById("shopkeeperCount");
-const workerCount = document.getElementById("workerCount");
-const jobCount = document.getElementById("jobCount");
-const shopStrip = document.getElementById("shopStrip");
-const auditTable = document.getElementById("auditTable");
+const shopList = document.getElementById("shopList");
+const panel = document.getElementById("panel");
+const panelContent = document.getElementById("panelContent");
 
 /* LOAD STATS */
-async function loadCounts(){
-  shopkeeperCount.innerText =
+async function loadStats(){
+  document.getElementById("shopkeepers").innerText =
     (await getDocs(query(collection(db,"users"),where("role","==","SHOPKEEPER")))).size;
 
-  workerCount.innerText =
+  document.getElementById("workers").innerText =
     (await getDocs(query(collection(db,"users"),where("role","==","WORKER")))).size;
-}
 
-async function loadJobCount(){
-  jobCount.innerText =
+  document.getElementById("jobs").innerText =
     (await getDocs(collection(db,"jobs"))).size;
+
+  let total=0;
+  const sales = await getDocs(collection(db,"sales"));
+  sales.forEach(d=> total+=Number(d.data().amount||0));
+  document.getElementById("revenue").innerText="₹"+total;
 }
 
-async function loadRevenue(){
-  let total = 0;
-  const snap = await getDocs(collection(db,"sales"));
-  snap.forEach(d=>{
-    total += Number(d.data().amount || 0);
-  });
-  totalRevenue.innerText = "₹" + total;
-}
-
+/* LOAD SHOPS */
 async function loadShops(){
   const snap = await getDocs(collection(db,"shops"));
-  shopStrip.innerHTML="";
+  shopList.innerHTML="";
   snap.forEach(docSnap=>{
     const shop = docSnap.data();
-    shopStrip.innerHTML += `
-      <div class="shop-card">
-        <h3>${shop.shopName || "Shop"}</h3>
+    shopList.innerHTML += `
+      <div class="shop-card" onclick="viewShop('${docSnap.id}','${shop.shopName}')">
+        <b>${shop.shopName}</b><br>
+        Click to view details
       </div>
     `;
   });
 }
 
-async function loadAuditLogs(){
-  const snap = await getDocs(
-    query(collection(db,"auditLogs"),orderBy("timestamp","desc"))
-  );
-  auditTable.innerHTML="";
-  snap.forEach(d=>{
-    const log = d.data();
-    auditTable.innerHTML += `
-      <tr>
-        <td>${log.userId}</td>
-        <td>${log.role}</td>
-        <td>${log.action}</td>
-        <td>${log.timestamp?.toDate().toLocaleString() || "-"}</td>
-      </tr>
-    `;
+/* VIEW SHOP INFO */
+window.viewShop = async(id,name)=>{
+  const workers = await getDocs(query(collection(db,"users"),
+    where("shopId","==",id),
+    where("role","==","WORKER")
+  ));
+
+  const jobs = await getDocs(query(collection(db,"jobs"),
+    where("shopId","==",id)
+  ));
+
+  panelContent.innerHTML = `
+    <h3>${name}</h3>
+    <p>Workers: ${workers.size}</p>
+    <p>Total Jobs: ${jobs.size}</p>
+  `;
+  panel.classList.add("active");
+}
+
+window.closePanel = ()=> panel.classList.remove("active");
+
+/* CREATE SHOP */
+window.openCreateShop = ()=>{
+  panelContent.innerHTML = `
+    <h3>Create Shop</h3>
+    <input id="shopName" placeholder="Shop Name"/>
+    <button onclick="createShop()">Create</button>
+  `;
+  panel.classList.add("active");
+}
+window.createShop = async()=>{
+  const name = document.getElementById("shopName").value;
+  if(!name) return alert("Enter name");
+  await addDoc(collection(db,"shops"),{shopName:name});
+  closePanel();
+  loadShops();
+}
+
+/* CREATE SHOPKEEPER */
+window.openCreateShopkeeper = async()=>{
+  const shops = await getDocs(collection(db,"shops"));
+  let options="";
+  shops.forEach(s=> options+=`<option value="${s.id}">${s.data().shopName}</option>`);
+
+  panelContent.innerHTML = `
+    <h3>Create Shopkeeper</h3>
+    <input id="skName" placeholder="Name"/>
+    <select id="skShop">${options}</select>
+    <button onclick="createShopkeeper()">Create</button>
+  `;
+  panel.classList.add("active");
+}
+window.createShopkeeper = async()=>{
+  await addDoc(collection(db,"users"),{
+    name:document.getElementById("skName").value,
+    role:"SHOPKEEPER",
+    shopId:document.getElementById("skShop").value
   });
+  closePanel();
+  loadStats();
+}
+
+/* CREATE WORKER */
+window.openCreateWorker = async()=>{
+  const shops = await getDocs(collection(db,"shops"));
+  let options="";
+  shops.forEach(s=> options+=`<option value="${s.id}">${s.data().shopName}</option>`);
+
+  panelContent.innerHTML = `
+    <h3>Create Worker</h3>
+    <input id="wName" placeholder="Name"/>
+    <select id="wShop">${options}</select>
+    <button onclick="createWorker()">Create</button>
+  `;
+  panel.classList.add("active");
+}
+window.createWorker = async()=>{
+  await addDoc(collection(db,"users"),{
+    name:document.getElementById("wName").value,
+    role:"WORKER",
+    shopId:document.getElementById("wShop").value
+  });
+  closePanel();
+  loadStats();
 }
 
 /* INIT */
-loadCounts();
-loadJobCount();
-loadRevenue();
+loadStats();
 loadShops();
-loadAuditLogs();
 
 </script>
 
