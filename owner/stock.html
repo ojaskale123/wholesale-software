@@ -1,182 +1,117 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Owner · Stock Overview</title>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Owner · Stock Overview</title>
 
-  <style>
-    :root {
-      --bg: #0f172a;
-      --card-bg: rgba(30, 41, 59, 0.8);
-      --border: rgba(148, 163, 184, 0.2);
-      --text: #e2e8f0;
-      --text-muted: #94a3b8;
-      --radius: 16px;
-      --overlay-bg: rgba(15, 23, 42, 0.85);
-    }
+<style>
+:root{
+  --bg:#0f172a;
+  --card:rgba(30,41,59,.85);
+  --border:rgba(148,163,184,.2);
+  --text:#e2e8f0;
+  --muted:#94a3b8;
+  --radius:16px;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:system-ui;background:var(--bg);color:var(--text);}
 
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+header{
+  padding:1.2rem 1.8rem;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  border-bottom:1px solid var(--border);
+  background:#111827;
+}
+button{
+  padding:.6rem 1.2rem;
+  border:none;
+  border-radius:10px;
+  cursor:pointer;
+  background:#ef4444;
+  color:white;
+}
 
-    body {
-      font-family: system-ui, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      min-height: 100vh;
-    }
+.container{
+  max-width:1200px;
+  margin:auto;
+  padding:2rem;
+}
 
-    header {
-      background: linear-gradient(135deg, #1e293b, #0f172a);
-      border-bottom: 1px solid var(--border);
-      padding: 1.2rem 1.8rem;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      position: sticky;
-      top: 0;
-      z-index: 100;
-    }
+.categories{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+  gap:1.2rem;
+}
 
-    header h2 {
-      font-size: 1.55rem;
-      font-weight: 600;
-      background: linear-gradient(90deg, #93c5fd, #c7d2fe);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
+.cat{
+  padding:2rem;
+  border-radius:16px;
+  font-weight:700;
+  text-align:center;
+  cursor:pointer;
+  transition:.25s;
+}
+.cat:hover{transform:translateY(-5px)}
 
-    .back-btn {
-      background: #ef4444;
-      color: white;
-      border: none;
-      padding: 0.65rem 1.3rem;
-      border-radius: 10px;
-      font-weight: 600;
-      cursor: pointer;
-    }
+.spare{background:linear-gradient(135deg,#667eea,#764ba2)}
+.battery{background:linear-gradient(135deg,#ec4899,#db2777)}
+.accessories{background:linear-gradient(135deg,#10b981,#059669)}
+.phone{background:linear-gradient(135deg,#fbbf24,#d97706);color:#111}
 
-    .container {
-      max-width: 1200px;
-      margin: auto;
-      padding: 2rem 1.5rem;
-    }
+.overlay{
+  position:fixed;inset:0;
+  background:rgba(0,0,0,.7);
+  display:none;
+  justify-content:center;
+  align-items:center;
+}
+.overlay.active{display:flex}
 
-    .categories {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-      gap: 1.4rem;
-    }
+.popup{
+  background:var(--card);
+  width:95%;max-width:800px;
+  max-height:85vh;
+  overflow-y:auto;
+  border-radius:16px;
+  padding:1.5rem;
+}
 
-    .cat-card {
-      border-radius: var(--radius);
-      padding: 2rem 1.5rem;
-      font-size: 1.35rem;
-      font-weight: 700;
-      text-align: center;
-      cursor: pointer;
-      transition: .25s;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.3);
-    }
-
-    .cat-card:hover { transform: translateY(-5px) scale(1.03); }
-
-    .spare       { background: linear-gradient(135deg,#667eea,#764ba2); }
-    .electronics { background: linear-gradient(135deg,#10b981,#059669); }
-    .battery     { background: linear-gradient(135deg,#ec4899,#db2777); }
-    .phone       { background: linear-gradient(135deg,#fbbf24,#d97706); color:#111827; }
-
-    .overlay {
-      position: fixed;
-      inset: 0;
-      background: var(--overlay-bg);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      z-index: 999;
-    }
-
-    .overlay.active { display: flex; }
-
-    .popup {
-      background: var(--card-bg);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      width: 92%;
-      max-width: 720px;
-      max-height: 90vh;
-      overflow: hidden;
-    }
-
-    .popup-header {
-      background: linear-gradient(135deg,#1e293b,#0f172a);
-      padding: 1.2rem 1.8rem;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .popup-header h3 { font-size: 1.45rem; }
-
-    .close-btn {
-      background: #ef4444;
-      color: white;
-      border: none;
-      padding: 0.6rem 1.2rem;
-      border-radius: 10px;
-      cursor: pointer;
-    }
-
-    .popup-body {
-      padding: 1.8rem;
-      max-height: 65vh;
-      overflow-y: auto;
-    }
-
-    .item {
-      background: rgba(51,65,85,.55);
-      border-radius: 12px;
-      padding: 1.3rem;
-      margin-bottom: 1rem;
-      border: 1px solid var(--border);
-    }
-
-    .item b { font-size: 1.15rem; }
-
-    .item div { color: var(--text-muted); margin-top: .3rem; }
-
-    .profit { color: #34d399; font-weight: 700; }
-
-    .empty-category {
-      text-align: center;
-      color: var(--text-muted);
-      padding: 3rem 1rem;
-    }
-  </style>
+.item{
+  background:#1e293b;
+  padding:1rem;
+  border-radius:12px;
+  margin-bottom:1rem;
+}
+.item b{font-size:1.1rem}
+.item div{color:var(--muted);margin-top:.3rem}
+.profit{color:#34d399;font-weight:700}
+</style>
 </head>
 
 <body>
 
 <header>
   <h2>Owner · Stock Overview</h2>
-  <button class="back-btn" onclick="location.href='index.html'">Back</button>
+  <button onclick="location.href='index.html'">Back</button>
 </header>
 
 <div class="container">
   <div class="categories">
-    <div class="cat-card spare" onclick="openCategory('SPARE')">Spare Parts</div>
-    <div class="cat-card electronics" onclick="openCategory('ELECTRONICS')">Electronics</div>
-    <div class="cat-card battery" onclick="openCategory('BATTERY')">Batteries</div>
-    <div class="cat-card phone" onclick="openCategory('SECOND_HAND')">Second-hand Phones</div>
+    <div class="cat spare" onclick="openCategory('Spare Parts')">Spare Parts</div>
+    <div class="cat battery" onclick="openCategory('Batteries')">Batteries</div>
+    <div class="cat accessories" onclick="openCategory('Accessories')">Accessories</div>
+    <div class="cat phone" onclick="openCategory('Second Hand Mobiles')">Second Hand Mobiles</div>
   </div>
 </div>
 
 <div class="overlay" id="overlay">
   <div class="popup">
-    <div class="popup-header">
-      <h3 id="popupTitle"></h3>
-      <button class="close-btn" onclick="closePopup()">Close</button>
-    </div>
-    <div class="popup-body" id="popupList"></div>
+    <h3 id="popupTitle"></h3>
+    <div id="popupList"></div>
+    <button style="margin-top:1rem;background:#ef4444" onclick="closePopup()">Close</button>
   </div>
 </div>
 
@@ -185,50 +120,42 @@ import { requireAuth } from "../auth/guard.js";
 import { db } from "../js/firebase.js";
 import {
   collection,
-  getDocs
+  onSnapshot
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-/* 🔒 OWNER ONLY */
+/* OWNER ONLY */
 requireAuth("OWNER");
 
 let ALL_PRODUCTS = [];
 
-/* LOAD ALL STOCK (ALL SHOPS) */
-async function loadStock() {
-  const snap = await getDocs(collection(db, "stock"));
-  ALL_PRODUCTS = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-}
+onSnapshot(collection(db,"stock"), snap=>{
+  ALL_PRODUCTS = snap.docs.map(d=>({id:d.id,...d.data()}));
+});
 
-await loadStock();
-
-/* OPEN CATEGORY */
-window.openCategory = function(category) {
-  const titleMap = {
-    SPARE: "Spare Parts",
-    ELECTRONICS: "Electronics",
-    BATTERY: "Batteries",
-    SECOND_HAND: "Second-hand Phones"
-  };
+window.openCategory = function(category){
 
   const list = document.getElementById("popupList");
-  const products = ALL_PRODUCTS.filter(p => p.category === category);
+  const title = document.getElementById("popupTitle");
 
-  document.getElementById("popupTitle").innerText = titleMap[category];
+  title.innerText = category;
   list.innerHTML = "";
 
-  if (!products.length) {
-    list.innerHTML = `<div class="empty-category">No items in this category yet</div>`;
+  const filtered = ALL_PRODUCTS.filter(p=>p.category===category);
+
+  if(!filtered.length){
+    list.innerHTML="<div style='color:#94a3b8'>No items</div>";
   }
 
-  products.forEach(p => {
-    const profit = (p.sellPrice || 0) - (p.buyPrice || 0);
-    list.innerHTML += `
+  filtered.forEach(p=>{
+    const profit = (p.sellPrice||0)-(p.buyPrice||0);
+    list.innerHTML+=`
       <div class="item">
         <b>${p.name}</b>
-        <div>Buy: ₹${p.buyPrice} • Sell: ₹${p.sellPrice}</div>
-        <div>Quantity: ${p.quantity}</div>
+        <div>Buy: ₹${p.buyPrice||0}</div>
+        <div>Sell: ₹${p.sellPrice||0}</div>
+        <div>Quantity: ${p.quantity||0}</div>
         <div class="profit">Profit per item: ₹${profit}</div>
-        <div style="font-size:.85rem">Shop ID: ${p.shopId || "—"}</div>
+        <div style="font-size:.8rem">Shop: ${p.shopId}</div>
       </div>
     `;
   });
@@ -236,8 +163,7 @@ window.openCategory = function(category) {
   document.getElementById("overlay").classList.add("active");
 };
 
-/* CLOSE POPUP */
-window.closePopup = function() {
+window.closePopup = function(){
   document.getElementById("overlay").classList.remove("active");
 };
 </script>

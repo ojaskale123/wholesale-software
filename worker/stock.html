@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Worker · Stock</title>
+
+<style>
+:root{
+  --bg:#0f172a;
+  --card:#1e293b;
+  --border:#334155;
+  --text:#e2e8f0;
+  --accent:#10b981;
+  --radius:16px;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:system-ui;background:var(--bg);color:var(--text)}
+
+header{
+  padding:1rem 1.5rem;
+  border-bottom:1px solid var(--border);
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+button{
+  background:#ef4444;
+  border:none;
+  padding:.5rem 1rem;
+  border-radius:8px;
+  color:white;
+  cursor:pointer;
+}
+
+.container{
+  max-width:1200px;
+  margin:auto;
+  padding:2rem;
+}
+
+/* CATEGORY GRID */
+.categories{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+  gap:1.2rem;
+}
+
+.cat-card{
+  padding:2rem;
+  border-radius:16px;
+  font-weight:700;
+  text-align:center;
+  cursor:pointer;
+  transition:.25s;
+}
+.cat-card:hover{transform:translateY(-6px)}
+
+.spare{background:linear-gradient(135deg,#667eea,#764ba2)}
+.battery{background:linear-gradient(135deg,#ec4899,#db2777)}
+.accessories{background:linear-gradient(135deg,#10b981,#059669)}
+.phone{background:linear-gradient(135deg,#fbbf24,#d97706);color:#111}
+
+/* LIST VIEW */
+.list-view{display:none}
+
+.search-bar{
+  width:100%;
+  padding:1rem;
+  border-radius:12px;
+  border:1px solid var(--border);
+  background:#1e293b;
+  color:white;
+  margin-bottom:1rem;
+}
+
+.barcode-bar{
+  width:100%;
+  padding:1rem;
+  border-radius:12px;
+  border:1px solid var(--border);
+  background:#111827;
+  color:#22c55e;
+  font-weight:600;
+  margin-bottom:1.5rem;
+}
+
+.grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(260px,1fr));
+  gap:1rem;
+}
+
+.card{
+  background:var(--card);
+  padding:1rem;
+  border-radius:var(--radius);
+  border:1px solid var(--border);
+}
+.card b{font-size:1.1rem}
+.meta{color:#94a3b8;margin-top:.4rem}
+.price{color:var(--accent);font-weight:700;margin-top:.6rem}
+.back-btn{
+  margin-bottom:1.2rem;
+  background:#334155;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <h3>Stock</h3>
+  <button onclick="location.href='index.html'">Back</button>
+</header>
+
+<div class="container">
+
+  <!-- CATEGORY VIEW -->
+  <div id="categoryView" class="categories">
+    <div class="cat-card spare" onclick="openCategory('Spare Parts')">Spare Parts</div>
+    <div class="cat-card battery" onclick="openCategory('Batteries')">Batteries</div>
+    <div class="cat-card accessories" onclick="openCategory('Accessories')">Accessories</div>
+    <div class="cat-card phone" onclick="openCategory('Second Hand Mobiles')">Second Hand Mobiles</div>
+  </div>
+
+  <!-- LIST VIEW -->
+  <div id="listView" class="list-view">
+    <button class="back-btn" onclick="goBack()">← Categories</button>
+
+    <!-- 🔎 Normal Search -->
+    <input type="text" id="searchInput" class="search-bar" placeholder="Search by name..."/>
+
+    <!-- 📦 Barcode Search -->
+    <input type="text" id="barcodeInput" class="barcode-bar" placeholder="Scan or enter barcode..." autofocus/>
+
+    <div class="grid" id="grid"></div>
+  </div>
+
+</div>
+
+<script type="module">
+import { requireAuth } from "../auth/guard.js";
+import { db } from "../js/firebase.js";
+import {
+  collection,
+  onSnapshot
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+/* WORKER AUTH */
+const user = requireAuth("WORKER");
+const shopId = user.shopId;
+
+const categoryView = document.getElementById("categoryView");
+const listView = document.getElementById("listView");
+const grid = document.getElementById("grid");
+const searchInput = document.getElementById("searchInput");
+const barcodeInput = document.getElementById("barcodeInput");
+
+let ALL_PRODUCTS = [];
+let CURRENT_CATEGORY = null;
+
+/* REAL-TIME STOCK */
+onSnapshot(collection(db,"stock"), snap=>{
+  ALL_PRODUCTS = snap.docs.map(d=>d.data());
+  render();
+});
+
+/* OPEN CATEGORY */
+window.openCategory = function(category){
+  CURRENT_CATEGORY = category;
+  categoryView.style.display="none";
+  listView.style.display="block";
+  barcodeInput.focus();
+  render();
+};
+
+/* BACK */
+window.goBack = function(){
+  CURRENT_CATEGORY = null;
+  listView.style.display="none";
+  categoryView.style.display="grid";
+  searchInput.value="";
+  barcodeInput.value="";
+};
+
+/* SEARCH EVENTS */
+searchInput.addEventListener("input", render);
+barcodeInput.addEventListener("input", render);
+
+/* RENDER */
+function render(){
+  if(!CURRENT_CATEGORY) return;
+
+  const nameQuery = searchInput.value.toLowerCase();
+  const barcodeQuery = barcodeInput.value.trim();
+
+  grid.innerHTML="";
+
+  let filtered = ALL_PRODUCTS
+    .filter(p=>p.shopId===shopId)
+    .filter(p=>p.category===CURRENT_CATEGORY);
+
+  if(barcodeQuery){
+    filtered = filtered.filter(p => p.barcode === barcodeQuery);
+  } else {
+    filtered = filtered.filter(p => p.name.toLowerCase().includes(nameQuery));
+  }
+
+  filtered = filtered.sort((a,b)=>a.name.localeCompare(b.name));
+
+  if(!filtered.length){
+    grid.innerHTML="<div style='color:#94a3b8'>No items found</div>";
+    return;
+  }
+
+  filtered.forEach(item=>{
+    grid.innerHTML+=`
+      <div class="card">
+        <b>${item.name}</b>
+        <div class="meta">Qty: ${item.quantity}</div>
+        <div class="price">₹${item.sellPrice}</div>
+      </div>
+    `;
+  });
+}
+</script>
+
+</body>
+</html>
