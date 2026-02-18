@@ -1,304 +1,148 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Sell – Point of Sale</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Sell Products</title>
 
-  <style>
-    /* 🔒 UI UNCHANGED */
-    :root {
-      --bg: #0f172a;
-      --card-bg: rgba(30, 41, 59, 0.82);
-      --border: rgba(148, 163, 184, 0.22);
-      --text: #e2e8f0;
-      --text-muted: #94a3b8;
-      --accent-green: #10b981;
-      --radius: 14px;
-      --shadow: 0 6px 20px rgba(0,0,0,0.28);
-    }
+<style>
+:root{
+  --bg:#0f172a;
+  --card:#1e293b;
+  --border:#334155;
+  --text:#e2e8f0;
+  --accent:#10b981;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:system-ui;background:var(--bg);color:var(--text)}
 
-    * { margin:0; padding:0; box-sizing:border-box; }
+header{
+  padding:1rem 1.5rem;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  border-bottom:1px solid var(--border);
+}
 
-    body {
-      font-family: system-ui;
-      background: var(--bg);
-      color: var(--text);
-      min-height: 100vh;
-    }
+button{
+  background:var(--accent);
+  border:none;
+  padding:.6rem 1rem;
+  border-radius:8px;
+  color:white;
+  cursor:pointer;
+}
 
-    .header {
-      background: linear-gradient(135deg, #1e293b, #0f172a);
-      border-bottom: 1px solid var(--border);
-      padding: 1.2rem;
-      text-align: center;
-      font-size: 1.5rem;
-      font-weight: 700;
-      position: sticky;
-      top: 0;
-      z-index: 100;
-    }
+.container{padding:2rem;max-width:1200px;margin:auto}
 
-    .container {
-      max-width: 1200px;
-      margin: auto;
-      padding: 1.5rem;
-    }
+.grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+  gap:1rem;
+}
 
-    #search {
-      width: 100%;
-      padding: 1rem;
-      border-radius: 12px;
-      border: 1px solid var(--border);
-      background: rgba(51,65,85,.6);
-      color: var(--text);
-      margin-bottom: 1.5rem;
-    }
+.card{
+  background:var(--card);
+  padding:1rem;
+  border-radius:12px;
+  border:1px solid var(--border);
+}
 
-    #list {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      gap: 1.2rem;
-    }
-
-    .item {
-      background: var(--card-bg);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 1.3rem;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      box-shadow: var(--shadow);
-    }
-
-    .item b { font-size: 1.15rem; }
-
-    .qty-controls {
-      display: flex;
-      gap: .6rem;
-      align-items: center;
-    }
-
-    .qty-btn {
-      width: 38px;
-      height: 38px;
-      border-radius: 8px;
-      border: 1px solid var(--border);
-      background: #334155;
-      color: white;
-      cursor: pointer;
-      font-size: 1.2rem;
-    }
-
-    .qty-btn:disabled {
-      opacity: .4;
-      cursor: not-allowed;
-    }
-
-    .cart-bar {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      background: linear-gradient(135deg, #1e293b, #0f172a);
-      border-top: 1px solid var(--border);
-      padding: 1rem 1.5rem;
-      display: none;
-      justify-content: space-between;
-      align-items: center;
-      z-index: 90;
-    }
-
-    #checkoutBtn {
-      background: linear-gradient(135deg, #10b981, #059669);
-      color: white;
-      border: none;
-      padding: .9rem 1.8rem;
-      border-radius: 12px;
-      cursor: pointer;
-    }
-  </style>
+input{
+  width:100%;
+  padding:.5rem;
+  margin-top:.6rem;
+  border-radius:6px;
+  border:1px solid var(--border);
+  background:#0f172a;
+  color:white;
+}
+</style>
 </head>
 
 <body>
 
-<div class="header">Sell – Point of Sale</div>
+<header>
+  <h3>Sell Products</h3>
+  <button onclick="goToCart()">View Cart</button>
+</header>
 
 <div class="container">
-  <input id="search" placeholder="Search product name or barcode..." />
-  <div id="list"></div>
-</div>
-
-<div class="cart-bar" id="cartBar">
-  <div>
-    Items: <b id="itemCount">0</b> |
-    Total: ₹<b id="totalAmount">0</b>
-  </div>
-  <button id="checkoutBtn">Checkout →</button>
+  <div class="grid" id="productGrid"></div>
 </div>
 
 <script type="module">
+import { requireAuth } from "../auth/guard.js";
 import { db } from "../js/firebase.js";
 import {
-  collection, getDocs, query, where,
-  addDoc, doc, updateDoc, serverTimestamp
+  collection,
+  query,
+  where,
+  onSnapshot
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-/* 🔐 AUTH */
-const user = JSON.parse(localStorage.getItem("currentUser"));
-if (!user || !["SHOPKEEPER","WORKER"].includes(user.role)) {
-  location.href = "/login.html";
-}
-if (!user.shopId) {
-  alert("Shop not linked to user");
-  throw new Error("Missing shopId");
-}
-
+const user = requireAuth(["SHOPKEEPER","WORKER"]);
 const shopId = user.shopId;
-const userId = user.uid || user.id;
 
-/* STATE */
-let products = [];
-let cart = { items: [] };
+const productGrid = document.getElementById("productGrid");
 
-/* UI */
-const list = document.getElementById("list");
-const search = document.getElementById("search");
-const cartBar = document.getElementById("cartBar");
-const itemCount = document.getElementById("itemCount");
-const totalAmount = document.getElementById("totalAmount");
-const checkoutBtn = document.getElementById("checkoutBtn");
+let CART = JSON.parse(localStorage.getItem("cart")) || { items: [] };
 
-/* LOAD STOCK */
-async function loadProducts() {
-  const q = query(collection(db,"stock"), where("shopId","==",shopId));
-  const snap = await getDocs(q);
-  products = snap.docs.map(d=>({
-    id:d.id,
-    ...d.data(),
-    quantity:Number(d.data().quantity||0),
-    sellPrice:Number(d.data().sellPrice||0)
-  }));
-  render();
-}
+/* LOAD STOCK REALTIME */
+const q = query(collection(db,"stock"), where("shopId","==",shopId));
 
-/* RENDER */
-function render() {
-  const q = search.value.toLowerCase();
-  list.innerHTML = "";
+onSnapshot(q,(snap)=>{
+  productGrid.innerHTML="";
 
-  products
-    .filter(p =>
-      (p.name||"").toLowerCase().includes(q) ||
-      String(p.barcode||"").includes(q)
-    )
-    .forEach(p=>{
-      const inCart = cart.items.find(i=>i.productId===p.id);
-      const qty = inCart ? inCart.quantity : 0;
+  snap.forEach(doc=>{
+    const p = doc.data();
+    if(p.quantity <= 0) return;
 
-      list.innerHTML += `
-        <div class="item">
-          <div>
-            <b>${p.name || "Unnamed"}</b>
-            <div>₹${p.sellPrice} • Stock: ${p.quantity}</div>
-          </div>
-          <div class="qty-controls">
-            <button class="qty-btn" ${qty<=0?"disabled":""}
-              onclick="updateQty('${p.id}',-1)">−</button>
-            <span>${qty}</span>
-            <button class="qty-btn" ${qty>=p.quantity?"disabled":""}
-              onclick="updateQty('${p.id}',1)">+</button>
-          </div>
-        </div>
-      `;
-    });
+    const div = document.createElement("div");
+    div.className="card";
+    div.innerHTML=`
+      <b>${p.name}</b><br>
+      Price: ₹${p.sellPrice}<br>
+      Available: ${p.quantity}
+      <input type="number" min="1" max="${p.quantity}" placeholder="Qty" id="qty-${doc.id}">
+      <button onclick="addToCart('${doc.id}','${p.name}',${p.sellPrice},${p.quantity})">Add</button>
+    `;
+    productGrid.appendChild(div);
+  });
+});
 
-  updateCartBar();
-}
+/* ADD TO CART */
+window.addToCart = function(id,name,price,stockQty){
+  const qtyInput = document.getElementById("qty-"+id);
+  const qty = Number(qtyInput.value);
 
-/* UPDATE CART */
-window.updateQty = (id,delta)=>{
-  const p = products.find(x=>x.id===id);
-  let item = cart.items.find(i=>i.productId===id);
+  if(!qty || qty<=0) return alert("Enter valid quantity");
+  if(qty > stockQty) return alert("Not enough stock");
 
-  if(!item && delta>0){
-    if(p.quantity<=0) return alert("Out of stock");
-    cart.items.push({
+  const existing = CART.items.find(i=>i.productId===id);
+
+  if(existing){
+    if(existing.quantity + qty > stockQty)
+      return alert("Exceeds stock");
+    existing.quantity += qty;
+  } else {
+    CART.items.push({
       productId:id,
-      name:p.name,
-      sellPrice:p.sellPrice,
-      quantity:1,
-      stockQty:p.quantity
-    });
-  } else if(item){
-    item.quantity += delta;
-    if(item.quantity<=0)
-      cart.items = cart.items.filter(i=>i.productId!==id);
-  }
-  render();
-};
-
-/* CART BAR */
-function updateCartBar(){
-  const count = cart.items.reduce((s,i)=>s+i.quantity,0);
-  const total = cart.items.reduce((s,i)=>s+i.sellPrice*i.quantity,0);
-  itemCount.innerText = count;
-  totalAmount.innerText = total.toLocaleString();
-  cartBar.style.display = count ? "flex" : "none";
-}
-
-/* CHECKOUT */
-checkoutBtn.onclick = async ()=>{
-  if(!cart.items.length) return;
-
-  // 🔒 REVALIDATE STOCK
-  for(const i of cart.items){
-    const live = products.find(p=>p.id===i.productId);
-    if(!live || live.quantity < i.quantity){
-      alert(`Insufficient stock for ${i.name}`);
-      return;
-    }
-  }
-
-  let amount = cart.items.reduce((s,i)=>s+i.sellPrice*i.quantity,0);
-
-  const saleRef = await addDoc(collection(db,"sales"),{
-    shopId,
-    soldBy:userId,
-    role:user.role,
-    items:cart.items,
-    amount,
-    createdAt:serverTimestamp()
-  });
-
-  await addDoc(collection(db,"auditLogs"),{
-    userId,
-    role:user.role,
-    shopId,
-    actionType:"SELL",
-    action:"Sale completed",
-    saleId:saleRef.id,
-    amount,
-    timestamp:serverTimestamp()
-  });
-
-  for(const i of cart.items){
-    await updateDoc(doc(db,"stock",i.productId),{
-      quantity:i.stockQty - i.quantity
+      name,
+      sellPrice:price,
+      quantity:qty
     });
   }
 
-  cart.items=[];
-  render();
-  loadProducts();
-  alert("Sale completed successfully");
+  localStorage.setItem("cart",JSON.stringify(CART));
+  alert("Added to cart");
+  qtyInput.value="";
 };
 
-/* INIT */
-search.oninput = render;
-loadProducts();
+window.goToCart = ()=>{
+  if(!CART.items.length) return alert("Cart empty");
+  location.href="cart.html";
+};
 </script>
-
 </body>
 </html>
