@@ -1,268 +1,252 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Stock – Inventory</title>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Shopkeeper · Stock</title>
 
-  <style>
-    :root {
-      --bg: #0f172a;
-      --card-bg: rgba(30, 41, 59, 0.82);
-      --border: rgba(148, 163, 184, 0.22);
-      --text: #e2e8f0;
-      --text-muted: #94a3b8;
-      --accent-green: #10b981;
-      --radius: 16px;
-      --shadow: 0 8px 24px rgba(0,0,0,0.35);
-    }
+<style>
+:root{
+  --bg:#0f172a;
+  --card:#1e293b;
+  --border:#334155;
+  --text:#e2e8f0;
+  --accent:#10b981;
+  --radius:16px;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:system-ui;background:var(--bg);color:var(--text)}
 
-    * { margin:0; padding:0; box-sizing:border-box; }
+header{
+  padding:1rem 1.5rem;
+  border-bottom:1px solid var(--border);
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
 
-    body {
-      font-family: system-ui;
-      background: var(--bg);
-      color: var(--text);
-      min-height: 100vh;
-    }
+button{
+  background:var(--accent);
+  border:none;
+  padding:.6rem 1.2rem;
+  border-radius:10px;
+  color:white;
+  cursor:pointer;
+}
 
-    .header {
-      background: linear-gradient(135deg, #1e293b, #0f172a);
-      border-bottom: 1px solid var(--border);
-      padding: 1.2rem 1.5rem;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.35);
-    }
+.container{padding:2rem;max-width:1300px;margin:auto}
 
-    .add-btn {
-      background: linear-gradient(135deg, #10b981, #059669);
-      color: white;
-      border: none;
-      padding: 0.75rem 1.5rem;
-      border-radius: 12px;
-      font-weight: 600;
-      cursor: pointer;
-    }
+.categories{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+  gap:1rem;
+  margin-bottom:2rem;
+}
 
-    .stock-grid {
-      max-width: 1400px;
-      margin: auto;
-      padding: 2rem 1.5rem;
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      gap: 1.4rem;
-    }
+.cat{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  padding:1.5rem;
+  text-align:center;
+  cursor:pointer;
+  transition:.25s;
+}
+.cat:hover{transform:translateY(-5px)}
 
-    .stock-card {
-      background: var(--card-bg);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 1.5rem;
-      box-shadow: var(--shadow);
-      cursor: pointer;
-      transition: .25s;
-    }
+.stock-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+  gap:1rem;
+}
 
-    .stock-card:hover {
-      transform: translateY(-6px);
-    }
+.card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  padding:1rem;
+  cursor:pointer;
+}
 
-    .stock-name {
-      font-size: 1.35rem;
-      font-weight: 700;
-      margin-bottom: .6rem;
-    }
+.modal{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.7);
+  display:none;
+  align-items:center;
+  justify-content:center;
+}
 
-    .stock-meta {
-      font-size: .95rem;
-      color: var(--text-muted);
-    }
+.modal-box{
+  background:var(--card);
+  padding:2rem;
+  border-radius:var(--radius);
+  width:95%;
+  max-width:450px;
+}
 
-    .price {
-      font-size: 1.25rem;
-      font-weight: 700;
-      color: var(--accent-green);
-      margin-top: .8rem;
-    }
-
-    /* MODAL */
-    .overlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(15,23,42,.85);
-      display: none;
-      z-index: 998;
-    }
-
-    .modal {
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%,-50%);
-      background: var(--card-bg);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 2rem;
-      width: 90%;
-      max-width: 480px;
-      display: none;
-      z-index: 999;
-    }
-
-    .modal input {
-      width: 100%;
-      padding: 1rem;
-      margin-bottom: 1.2rem;
-      border-radius: 12px;
-      border: 1px solid var(--border);
-      background: rgba(51,65,85,.6);
-      color: var(--text);
-    }
-
-    .modal button {
-      width: 100%;
-      padding: 1rem;
-      background: linear-gradient(135deg,#10b981,#059669);
-      color: white;
-      border: none;
-      border-radius: 12px;
-      font-weight: 600;
-      cursor: pointer;
-    }
-  </style>
+.modal-box input, .modal-box select{
+  width:100%;
+  padding:.7rem;
+  margin-bottom:1rem;
+  border-radius:8px;
+  border:1px solid var(--border);
+  background:#0f172a;
+  color:white;
+}
+</style>
 </head>
 
 <body>
 
-<div class="header">
-  <div>Stock – Inventory</div>
-  <div class="add-btn" id="addBtn">+ Add Item</div>
+<header>
+  <h3>Shopkeeper Stock</h3>
+  <button id="addBtn">+ Add Item</button>
+</header>
+
+<div class="container">
+
+<div class="categories">
+  <div class="cat" onclick="loadCategory('SPARE')">Spare Parts</div>
+  <div class="cat" onclick="loadCategory('BATTERY')">Batteries</div>
+  <div class="cat" onclick="loadCategory('ACCESSORY')">Accessories</div>
+  <div class="cat" onclick="loadCategory('SECOND_HAND')">Second Hand Mobiles</div>
+  <div class="cat" onclick="loadCategory('ALL')">All Products</div>
 </div>
 
 <div class="stock-grid" id="stockGrid"></div>
 
-<div class="overlay" id="overlay"></div>
+</div>
 
+<!-- MODAL -->
 <div class="modal" id="modal">
-  <input id="name" placeholder="Item name" />
-  <input id="category" placeholder="Category" />
-  <input id="quantity" type="number" placeholder="Quantity" min="0" />
-  <input id="sellPrice" type="number" placeholder="Selling price (₹)" min="0" />
-  <button id="saveBtn">Save Item</button>
+  <div class="modal-box">
+    <h3>Add / Edit Item</h3>
+    <input id="name" placeholder="Item Name"/>
+    <input id="barcode" placeholder="Barcode"/>
+    <select id="category">
+      <option value="">Select Category</option>
+      <option value="SPARE">Spare Parts</option>
+      <option value="BATTERY">Batteries</option>
+      <option value="ACCESSORY">Accessories</option>
+      <option value="SECOND_HAND">Second Hand Mobiles</option>
+    </select>
+    <input id="quantity" type="number" placeholder="Quantity"/>
+    <input id="buyPrice" type="number" placeholder="Buy Price"/>
+    <input id="sellPrice" type="number" placeholder="Sell Price"/>
+    <button onclick="saveItem()">Save</button>
+  </div>
 </div>
 
 <script type="module">
 import { db } from "../js/firebase.js";
 import {
-  collection, addDoc, getDocs, query, where,
-  serverTimestamp, doc, updateDoc
+  collection,
+  addDoc,
+  updateDoc,
+  doc,
+  onSnapshot,
+  query,
+  where
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-/* 🔐 AUTH SAFE */
+/* AUTH CHECK */
 const user = JSON.parse(localStorage.getItem("currentUser"));
-if (!user || user.role !== "SHOPKEEPER") {
-  location.href = "/login.html";
+if(!user || user.role !== "SHOPKEEPER"){
+  location.href="../login.html";
 }
 const shopId = user.shopId;
 
-/* UI */
 const stockGrid = document.getElementById("stockGrid");
 const modal = document.getElementById("modal");
-const overlay = document.getElementById("overlay");
-const name = document.getElementById("name");
-const category = document.getElementById("category");
-const quantity = document.getElementById("quantity");
-const sellPrice = document.getElementById("sellPrice");
-const saveBtn = document.getElementById("saveBtn");
 const addBtn = document.getElementById("addBtn");
 
+let ALL = [];
 let editId = null;
 
-/* LOAD STOCK */
-async function loadStock() {
-  stockGrid.innerHTML = "";
-  const q = query(collection(db,"stock"), where("shopId","==",shopId));
-  const snap = await getDocs(q);
+/* REALTIME LISTENER */
+const q = query(collection(db,"stock"), where("shopId","==",shopId));
+onSnapshot(q,(snap)=>{
+  ALL = snap.docs.map(d=>({id:d.id,...d.data()}));
+  loadCategory("ALL");
+});
 
-  snap.forEach(d=>{
-    const i = d.data();
+/* LOAD CATEGORY */
+window.loadCategory = function(cat){
+  stockGrid.innerHTML="";
+  let list = cat==="ALL" ? ALL : ALL.filter(i=>i.category===cat);
+
+  list.sort((a,b)=>a.name.localeCompare(b.name));
+
+  list.forEach(i=>{
     const div = document.createElement("div");
-    div.className = "stock-card";
-    div.innerHTML = `
-      <div class="stock-name">${i.name}</div>
-      <div class="stock-meta">Category: ${i.category}</div>
-      <div class="stock-meta">Quantity: ${i.quantity}</div>
-      <div class="price">₹${Number(i.sellPrice||0).toLocaleString()}</div>
+    div.className="card";
+    div.innerHTML=`
+      <b>${i.name}</b><br>
+      Barcode: ${i.barcode||"-"}<br>
+      Qty: ${i.quantity}<br>
+      Buy: ₹${i.buyPrice||0}<br>
+      Sell: ₹${i.sellPrice||0}
     `;
-    div.onclick = ()=>openEdit(d.id,i);
+    div.onclick=()=>openEdit(i);
     stockGrid.appendChild(div);
   });
+};
+
+/* OPEN EDIT */
+function openEdit(item){
+  editId = item.id;
+  name.value=item.name||"";
+  barcode.value=item.barcode||"";
+  category.value=item.category||"";
+  quantity.value=item.quantity||0;
+  buyPrice.value=item.buyPrice||0;
+  sellPrice.value=item.sellPrice||0;
+  modal.style.display="flex";
 }
 
-/* OPEN MODAL */
-function openEdit(id,item){
-  editId = id;
-  name.value = item.name || "";
-  category.value = item.category || "";
-  quantity.value = item.quantity ?? 0;
-  sellPrice.value = item.sellPrice ?? 0;
-  modal.style.display = "block";
-  overlay.style.display = "block";
-}
+/* ADD */
+addBtn.onclick=()=>{
+  editId=null;
+  name.value="";
+  barcode.value="";
+  category.value="";
+  quantity.value="";
+  buyPrice.value="";
+  sellPrice.value="";
+  modal.style.display="flex";
+};
 
 /* SAVE */
-saveBtn.onclick = async ()=>{
-  const data = {
-    name: name.value.trim(),
-    category: category.value.trim(),
-    quantity: Number(quantity.value) || 0,
-    sellPrice: Number(sellPrice.value) || 0
+window.saveItem = async function(){
+  const data={
+    name:name.value.trim(),
+    barcode:barcode.value.trim(),
+    category:category.value,
+    quantity:Number(quantity.value)||0,
+    buyPrice:Number(buyPrice.value)||0,
+    sellPrice:Number(sellPrice.value)||0,
+    shopId
   };
 
   if(!data.name || !data.category){
-    alert("Name & category required");
+    alert("Name & Category required");
     return;
   }
 
   if(editId){
     await updateDoc(doc(db,"stock",editId),data);
-  } else {
-    await addDoc(collection(db,"stock"),{
-      ...data,
-      shopId,
-      createdAt: serverTimestamp()
-    });
+  }else{
+    await addDoc(collection(db,"stock"),data);
   }
 
-  closeModal();
-  loadStock();
+  modal.style.display="none";
 };
 
-/* ADD NEW */
-addBtn.onclick = ()=>{
-  editId = null;
-  name.value = "";
-  category.value = "";
-  quantity.value = "";
-  sellPrice.value = "";
-  modal.style.display = "block";
-  overlay.style.display = "block";
+modal.onclick=(e)=>{
+  if(e.target===modal) modal.style.display="none";
 };
 
-overlay.onclick = closeModal;
-
-function closeModal(){
-  modal.style.display = "none";
-  overlay.style.display = "none";
-}
-
-loadStock();
 </script>
-
 </body>
 </html>
