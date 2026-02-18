@@ -38,13 +38,8 @@ button{
   margin-left:.5rem;
   transition:.2s;
 }
-button:hover{
-  opacity:.9;
-}
-
-.logout{
-  background:#ef4444;
-}
+button:hover{opacity:.9}
+.logout{background:#ef4444}
 
 main{
   max-width:1300px;
@@ -64,6 +59,12 @@ main{
   border:1px solid var(--border);
   border-radius:var(--radius);
   padding:1.5rem;
+  cursor:pointer;
+  transition:.25s;
+}
+.card:hover{
+  transform:translateY(-5px);
+  border-color:#60a5fa;
 }
 
 .shop-grid{
@@ -80,7 +81,6 @@ main{
   cursor:pointer;
   transition:.25s;
 }
-
 .shop-card:hover{
   transform:translateY(-5px);
   border-color:#60a5fa;
@@ -98,10 +98,7 @@ main{
   transition:.35s;
   z-index:999;
 }
-
-.panel.active{
-  bottom:0;
-}
+.panel.active{bottom:0}
 
 .close{
   margin-top:1.5rem;
@@ -127,10 +124,28 @@ main{
 <main>
 
 <div class="stats">
-  <div class="card">Total Revenue<br><b id="revenue">₹0</b></div>
-  <div class="card">Shopkeepers<br><b id="shopkeepers">0</b></div>
-  <div class="card">Workers<br><b id="workers">0</b></div>
-  <div class="card">Jobs<br><b id="jobs">0</b></div>
+
+  <div class="card">
+    Total Revenue<br><b id="revenue">₹0</b>
+  </div>
+
+  <div class="card">
+    Shopkeepers<br><b id="shopkeepers">0</b>
+  </div>
+
+  <div class="card">
+    Workers<br><b id="workers">0</b>
+  </div>
+
+  <div class="card">
+    Jobs<br><b id="jobs">0</b>
+  </div>
+
+  <!-- 🔥 NEW STOCK CARD -->
+  <div class="card" onclick="location.href='stock.html'">
+    Total Stock Items<br><b id="stockCount">0</b>
+  </div>
+
 </div>
 
 <h3>Your Shops</h3>
@@ -151,9 +166,9 @@ import {
   query,
   where,
   doc,
-  getDoc
+  getDoc,
+  onSnapshot
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-
 import { signOut }
 from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
@@ -169,12 +184,7 @@ const panelContent = document.getElementById("panelContent");
 
 /* LOGOUT */
 document.getElementById("logoutBtn").addEventListener("click", async () => {
-  try {
-    await signOut(auth);
-  } catch (e) {
-    console.log("Auth signout skipped (permanent login)");
-  }
-
+  try { await signOut(auth); } catch(e){}
   localStorage.removeItem("currentUser");
   window.location.replace("../login.html");
 });
@@ -182,24 +192,27 @@ document.getElementById("logoutBtn").addEventListener("click", async () => {
 /* LOAD STATS */
 async function loadStats(){
 
-  const shopkeepersSnap = await getDocs(
-    query(collection(db,"users"),where("role","==","SHOPKEEPER"))
-  );
-  document.getElementById("shopkeepers").innerText = shopkeepersSnap.size;
+  document.getElementById("shopkeepers").innerText =
+    (await getDocs(query(collection(db,"users"),
+      where("role","==","SHOPKEEPER")))).size;
 
-  const workersSnap = await getDocs(
-    query(collection(db,"users"),where("role","==","WORKER"))
-  );
-  document.getElementById("workers").innerText = workersSnap.size;
+  document.getElementById("workers").innerText =
+    (await getDocs(query(collection(db,"users"),
+      where("role","==","WORKER")))).size;
 
-  const jobsSnap = await getDocs(collection(db,"jobs"));
-  document.getElementById("jobs").innerText = jobsSnap.size;
+  document.getElementById("jobs").innerText =
+    (await getDocs(collection(db,"jobs"))).size;
 
   let total=0;
   const salesSnap = await getDocs(collection(db,"sales"));
   salesSnap.forEach(d=> total+=Number(d.data().amount||0));
   document.getElementById("revenue").innerText="₹"+total;
 }
+
+/* 🔥 REALTIME STOCK COUNT */
+onSnapshot(collection(db,"stock"),(snap)=>{
+  document.getElementById("stockCount").innerText = snap.size;
+});
 
 /* LOAD SHOPS */
 async function loadShops(){
@@ -208,18 +221,13 @@ async function loadShops(){
 
   snap.forEach(docSnap=>{
     const shop = docSnap.data();
-
     const card = document.createElement("div");
-    card.className = "shop-card";
-    card.innerHTML = `
+    card.className="shop-card";
+    card.innerHTML=`
       <b>${shop.shopName}</b><br>
       ${shop.city || ""}
     `;
-
-    card.addEventListener("click", ()=>{
-      viewShop(docSnap.id);
-    });
-
+    card.onclick=()=>viewShop(docSnap.id);
     shopList.appendChild(card);
   });
 }
