@@ -124,51 +124,89 @@ import {
 
 /* 🔒 SHOPKEEPER ONLY */
 const user = requireAuth("SHOPKEEPER");
-
 const list = document.getElementById("list");
 
-/* TODAY (yyyy-mm-dd) */
-function today() {
-  return new Date().toISOString().slice(0,10);
+/* SAFE LOCAL DATE (NO UTC SHIFT BUG) */
+function today(){
+  const d = new Date();
+  return d.getFullYear() + "-" +
+         String(d.getMonth()+1).padStart(2,"0") + "-" +
+         String(d.getDate()).padStart(2,"0");
 }
 
 /* LOAD ATTENDANCE */
-async function loadAttendance() {
+async function loadAttendance(){
+
   list.innerHTML = "";
 
-  const q = query(
-    collection(db, "attendance"),
-    where("shopId", "==", user.shopId),
-    where("date", "==", today())
+  /* GET TODAY ATTENDANCE */
+  const attendanceQuery = query(
+    collection(db,"attendance"),
+    where("shopId","==",user.shopId),
+    where("date","==",today())
   );
 
-  const snap = await getDocs(q);
+  const attendanceSnap = await getDocs(attendanceQuery);
 
-  if (snap.empty) {
+  if(attendanceSnap.empty){
     list.innerHTML = `<div class="empty">No attendance recorded today</div>`;
     return;
   }
 
-  snap.forEach(docSnap => {
+  /* FETCH WORKERS FOR NAME MAPPING */
+  const workersQuery = query(
+    collection(db,"users"),
+    where("shopId","==",user.shopId),
+    where("role","==","WORKER")
+  );
+
+  const workersSnap = await getDocs(workersQuery);
+
+  const workerMap = {};
+  workersSnap.forEach(w=>{
+    workerMap[w.id] = w.data().name || "Worker";
+  });
+
+  /* SORT BY CHECK-IN TIME */
+  const records = attendanceSnap.docs.sort((a,b)=>{
+    return (a.data().checkIn?.seconds || 0) -
+           (b.data().checkIn?.seconds || 0);
+  });
+
+  records.forEach(docSnap=>{
     const a = docSnap.data();
+
+    const workerName = workerMap[a.workerId] || "Worker";
+
+    const checkInTime = a.checkIn
+      ? a.checkIn.toDate().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})
+      : "—";
+
+    const checkOutTime = a.checkOut
+      ? a.checkOut.toDate().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})
+      : "—";
 
     const status = a.checkOut ? "PRESENT" : "WORKING";
 
     const div = document.createElement("div");
     div.className = "card";
     div.innerHTML = `
-      <b>${a.workerName || "Worker"}</b>
-      <div>Check-in: ${a.checkIn?.toDate().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</div>
-      <div>Check-out: ${a.checkOut ? a.checkOut.toDate().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) : "—"}</div>
+      <b>${workerName}</b>
+      <div>Check-in: ${checkInTime}</div>
+      <div>Check-out: ${checkOutTime}</div>
       <span class="status ${status}">${status}</span>
     `;
+
     list.appendChild(div);
   });
 }
 
-/* INITIAL LOAD + AUTO REFRESH */
+/* INITIAL LOAD */
 loadAttendance();
-setInterval(loadAttendance, 15000);
+
+/* AUTO REFRESH EVERY 15s */
+setInterval(loadAttendance,15000);
+
 </script>
 
 </body>

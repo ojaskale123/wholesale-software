@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Worker Management</title>
+
+<style>
+:root{
+  --bg:#0f172a;
+  --card:#1e293b;
+  --border:#334155;
+  --text:#e2e8f0;
+  --muted:#94a3b8;
+  --success:#10b981;
+  --danger:#ef4444;
+  --accent:#3b82f6;
+  --radius:16px;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:system-ui;background:var(--bg);color:var(--text)}
+
+header{
+  padding:1.2rem 1.5rem;
+  border-bottom:1px solid var(--border);
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+
+header h2{
+  font-size:1.4rem;
+  background:linear-gradient(90deg,#93c5fd,#c7d2fe);
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+}
+
+header button{
+  background:#ef4444;
+  border:none;
+  padding:.6rem 1.2rem;
+  border-radius:10px;
+  color:white;
+  cursor:pointer;
+}
+
+.container{
+  max-width:1100px;
+  margin:auto;
+  padding:2rem;
+}
+
+.grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+  gap:1.2rem;
+}
+
+.card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  padding:1.5rem;
+  transition:.25s;
+}
+
+.card:hover{
+  transform:translateY(-6px);
+  border-color:var(--accent);
+}
+
+.card b{
+  font-size:1.2rem;
+}
+
+.meta{
+  color:var(--muted);
+  margin-top:.5rem;
+}
+
+.status{
+  display:inline-block;
+  margin-top:.8rem;
+  padding:.4rem 1rem;
+  border-radius:999px;
+  font-size:.8rem;
+  font-weight:600;
+  color:white;
+}
+
+.ACTIVE{background:var(--success)}
+.INACTIVE{background:var(--danger)}
+.WORKING{background:var(--accent)}
+.PRESENT{background:var(--success)}
+
+.actions{
+  margin-top:1rem;
+}
+
+.actions button{
+  width:100%;
+  padding:.6rem;
+  border:none;
+  border-radius:10px;
+  cursor:pointer;
+  font-weight:600;
+}
+
+.activate{background:var(--success);color:white}
+.deactivate{background:var(--danger);color:white}
+
+.empty{
+  text-align:center;
+  color:var(--muted);
+  padding:3rem 1rem;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <h2>Worker Management</h2>
+  <button onclick="location.href='index.html'">← Back</button>
+</header>
+
+<div class="container">
+  <div class="grid" id="workerGrid"></div>
+</div>
+
+<script type="module">
+import { requireAuth } from "../auth/guard.js";
+import { db } from "../js/firebase.js";
+import {
+  collection,
+  query,
+  where,
+  onSnapshot,
+  doc,
+  updateDoc,
+  getDocs
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+/* 🔐 SHOPKEEPER ONLY */
+const user = requireAuth("SHOPKEEPER");
+const shopId = user.shopId;
+const workerGrid = document.getElementById("workerGrid");
+
+/* TODAY */
+function today(){
+  const d=new Date();
+  return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+}
+
+/* LOAD WORKERS REALTIME */
+const workerQuery = query(
+  collection(db,"users"),
+  where("shopId","==",shopId),
+  where("role","==","WORKER")
+);
+
+onSnapshot(workerQuery, async (snap)=>{
+
+  workerGrid.innerHTML="";
+
+  if(snap.empty){
+    workerGrid.innerHTML=`<div class="empty">No workers added yet</div>`;
+    return;
+  }
+
+  /* FETCH TODAY ATTENDANCE */
+  const attendanceSnap = await getDocs(
+    query(
+      collection(db,"attendance"),
+      where("shopId","==",shopId),
+      where("date","==",today())
+    )
+  );
+
+  const attendanceMap={};
+  attendanceSnap.forEach(a=>{
+    const data=a.data();
+    attendanceMap[data.workerId]=data.checkOut ? "PRESENT" : "WORKING";
+  });
+
+  snap.forEach(docSnap=>{
+    const w=docSnap.data();
+    const workerId=docSnap.id;
+
+    const isActive = w.active !== false; // default true
+    const attendanceStatus = attendanceMap[workerId] || null;
+
+    const card=document.createElement("div");
+    card.className="card";
+
+    card.innerHTML=`
+      <b>${w.name}</b>
+      <div class="meta">Email: ${w.email || "—"}</div>
+      <div class="meta">Joined: ${w.createdAt?.toDate().toLocaleDateString() || "—"}</div>
+      <span class="status ${isActive ? "ACTIVE":"INACTIVE"}">
+        ${isActive ? "ACTIVE":"INACTIVE"}
+      </span>
+      ${attendanceStatus ? 
+        `<span class="status ${attendanceStatus}">
+          ${attendanceStatus}
+        </span>` 
+      : ""}
+      <div class="actions">
+        <button class="${isActive ? "deactivate":"activate"}"
+          onclick="toggleStatus('${workerId}',${isActive})">
+          ${isActive ? "Deactivate":"Activate"}
+        </button>
+      </div>
+    `;
+
+    workerGrid.appendChild(card);
+  });
+
+});
+
+/* TOGGLE STATUS */
+window.toggleStatus = async (id,current)=>{
+  await updateDoc(doc(db,"users",id),{
+    active: !current
+  });
+};
+
+</script>
+
+</body>
+</html>
