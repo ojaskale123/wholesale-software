@@ -64,7 +64,8 @@ button{
 /* LIST VIEW */
 .list-view{display:none}
 
-.search-bar{
+.search-bar,
+.barcode-bar{
   width:100%;
   padding:1rem;
   border-radius:12px;
@@ -75,14 +76,9 @@ button{
 }
 
 .barcode-bar{
-  width:100%;
-  padding:1rem;
-  border-radius:12px;
-  border:1px solid var(--border);
   background:#111827;
   color:#22c55e;
   font-weight:600;
-  margin-bottom:1.5rem;
 }
 
 .grid{
@@ -100,6 +96,7 @@ button{
 .card b{font-size:1.1rem}
 .meta{color:#94a3b8;margin-top:.4rem}
 .price{color:var(--accent);font-weight:700;margin-top:.6rem}
+
 .back-btn{
   margin-bottom:1.2rem;
   background:#334155;
@@ -118,20 +115,17 @@ button{
 
   <!-- CATEGORY VIEW -->
   <div id="categoryView" class="categories">
-    <div class="cat-card spare" onclick="openCategory('Spare Parts')">Spare Parts</div>
-    <div class="cat-card battery" onclick="openCategory('Batteries')">Batteries</div>
-    <div class="cat-card accessories" onclick="openCategory('Accessories')">Accessories</div>
-    <div class="cat-card phone" onclick="openCategory('Second Hand Mobiles')">Second Hand Mobiles</div>
+    <div class="cat-card spare" onclick="openCategory('SPARE')">Spare Parts</div>
+    <div class="cat-card battery" onclick="openCategory('BATTERY')">Batteries</div>
+    <div class="cat-card accessories" onclick="openCategory('ACCESSORY')">Accessories</div>
+    <div class="cat-card phone" onclick="openCategory('SECOND_HAND')">Second Hand Mobiles</div>
   </div>
 
   <!-- LIST VIEW -->
   <div id="listView" class="list-view">
     <button class="back-btn" onclick="goBack()">← Categories</button>
 
-    <!-- 🔎 Normal Search -->
     <input type="text" id="searchInput" class="search-bar" placeholder="Search by name..."/>
-
-    <!-- 📦 Barcode Search -->
     <input type="text" id="barcodeInput" class="barcode-bar" placeholder="Scan or enter barcode..." autofocus/>
 
     <div class="grid" id="grid"></div>
@@ -144,10 +138,12 @@ import { requireAuth } from "../auth/guard.js";
 import { db } from "../js/firebase.js";
 import {
   collection,
+  query,
+  where,
   onSnapshot
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-/* WORKER AUTH */
+/* 🔒 WORKER AUTH */
 const user = requireAuth("WORKER");
 const shopId = user.shopId;
 
@@ -160,9 +156,14 @@ const barcodeInput = document.getElementById("barcodeInput");
 let ALL_PRODUCTS = [];
 let CURRENT_CATEGORY = null;
 
-/* REAL-TIME STOCK */
-onSnapshot(collection(db,"stock"), snap=>{
-  ALL_PRODUCTS = snap.docs.map(d=>d.data());
+/* ✅ REAL-TIME SHOP STOCK ONLY */
+const stockQuery = query(collection(db,"stock"), where("shopId","==",shopId));
+
+onSnapshot(stockQuery, snap=>{
+  ALL_PRODUCTS = snap.docs.map(d=>({
+    id:d.id,
+    ...d.data()
+  }));
   render();
 });
 
@@ -198,16 +199,19 @@ function render(){
   grid.innerHTML="";
 
   let filtered = ALL_PRODUCTS
-    .filter(p=>p.shopId===shopId)
-    .filter(p=>p.category===CURRENT_CATEGORY);
+    .filter(p=>p.category === CURRENT_CATEGORY);
 
   if(barcodeQuery){
-    filtered = filtered.filter(p => p.barcode === barcodeQuery);
+    filtered = filtered.filter(p => (p.barcode || "") === barcodeQuery);
   } else {
-    filtered = filtered.filter(p => p.name.toLowerCase().includes(nameQuery));
+    filtered = filtered.filter(p =>
+      (p.name || "").toLowerCase().includes(nameQuery)
+    );
   }
 
-  filtered = filtered.sort((a,b)=>a.name.localeCompare(b.name));
+  filtered.sort((a,b)=>
+    (a.name || "").localeCompare(b.name || "")
+  );
 
   if(!filtered.length){
     grid.innerHTML="<div style='color:#94a3b8'>No items found</div>";
@@ -217,9 +221,9 @@ function render(){
   filtered.forEach(item=>{
     grid.innerHTML+=`
       <div class="card">
-        <b>${item.name}</b>
-        <div class="meta">Qty: ${item.quantity}</div>
-        <div class="price">₹${item.sellPrice}</div>
+        <b>${item.name || "Unnamed"}</b>
+        <div class="meta">Qty: ${item.quantity ?? 0}</div>
+        <div class="price">₹${item.sellPrice ?? 0}</div>
       </div>
     `;
   });

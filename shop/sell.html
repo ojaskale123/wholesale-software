@@ -3,146 +3,253 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Sell Products</title>
+<title>Sell – Point of Sale</title>
 
 <style>
-:root{
+:root {
   --bg:#0f172a;
-  --card:#1e293b;
-  --border:#334155;
+  --card-bg:rgba(30,41,59,.82);
+  --border:rgba(148,163,184,.22);
   --text:#e2e8f0;
-  --accent:#10b981;
+  --accent-green:#10b981;
+  --radius:14px;
 }
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:system-ui;background:var(--bg);color:var(--text)}
 
-header{
-  padding:1rem 1.5rem;
+.header{
+  background:linear-gradient(135deg,#1e293b,#0f172a);
+  border-bottom:1px solid var(--border);
+  padding:1.2rem;
+  text-align:center;
+  font-size:1.5rem;
+  font-weight:700;
+}
+
+.container{
+  max-width:1200px;
+  margin:auto;
+  padding:1.5rem;
+}
+
+#search{
+  width:100%;
+  padding:1rem;
+  border-radius:12px;
+  border:1px solid var(--border);
+  background:#33415599;
+  color:white;
+  margin-bottom:1.5rem;
+}
+
+#list{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(280px,1fr));
+  gap:1.2rem;
+}
+
+.item{
+  background:var(--card-bg);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  padding:1.2rem;
   display:flex;
   justify-content:space-between;
   align-items:center;
-  border-bottom:1px solid var(--border);
 }
 
-button{
-  background:var(--accent);
-  border:none;
-  padding:.6rem 1rem;
+.qty-controls{
+  display:flex;
+  gap:.5rem;
+  align-items:center;
+}
+
+.qty-btn{
+  width:36px;
+  height:36px;
   border-radius:8px;
+  border:1px solid var(--border);
+  background:#334155;
   color:white;
   cursor:pointer;
 }
 
-.container{padding:2rem;max-width:1200px;margin:auto}
-
-.grid{
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
-  gap:1rem;
+.qty-btn:disabled{
+  opacity:.4;
+  cursor:not-allowed;
 }
 
-.card{
-  background:var(--card);
-  padding:1rem;
+.cart-bar{
+  position:fixed;
+  bottom:0;
+  left:0;
+  right:0;
+  background:#1e293b;
+  padding:1rem 1.5rem;
+  display:none;
+  justify-content:space-between;
+  align-items:center;
+}
+
+#checkoutBtn{
+  background:linear-gradient(135deg,#10b981,#059669);
+  border:none;
+  padding:.9rem 1.6rem;
   border-radius:12px;
-  border:1px solid var(--border);
-}
-
-input{
-  width:100%;
-  padding:.5rem;
-  margin-top:.6rem;
-  border-radius:6px;
-  border:1px solid var(--border);
-  background:#0f172a;
   color:white;
+  cursor:pointer;
 }
 </style>
 </head>
 
 <body>
 
-<header>
-  <h3>Sell Products</h3>
-  <button onclick="goToCart()">View Cart</button>
-</header>
+<div class="header">Sell – Point of Sale</div>
 
 <div class="container">
-  <div class="grid" id="productGrid"></div>
+  <input id="search" placeholder="Search name or barcode...">
+  <div id="list"></div>
+</div>
+
+<div class="cart-bar" id="cartBar">
+  <div>
+    Items: <b id="itemCount">0</b> |
+    Total: ₹<b id="totalAmount">0</b>
+  </div>
+  <button id="checkoutBtn">Checkout →</button>
 </div>
 
 <script type="module">
-import { requireAuth } from "../auth/guard.js";
 import { db } from "../js/firebase.js";
 import {
-  collection,
-  query,
-  where,
-  onSnapshot
+  collection, getDocs, query, where
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-const user = requireAuth(["SHOPKEEPER","WORKER"]);
+/* 🔐 AUTH */
+const user = JSON.parse(localStorage.getItem("currentUser"));
+if(!user || !["SHOPKEEPER","WORKER"].includes(user.role)){
+  location.href="../login.html";
+}
 const shopId = user.shopId;
 
-const productGrid = document.getElementById("productGrid");
+/* STATE */
+let products=[];
+let cart={items:[]};
 
-let CART = JSON.parse(localStorage.getItem("cart")) || { items: [] };
+/* ELEMENTS */
+const list=document.getElementById("list");
+const search=document.getElementById("search");
+const cartBar=document.getElementById("cartBar");
+const itemCount=document.getElementById("itemCount");
+const totalAmount=document.getElementById("totalAmount");
+const checkoutBtn=document.getElementById("checkoutBtn");
 
-/* LOAD STOCK REALTIME */
-const q = query(collection(db,"stock"), where("shopId","==",shopId));
+/* LOAD STOCK */
+async function loadProducts(){
+  const q=query(collection(db,"stock"),where("shopId","==",shopId));
+  const snap=await getDocs(q);
 
-onSnapshot(q,(snap)=>{
-  productGrid.innerHTML="";
+  products=snap.docs.map(d=>({
+    id:d.id,
+    ...d.data(),
+    quantity:Number(d.data().quantity||0),
+    sellPrice:Number(d.data().sellPrice||0)
+  }));
 
-  snap.forEach(doc=>{
-    const p = doc.data();
-    if(p.quantity <= 0) return;
+  render();
+}
 
-    const div = document.createElement("div");
-    div.className="card";
-    div.innerHTML=`
-      <b>${p.name}</b><br>
-      Price: ₹${p.sellPrice}<br>
-      Available: ${p.quantity}
-      <input type="number" min="1" max="${p.quantity}" placeholder="Qty" id="qty-${doc.id}">
-      <button onclick="addToCart('${doc.id}','${p.name}',${p.sellPrice},${p.quantity})">Add</button>
+/* RENDER */
+function render(){
+  list.innerHTML="";
+  const q=search.value.toLowerCase();
+
+  products
+  .filter(p=>
+    (p.name||"").toLowerCase().includes(q) ||
+    String(p.barcode||"").includes(q)
+  )
+  .forEach(p=>{
+
+    const inCart=cart.items.find(i=>i.productId===p.id);
+    const qty=inCart?inCart.quantity:0;
+
+    list.innerHTML+=`
+      <div class="item">
+        <div>
+          <b>${p.name||"Unnamed"}</b><br>
+          ₹${p.sellPrice} • Stock: ${p.quantity}
+        </div>
+        <div class="qty-controls">
+          <button class="qty-btn"
+            ${qty<=0?"disabled":""}
+            onclick="updateQty('${p.id}',-1)">-</button>
+          <span>${qty}</span>
+          <button class="qty-btn"
+            ${qty>=p.quantity?"disabled":""}
+            onclick="updateQty('${p.id}',1)">+</button>
+        </div>
+      </div>
     `;
-    productGrid.appendChild(div);
   });
-});
 
-/* ADD TO CART */
-window.addToCart = function(id,name,price,stockQty){
-  const qtyInput = document.getElementById("qty-"+id);
-  const qty = Number(qtyInput.value);
+  updateCartBar();
+}
 
-  if(!qty || qty<=0) return alert("Enter valid quantity");
-  if(qty > stockQty) return alert("Not enough stock");
+/* UPDATE QTY */
+window.updateQty=(id,delta)=>{
+  const product=products.find(p=>p.id===id);
+  let item=cart.items.find(i=>i.productId===id);
 
-  const existing = CART.items.find(i=>i.productId===id);
+  if(!product) return;
 
-  if(existing){
-    if(existing.quantity + qty > stockQty)
-      return alert("Exceeds stock");
-    existing.quantity += qty;
-  } else {
-    CART.items.push({
+  if(!item && delta>0){
+    if(product.quantity<=0) return alert("Out of stock");
+
+    cart.items.push({
       productId:id,
-      name,
-      sellPrice:price,
-      quantity:qty
+      name:product.name,
+      sellPrice:product.sellPrice,
+      quantity:1
     });
+
+  }else if(item){
+    item.quantity+=delta;
+
+    if(item.quantity<=0){
+      cart.items=cart.items.filter(i=>i.productId!==id);
+    }
+
+    if(item.quantity>product.quantity){
+      item.quantity=product.quantity;
+    }
   }
 
-  localStorage.setItem("cart",JSON.stringify(CART));
-  alert("Added to cart");
-  qtyInput.value="";
+  render();
 };
 
-window.goToCart = ()=>{
-  if(!CART.items.length) return alert("Cart empty");
+/* CART BAR */
+function updateCartBar(){
+  const count=cart.items.reduce((s,i)=>s+i.quantity,0);
+  const total=cart.items.reduce((s,i)=>s+i.sellPrice*i.quantity,0);
+
+  itemCount.innerText=count;
+  totalAmount.innerText=total.toLocaleString();
+
+  cartBar.style.display=count?"flex":"none";
+}
+
+/* CHECKOUT */
+checkoutBtn.onclick=()=>{
+  if(!cart.items.length) return;
+
+  localStorage.setItem("cart",JSON.stringify(cart));
   location.href="cart.html";
 };
+
+search.oninput=render;
+loadProducts();
 </script>
+
 </body>
 </html>

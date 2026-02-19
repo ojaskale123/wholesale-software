@@ -6,57 +6,68 @@
 <title>Cart Summary</title>
 
 <style>
-:root{
+:root {
   --bg:#0f172a;
-  --card:#1e293b;
-  --border:#334155;
+  --card-bg:rgba(30,41,59,.8);
+  --border:rgba(148,163,184,.2);
   --text:#e2e8f0;
-  --accent:#10b981;
+  --accent-green:#10b981;
+  --radius:14px;
 }
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:system-ui;background:var(--bg);color:var(--text)}
 
 header{
+  background:#1e293b;
   padding:1rem 1.5rem;
   display:flex;
   justify-content:space-between;
   align-items:center;
-  border-bottom:1px solid var(--border);
 }
 
-button{
-  background:var(--accent);
-  border:none;
-  padding:.6rem 1rem;
-  border-radius:8px;
-  color:white;
-  cursor:pointer;
+.container{
+  max-width:720px;
+  margin:auto;
+  padding:1.8rem;
 }
-
-.container{max-width:700px;margin:auto;padding:2rem}
 
 .item{
-  background:var(--card);
-  padding:1rem;
-  border-radius:10px;
+  background:var(--card-bg);
   border:1px solid var(--border);
+  border-radius:var(--radius);
+  padding:1.2rem;
   margin-bottom:1rem;
 }
 
 .total{
-  font-size:1.5rem;
   text-align:right;
-  margin:1rem 0;
+  font-size:1.5rem;
+  font-weight:700;
+  color:var(--accent-green);
+  margin:1.5rem 0;
 }
+
 input{
   width:100%;
-  padding:.7rem;
+  padding:1rem;
   margin-bottom:1rem;
-  border-radius:6px;
+  border-radius:12px;
   border:1px solid var(--border);
-  background:#0f172a;
+  background:#33415599;
   color:white;
 }
+
+.btn{
+  width:100%;
+  padding:1rem;
+  border:none;
+  border-radius:12px;
+  cursor:pointer;
+  margin-top:.8rem;
+}
+
+.confirm{background:#10b981;color:white}
+.cancel{background:#475569;color:white}
 </style>
 </head>
 
@@ -75,7 +86,8 @@ input{
   <input id="custName" placeholder="Customer Name">
   <input id="custPhone" placeholder="Customer Phone">
 
-  <button onclick="confirmSell()">Confirm Sale</button>
+  <button class="btn confirm" onclick="confirmSell()">CONFIRM SELL</button>
+  <button class="btn cancel" onclick="cancelCart()">CANCEL</button>
 </div>
 
 <script type="module">
@@ -90,83 +102,74 @@ import {
   serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-const user = requireAuth(["SHOPKEEPER","WORKER"]);
+const user=requireAuth(["SHOPKEEPER","WORKER"]);
 
-const cart = JSON.parse(localStorage.getItem("cart"));
-
+const cart=JSON.parse(localStorage.getItem("cart"));
 if(!cart || !cart.items.length){
   alert("Cart empty");
   location.href="sell.html";
 }
 
-let total=0;
 const list=document.getElementById("cartItems");
+let total=0;
 
 cart.items.forEach(i=>{
   total+=i.sellPrice*i.quantity;
-
-  const div=document.createElement("div");
-  div.className="item";
-  div.innerHTML=`
-    <b>${i.name}</b><br>
-    Qty: ${i.quantity} × ₹${i.sellPrice}<br>
-    Subtotal: ₹${i.sellPrice*i.quantity}
+  list.innerHTML+=`
+    <div class="item">
+      <b>${i.name}</b><br>
+      Qty: ${i.quantity} × ₹${i.sellPrice}
+    </div>
   `;
-  list.appendChild(div);
 });
-
 document.getElementById("total").innerText=total;
 
+/* CONFIRM */
 window.confirmSell=async()=>{
+  if(!custName.value || !custPhone.value)
+    return alert("Enter customer details");
 
-  const name=document.getElementById("custName").value.trim();
-  const phone=document.getElementById("custPhone").value.trim();
+  const saleRef=await addDoc(collection(db,"sales"),{
+    shopId:user.shopId,
+    amount:total,
+    soldBy:user.uid,
+    customerName:custName.value,
+    customerPhone:custPhone.value,
+    createdAt:serverTimestamp()
+  });
 
-  if(!name||!phone) return alert("Enter customer details");
-
-  try{
-
-    const saleRef=await addDoc(collection(db,"sales"),{
-      shopId:user.shopId,
-      amount:total,
-      soldBy:user.uid,
-      customerName:name,
-      customerPhone:phone,
-      createdAt:serverTimestamp()
+  for(const i of cart.items){
+    await updateDoc(doc(db,"stock",i.productId),{
+      quantity:increment(-i.quantity)
     });
-
-    for(const i of cart.items){
-      await updateDoc(doc(db,"stock",i.productId),{
-        quantity:increment(-i.quantity)
-      });
-    }
-
-    await addDoc(collection(db,"jobs"),{
-      shopId:user.shopId,
-      type:"SELL",
-      status:"DELIVERED",
-      saleId:saleRef.id,
-      totalAmount:total,
-      createdAt:serverTimestamp()
-    });
-
-    await addDoc(collection(db,"auditLogs"),{
-      userId:user.uid,
-      role:user.role,
-      actionType:"SALE",
-      action:`Sold ₹${total}`,
-      shopId:user.shopId,
-      timestamp:serverTimestamp()
-    });
-
-    localStorage.removeItem("cart");
-    alert("Sale completed");
-    location.href="sell.html";
-
-  }catch(e){
-    console.error(e);
-    alert("Error completing sale");
   }
+
+  await addDoc(collection(db,"jobs"),{
+    shopId:user.shopId,
+    type:"SELL",
+    status:"DELIVERED",
+    saleId:saleRef.id,
+    totalAmount:total,
+    createdAt:serverTimestamp()
+  });
+
+  await addDoc(collection(db,"auditLogs"),{
+    userId:user.uid,
+    role:user.role,
+    actionType:"SALE",
+    shopId:user.shopId,
+    amount:total,
+    timestamp:serverTimestamp()
+  });
+
+  localStorage.removeItem("cart");
+  alert("Sale completed");
+  location.href="sell.html";
+};
+
+window.cancelCart=()=>{
+  localStorage.removeItem("cart");
+  location.href="sell.html";
 };
 </script>
 
