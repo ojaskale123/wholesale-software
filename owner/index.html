@@ -19,7 +19,6 @@ body{
   background:var(--bg);
   color:var(--text);
 }
-
 header{
   padding:2rem;
   border-bottom:1px solid var(--border);
@@ -27,7 +26,6 @@ header{
   justify-content:space-between;
   align-items:center;
 }
-
 button{
   padding:.6rem 1rem;
   border:none;
@@ -36,24 +34,19 @@ button{
   background:#1d4ed8;
   color:white;
   margin-left:.5rem;
-  transition:.2s;
 }
-button:hover{opacity:.9}
 .logout{background:#ef4444}
-
 main{
   max-width:1300px;
   margin:auto;
   padding:2rem;
 }
-
 .stats{
   display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
   gap:1rem;
   margin-bottom:2rem;
 }
-
 .card{
   background:var(--card);
   border:1px solid var(--border);
@@ -66,26 +59,18 @@ main{
   transform:translateY(-5px);
   border-color:#60a5fa;
 }
-
 .shop-grid{
   display:grid;
   grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
   gap:1rem;
 }
-
 .shop-card{
   background:var(--card);
   border:1px solid var(--border);
   border-radius:var(--radius);
   padding:1.2rem;
   cursor:pointer;
-  transition:.25s;
 }
-.shop-card:hover{
-  transform:translateY(-5px);
-  border-color:#60a5fa;
-}
-
 .panel{
   position:fixed;
   bottom:-100%;
@@ -97,9 +82,10 @@ main{
   border-top-right-radius:20px;
   transition:.35s;
   z-index:999;
+  max-height:70vh;
+  overflow:auto;
 }
 .panel.active{bottom:0}
-
 .close{
   margin-top:1.5rem;
   text-align:center;
@@ -125,25 +111,34 @@ main{
 
 <div class="stats">
 
-  <div class="card">
+  <div class="card" onclick="openRevenue()">
     Total Revenue<br><b id="revenue">₹0</b>
   </div>
 
-  <div class="card">
+  <div class="card" onclick="openShopkeepers()">
     Shopkeepers<br><b id="shopkeepers">0</b>
   </div>
 
-  <div class="card">
+  <div class="card" onclick="openWorkers()">
     Workers<br><b id="workers">0</b>
   </div>
 
-  <div class="card">
+  <div class="card" onclick="openJobs()">
     Jobs<br><b id="jobs">0</b>
   </div>
 
-  <!-- 🔥 NEW STOCK CARD -->
   <div class="card" onclick="location.href='stock.html'">
     Total Stock Items<br><b id="stockCount">0</b>
+  </div>
+
+  <!-- ✅ NEW HISTORY CARD -->
+  <div class="card" onclick="location.href='history.html'">
+    History<br><b>View Sales & Jobs</b>
+  </div>
+
+  <!-- ✅ NEW SELL CARD -->
+  <div class="card" onclick="location.href='../shop/sell.html'">
+    Sell Overview<br><b>Quick Access</b>
   </div>
 
 </div>
@@ -172,114 +167,97 @@ import {
 import { signOut }
 from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-/* OWNER CHECK */
+/* AUTH */
 const user = JSON.parse(localStorage.getItem("currentUser"));
 if (!user || user.role !== "OWNER") {
-  window.location.replace("../login.html");
+  location.href="../login.html";
 }
-
-const shopList = document.getElementById("shopList");
-const panel = document.getElementById("panel");
-const panelContent = document.getElementById("panelContent");
 
 /* LOGOUT */
-document.getElementById("logoutBtn").addEventListener("click", async () => {
-  try { await signOut(auth); } catch(e){}
-  localStorage.removeItem("currentUser");
-  window.location.replace("../login.html");
+document.getElementById("logoutBtn").onclick=async()=>{
+  try{await signOut(auth);}catch(e){}
+  localStorage.clear();
+  location.href="../login.html";
+};
+
+const panel=document.getElementById("panel");
+const panelContent=document.getElementById("panelContent");
+const shopList=document.getElementById("shopList");
+
+/* REALTIME STATS */
+onSnapshot(collection(db,"users"),snap=>{
+  let s=0,w=0;
+  snap.forEach(d=>{
+    if(d.data().role==="SHOPKEEPER") s++;
+    if(d.data().role==="WORKER") w++;
+  });
+  shopkeepers.innerText=s;
+  workers.innerText=w;
 });
 
-/* LOAD STATS */
-async function loadStats(){
+onSnapshot(collection(db,"jobs"),snap=>{
+  jobs.innerText=snap.size;
+});
 
-  document.getElementById("shopkeepers").innerText =
-    (await getDocs(query(collection(db,"users"),
-      where("role","==","SHOPKEEPER")))).size;
-
-  document.getElementById("workers").innerText =
-    (await getDocs(query(collection(db,"users"),
-      where("role","==","WORKER")))).size;
-
-  document.getElementById("jobs").innerText =
-    (await getDocs(collection(db,"jobs"))).size;
-
+onSnapshot(collection(db,"sales"),snap=>{
   let total=0;
-  const salesSnap = await getDocs(collection(db,"sales"));
-  salesSnap.forEach(d=> total+=Number(d.data().amount||0));
-  document.getElementById("revenue").innerText="₹"+total;
-}
-
-/* 🔥 REALTIME STOCK COUNT */
-onSnapshot(collection(db,"stock"),(snap)=>{
-  document.getElementById("stockCount").innerText = snap.size;
+  snap.forEach(d=> total+=Number(d.data().amount||0));
+  revenue.innerText="₹"+total.toLocaleString();
 });
+
+onSnapshot(collection(db,"stock"),snap=>{
+  stockCount.innerText=snap.size;
+});
+
+/* OPEN FUNCTIONS */
+window.openRevenue=async()=>{
+  const snap=await getDocs(collection(db,"sales"));
+  panelContent.innerHTML=`<h3>Total Revenue</h3>
+  <p>Total Sales Count: ${snap.size}</p>
+  <p>Combined Revenue: ${revenue.innerText}</p>`;
+  panel.classList.add("active");
+};
+
+window.openShopkeepers=async()=>{
+  const snap=await getDocs(query(collection(db,"users"),
+    where("role","==","SHOPKEEPER")));
+  let html="<h3>Shopkeepers</h3>";
+  snap.forEach(d=> html+=`<p>${d.data().name}</p>`);
+  panelContent.innerHTML=html;
+  panel.classList.add("active");
+};
+
+window.openWorkers=async()=>{
+  const snap=await getDocs(query(collection(db,"users"),
+    where("role","==","WORKER")));
+  let html="<h3>Workers</h3>";
+  snap.forEach(d=> html+=`<p>${d.data().name}</p>`);
+  panelContent.innerHTML=html;
+  panel.classList.add("active");
+};
+
+window.openJobs=async()=>{
+  const snap=await getDocs(collection(db,"jobs"));
+  panelContent.innerHTML=`<h3>Jobs Overview</h3>
+  <p>Total Jobs: ${snap.size}</p>`;
+  panel.classList.add("active");
+};
+
+window.closePanel=()=>panel.classList.remove("active");
 
 /* LOAD SHOPS */
 async function loadShops(){
-  const snap = await getDocs(collection(db,"shops"));
+  const snap=await getDocs(collection(db,"shops"));
   shopList.innerHTML="";
-
   snap.forEach(docSnap=>{
-    const shop = docSnap.data();
-    const card = document.createElement("div");
-    card.className="shop-card";
-    card.innerHTML=`
-      <b>${shop.shopName}</b><br>
-      ${shop.city || ""}
-    `;
-    card.onclick=()=>viewShop(docSnap.id);
-    shopList.appendChild(card);
+    const s=docSnap.data();
+    const div=document.createElement("div");
+    div.className="shop-card";
+    div.innerHTML=`<b>${s.shopName}</b><br>${s.city||""}`;
+    shopList.appendChild(div);
   });
 }
-
-/* VIEW SHOP DETAILS */
-async function viewShop(id){
-
-  const shopDoc = await getDoc(doc(db,"shops",id));
-  const shop = shopDoc.data();
-
-  const shopkeeperSnap = await getDocs(
-    query(collection(db,"users"),
-      where("shopId","==",id),
-      where("role","==","SHOPKEEPER"))
-  );
-
-  const workerSnap = await getDocs(
-    query(collection(db,"users"),
-      where("shopId","==",id),
-      where("role","==","WORKER"))
-  );
-
-  const jobsSnap = await getDocs(
-    query(collection(db,"jobs"),
-      where("shopId","==",id))
-  );
-
-  let revenue=0;
-  const salesSnap = await getDocs(
-    query(collection(db,"sales"),
-      where("shopId","==",id))
-  );
-  salesSnap.forEach(d=> revenue+=Number(d.data().amount||0));
-
-  panelContent.innerHTML = `
-    <h3>${shop.shopName}</h3>
-    <p><b>City:</b> ${shop.city || "—"}</p>
-    <p><b>Shopkeeper:</b> ${shopkeeperSnap.docs[0]?.data()?.name || "Not Assigned"}</p>
-    <p><b>Total Workers:</b> ${workerSnap.size}</p>
-    <p><b>Total Jobs:</b> ${jobsSnap.size}</p>
-    <p><b>Total Revenue:</b> ₹${revenue}</p>
-  `;
-
-  panel.classList.add("active");
-}
-
-window.closePanel = ()=> panel.classList.remove("active");
-
-/* INIT */
-loadStats();
 loadShops();
-
 </script>
 
 </body>
