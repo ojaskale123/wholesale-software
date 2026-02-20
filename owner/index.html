@@ -69,7 +69,6 @@ main{
   border:1px solid var(--border);
   border-radius:var(--radius);
   padding:1.2rem;
-  cursor:pointer;
 }
 .panel{
   position:fixed;
@@ -131,14 +130,12 @@ main{
     Total Stock Items<br><b id="stockCount">0</b>
   </div>
 
-  <!-- ✅ NEW HISTORY CARD -->
   <div class="card" onclick="location.href='history.html'">
-    History<br><b>View Sales & Jobs</b>
+    History<br><b>View Activity</b>
   </div>
 
-  <!-- ✅ NEW SELL CARD -->
-  <div class="card" onclick="location.href='../shop/sell.html'">
-    Sell Overview<br><b>Quick Access</b>
+  <div class="card" onclick="location.href='sell-overview.html'">
+    Sell Overview<br><b>View All Sales</b>
   </div>
 
 </div>
@@ -160,14 +157,12 @@ import {
   getDocs,
   query,
   where,
-  doc,
-  getDoc,
   onSnapshot
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 import { signOut }
 from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-/* AUTH */
+/* AUTH CHECK */
 const user = JSON.parse(localStorage.getItem("currentUser"));
 if (!user || user.role !== "OWNER") {
   location.href="../login.html";
@@ -210,36 +205,91 @@ onSnapshot(collection(db,"stock"),snap=>{
 });
 
 /* OPEN FUNCTIONS */
+
 window.openRevenue=async()=>{
   const snap=await getDocs(collection(db,"sales"));
-  panelContent.innerHTML=`<h3>Total Revenue</h3>
-  <p>Total Sales Count: ${snap.size}</p>
-  <p>Combined Revenue: ${revenue.innerText}</p>`;
+  panelContent.innerHTML=`
+    <h3>Total Revenue</h3>
+    <p>Total Sales: ${snap.size}</p>
+    <p>Revenue: ${revenue.innerText}</p>
+  `;
   panel.classList.add("active");
 };
 
 window.openShopkeepers=async()=>{
-  const snap=await getDocs(query(collection(db,"users"),
-    where("role","==","SHOPKEEPER")));
-  let html="<h3>Shopkeepers</h3>";
-  snap.forEach(d=> html+=`<p>${d.data().name}</p>`);
+  const usersSnap=await getDocs(query(
+    collection(db,"users"),
+    where("role","==","SHOPKEEPER")
+  ));
+  const shopsSnap=await getDocs(collection(db,"shops"));
+  const shops=shopsSnap.docs.map(d=>({id:d.id,...d.data()}));
+
+  let html=`<h3>Shopkeepers</h3>
+            <p>Total: ${usersSnap.size}</p><br>`;
+
+  usersSnap.forEach(docSnap=>{
+    const u=docSnap.data();
+    const shop=shops.find(s=>s.id===u.shopId);
+    html+=`
+      <div style="margin-bottom:8px">
+        <b>${u.name}</b>
+        <small style="color:#94a3b8">
+          • Shop: ${shop?.shopName || "Not Assigned"}
+        </small>
+      </div>
+    `;
+  });
+
   panelContent.innerHTML=html;
   panel.classList.add("active");
 };
 
 window.openWorkers=async()=>{
-  const snap=await getDocs(query(collection(db,"users"),
-    where("role","==","WORKER")));
-  let html="<h3>Workers</h3>";
-  snap.forEach(d=> html+=`<p>${d.data().name}</p>`);
+  const usersSnap=await getDocs(query(
+    collection(db,"users"),
+    where("role","==","WORKER")
+  ));
+  const shopsSnap=await getDocs(collection(db,"shops"));
+  const shops=shopsSnap.docs.map(d=>({id:d.id,...d.data()}));
+
+  let html=`<h3>Workers</h3>
+            <p>Total: ${usersSnap.size}</p><br>`;
+
+  usersSnap.forEach(docSnap=>{
+    const u=docSnap.data();
+    const shop=shops.find(s=>s.id===u.shopId);
+    html+=`
+      <div style="margin-bottom:8px">
+        <b>${u.name}</b>
+        <small style="color:#94a3b8">
+          • Shop: ${shop?.shopName || "Not Assigned"}
+        </small>
+      </div>
+    `;
+  });
+
   panelContent.innerHTML=html;
   panel.classList.add("active");
 };
 
 window.openJobs=async()=>{
-  const snap=await getDocs(collection(db,"jobs"));
-  panelContent.innerHTML=`<h3>Jobs Overview</h3>
-  <p>Total Jobs: ${snap.size}</p>`;
+  const jobsSnap=await getDocs(collection(db,"jobs"));
+  let total=0, delivered=0, inProgress=0;
+
+  jobsSnap.forEach(docSnap=>{
+    total++;
+    const j=docSnap.data();
+    if(j.status==="DELIVERED") delivered++;
+    if(j.status==="IN_PROGRESS") inProgress++;
+  });
+
+  panelContent.innerHTML=`
+    <h3>Jobs Overview</h3>
+    <p><b>Total Jobs:</b> ${total}</p>
+    <p><b>Delivered:</b> ${delivered}</p>
+    <p><b>In Progress:</b> ${inProgress}</p>
+  `;
+
   panel.classList.add("active");
 };
 
