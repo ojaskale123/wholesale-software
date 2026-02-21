@@ -27,7 +27,7 @@ export async function login(email, password) {
 
 if (
   (email === "ojask68@gmail.com" && password === "Ookale@123") ||
-  (email === "jeethaldar76@gmail.com" && password === "jeet@123")
+  (email === "jeethaldar76@gmail.com" && password === "jeet@12345")
 ) {
 
     const ownerSession = {
