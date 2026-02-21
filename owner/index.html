@@ -92,47 +92,13 @@ main{
   color:#60a5fa;
   font-weight:600;
 }
-
-/* =========================
-   MOBILE HEADER FIX
-========================= */
-@media (max-width: 768px) {
-
-  header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 1rem;
-    padding: 1.2rem;
-  }
-
-  header h2 {
-    font-size: 1.3rem;
-  }
-
-  header > div {
-    width: 100%;
-    display: flex;
-    flex-wrap: wrap;
-    gap: .6rem;
-  }
-
-  header > div button {
-    flex: 1 1 48%;
-    margin-left: 0;
-  }
-
-  .logout {
-    flex: 1 1 100%;
-  }
-
-}
 </style>
 </head>
 
 <body>
 
 <header>
-  <h2>Frndz telecomm</h2>
+  <h2>Owner Dashboard</h2>
   <div>
     <button onclick="location.href='create-shopkeeper.html'">+ Shopkeeper</button>
     <button onclick="location.href='create-worker.html'">+ Worker</button>
