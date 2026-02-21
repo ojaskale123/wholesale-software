@@ -27,7 +27,6 @@
 
     .app-header {
       background: linear-gradient(135deg, #1e293b, #0f172a);
-      backdrop-filter: blur(12px);
       border-bottom: 1px solid var(--border);
       padding: 1.2rem 1.8rem;
       display: flex;
@@ -59,11 +58,6 @@
       border-radius: 10px;
       font-weight: 600;
       cursor: pointer;
-    }
-
-    .logout-btn:hover {
-      background: #dc2626;
-      transform: translateY(-2px);
     }
 
     .dashboard {
@@ -102,35 +96,16 @@
       color: rgba(255,255,255,0.85);
     }
 
-    .stock {
-      background: linear-gradient(135deg, #667eea, #764ba2);
-    }
+    .stock { background: linear-gradient(135deg, #667eea, #764ba2); }
+    .sell { background: linear-gradient(135deg, #10b981, #059669); }
+    .repair { background: linear-gradient(135deg, #ec4899, #db2777); }
+    .attendance { background: linear-gradient(135deg, #1e40af, #3b82f6); }
+    .jobs { background: linear-gradient(135deg, #fbbf24, #d97706); color: #111827; }
+    .workers { background: linear-gradient(135deg, #6366f1, #8b5cf6); }
+    .history { background: linear-gradient(135deg, #0ea5e9, #2563eb); }
 
-    .sell {
-      background: linear-gradient(135deg, #10b981, #059669);
-    }
-
-    .repair {
-      background: linear-gradient(135deg, #ec4899, #db2777);
-    }
-
-    .attendance {
-      background: linear-gradient(135deg, #1e40af, #3b82f6);
-    }
-
-    .jobs {
-      background: linear-gradient(135deg, #fbbf24, #d97706);
-      color: #111827;
-    }
-
-    .workers {
-      background: linear-gradient(135deg, #6366f1, #8b5cf6);
-    }
-
-    /* ✅ NEW HISTORY CARD */
-    .history {
-      background: linear-gradient(135deg, #0ea5e9, #2563eb);
-    }
+    /* ✅ NEW UPDATES CARD */
+    .updates { background: linear-gradient(135deg, #22c55e, #16a34a); }
 
   </style>
 </head>
@@ -149,38 +124,43 @@
 
   <div class="card stock" onclick="location.href='stock.html'">
     <h3>Stock</h3>
-    <p>Manage inventory, categories & availability</p>
+    <p>Manage inventory</p>
   </div>
 
   <div class="card sell" onclick="location.href='sell.html'">
     <h3>Sell</h3>
-    <p>Quick counter sales with cart & billing</p>
+    <p>Quick counter sales</p>
   </div>
 
   <div class="card repair" onclick="location.href='repair.html'">
     <h3>Repair Jobs</h3>
-    <p>Create & assign repair tasks to workers</p>
+    <p>Create & assign repair tasks</p>
   </div>
 
   <div class="card attendance" onclick="location.href='attendance.html'">
     <h3>Attendance</h3>
-    <p>Track today’s worker check-in & status</p>
+    <p>Track worker check-in</p>
   </div>
 
   <div class="card jobs" onclick="location.href='jobs.html'">
     <h3>Job Status</h3>
-    <p>Monitor open, in-progress & completed jobs</p>
+    <p>Monitor job progress</p>
   </div>
 
   <div class="card workers" onclick="location.href='worker-management.html'">
     <h3>Worker Management</h3>
-    <p>Manage workers, activity & account status</p>
+    <p>Manage workers</p>
   </div>
 
-  <!-- ✅ NEW HISTORY CARD -->
   <div class="card history" onclick="location.href='history.html'">
     <h3>History</h3>
-    <p>View sales & repair history records</p>
+    <p>Sales & repair history</p>
+  </div>
+
+  <!-- ✅ NEW CARD -->
+  <div class="card updates" onclick="location.href='updates.html'">
+    <h3>Job Updates</h3>
+    <p>Send WhatsApp updates to customers</p>
   </div>
 
 </div>
@@ -191,17 +171,11 @@ import { auth } from "../js/firebase.js";
 import { signOut }
 from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-const user = requireAuth(["SHOPKEEPER"]);
+requireAuth(["SHOPKEEPER"]);
 
 window.logout = async () => {
-  try {
-    await signOut(auth);
-    localStorage.clear();
-    location.href = "/login.html";
-  } catch (e) {
-    alert("Logout failed");
-    console.error(e);
-  }
+  await signOut(auth);
+  location.href = "/login.html";
 };
 </script>
 

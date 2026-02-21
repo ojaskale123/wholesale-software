@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Shopkeeper - Job Updates</title>
+
+<style>
+:root {
+  --bg: #0f172a;
+  --card: rgba(30,41,59,0.85);
+  --accent: #25D366;
+  --text: #e2e8f0;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  font-family: Arial, sans-serif;
+  color: var(--text);
+}
+
+/* Premium Header */
+.header {
+  background: linear-gradient(90deg,#1e293b,#0f172a);
+  padding: 18px 25px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.header h2 {
+  margin: 0;
+}
+
+.filter-select {
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: none;
+  background: #1e293b;
+  color: white;
+}
+
+/* Cards */
+.container {
+  padding: 25px;
+}
+
+.card {
+  background: var(--card);
+  padding: 18px;
+  border-radius: 16px;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+  transition: 0.3s;
+}
+
+.card:hover {
+  transform: translateY(-3px);
+}
+
+.card p {
+  margin: 6px 0;
+}
+
+.status {
+  font-weight: bold;
+}
+
+.btn-whatsapp {
+  background: var(--accent);
+  border: none;
+  padding: 8px 16px;
+  border-radius: 10px;
+  color: white;
+  cursor: pointer;
+  margin-top: 10px;
+}
+
+.btn-whatsapp:hover {
+  opacity: 0.9;
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">
+  <h2>📩 Job Updates & WhatsApp</h2>
+
+  <select id="filter" class="filter-select">
+    <option value="all">All</option>
+    <option value="accepted">Accepted</option>
+    <option value="completed">Completed</option>
+    <option value="sent">Message Sent</option>
+  </select>
+</div>
+
+<div class="container" id="updatesContainer">
+  <!-- Dynamic Cards -->
+</div>
+
+
+<script type="module">
+
+import { db } from "../firebase.js";
+import {
+  collection,
+  query,
+  where,
+  onSnapshot,
+  updateDoc,
+  doc
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+import { sendManualWhatsApp } from "../js/manualWhatsapp.js";
+
+const container = document.getElementById("updatesContainer");
+const filter = document.getElementById("filter");
+
+let allJobs = [];
+
+// Get current shop (adjust if stored differently)
+const currentShop = JSON.parse(localStorage.getItem("currentShop"));
+
+const q = query(
+  collection(db, "jobs"),
+  where("shopId", "==", currentShop.id)
+);
+
+onSnapshot(q, (snapshot) => {
+  allJobs = [];
+
+  snapshot.forEach(docSnap => {
+    const data = docSnap.data();
+
+    if (data.status === "accepted" || data.status === "completed") {
+      allJobs.push({
+        id: docSnap.id,
+        ...data
+      });
+    }
+  });
+
+  render(allJobs);
+});
+
+function render(jobs) {
+  container.innerHTML = "";
+
+  if (jobs.length === 0) {
+    container.innerHTML = "<p>No updates found.</p>";
+    return;
+  }
+
+  jobs.forEach(job => {
+
+    const card = document.createElement("div");
+    card.className = "card";
+
+    card.innerHTML = `
+      <p><b>Customer:</b> ${job.customerName}</p>
+      <p><b>Device:</b> ${job.deviceName}</p>
+      <p><b>Amount:</b> ₹${job.finalCost || job.estimatedCost || "-"}</p>
+      <p class="status">Status: ${job.status}</p>
+
+      ${
+        !job.messageSent
+        ? `<button class="btn-whatsapp" onclick="sendMsg('${job.id}')">Send WhatsApp</button>`
+        : `<p style="color:#22c55e;">Message Sent ✅</p>`
+      }
+    `;
+
+    container.appendChild(card);
+  });
+}
+
+window.sendMsg = async function(jobId) {
+
+  const job = allJobs.find(j => j.id === jobId);
+
+  let templateKey = "";
+
+  if (job.status === "accepted") {
+    templateKey = "repair_ready";
+  }
+
+  if (job.status === "completed") {
+    templateKey = "repair_ready";
+  }
+
+  sendManualWhatsApp({
+    templateKey,
+    phone: job.customerPhone,
+    variables: {
+      customerName: job.customerName,
+      device: job.deviceName,
+      amount: job.finalCost || job.estimatedCost,
+      shopName: currentShop.name
+    }
+  });
+
+  await updateDoc(doc(db, "jobs", jobId), {
+    messageSent: true,
+    messageType: job.status
+  });
+};
+
+filter.addEventListener("change", () => {
+  const value = filter.value;
+
+  if (value === "all") {
+    render(allJobs);
+    return;
+  }
+
+  if (value === "sent") {
+    render(allJobs.filter(j => j.messageSent));
+    return;
+  }
+
+  render(allJobs.filter(j => j.status === value));
+});
+
+</script>
+
+</body>
+</html>
