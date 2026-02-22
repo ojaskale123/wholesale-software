@@ -34,6 +34,13 @@ button{
   cursor:pointer;
 }
 
+.edit-btn{
+  background:#3b82f6;
+  padding:.4rem .8rem;
+  font-size:.85rem;
+  border-radius:8px;
+}
+
 .container{padding:2rem;max-width:1300px;margin:auto}
 
 .categories{
@@ -65,7 +72,6 @@ button{
   border:1px solid var(--border);
   border-radius:var(--radius);
   padding:1rem;
-  cursor:pointer;
 }
 
 .modal{
@@ -134,6 +140,11 @@ button{
     <input id="quantityInput" type="number" placeholder="Quantity"/>
     <input id="buyPriceInput" type="number" placeholder="Buy Price"/>
     <input id="sellPriceInput" type="number" placeholder="Sell Price"/>
+
+    <!-- IMEI FIELDS -->
+    <input id="imei1Input" placeholder="IMEI No. 1" style="display:none;"/>
+    <input id="imei2Input" placeholder="IMEI No. 2" style="display:none;"/>
+
     <button id="saveBtn">Save</button>
   </div>
 </div>
@@ -150,14 +161,12 @@ import {
   where
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-/* AUTH CHECK */
 const user = JSON.parse(localStorage.getItem("currentUser"));
 if(!user || user.role !== "SHOPKEEPER"){
   location.href="../login.html";
 }
 const shopId = user.shopId;
 
-/* DOM ELEMENTS */
 const stockGrid = document.getElementById("stockGrid");
 const modal = document.getElementById("modal");
 const addBtn = document.getElementById("addBtn");
@@ -169,63 +178,81 @@ const categoryInput = document.getElementById("categoryInput");
 const quantityInput = document.getElementById("quantityInput");
 const buyPriceInput = document.getElementById("buyPriceInput");
 const sellPriceInput = document.getElementById("sellPriceInput");
+const imei1Input = document.getElementById("imei1Input");
+const imei2Input = document.getElementById("imei2Input");
 
 let ALL = [];
 let editId = null;
 
-/* REALTIME STOCK LISTENER */
+categoryInput.addEventListener("change",()=>{
+  if(categoryInput.value==="SECOND_HAND"){
+    imei1Input.style.display="block";
+    imei2Input.style.display="block";
+  }else{
+    imei1Input.style.display="none";
+    imei2Input.style.display="none";
+    imei1Input.value="";
+    imei2Input.value="";
+  }
+});
+
 const q = query(collection(db,"stock"), where("shopId","==",shopId));
 onSnapshot(q,(snap)=>{
   ALL = snap.docs.map(d=>({id:d.id,...d.data()}));
   loadCategory("ALL");
 });
 
-/* LOAD CATEGORY */
-window.loadCategory = function(cat){
+window.loadCategory=function(cat){
   stockGrid.innerHTML="";
-  let list = cat==="ALL" ? ALL : ALL.filter(i=>i.category===cat);
+  let list = cat==="ALL"?ALL:ALL.filter(i=>i.category===cat);
 
   list.sort((a,b)=>a.name.localeCompare(b.name));
 
-  if(list.length === 0){
-    stockGrid.innerHTML = "<p>No items found</p>";
+  if(list.length===0){
+    stockGrid.innerHTML="<p>No items found</p>";
     return;
   }
 
   list.forEach(i=>{
-    const div = document.createElement("div");
+    const div=document.createElement("div");
     div.className="card";
-   div.innerHTML=`
-  <b>${i.name}</b><br>
-  Barcode: ${i.barcode||"-"}<br>
-  Qty: ${i.quantity}<br>
-  Buy: ₹${i.buyPrice||0}<br>
-  Sell: ₹${i.sellPrice||0}
-  <br><br>
-  <button class="edit-btn">Edit</button>
-`;
-
-div.querySelector(".edit-btn").onclick = (e)=>{
-  e.stopPropagation();
-  openEdit(i);
-};
+    div.innerHTML=`
+      <b>${i.name}</b><br>
+      Barcode: ${i.barcode||"-"}<br>
+      Qty: ${i.quantity}<br>
+      Buy: ₹${i.buyPrice||0}<br>
+      Sell: ₹${i.sellPrice||0}
+      ${i.category==="SECOND_HAND" ? `<br>IMEI1: ${i.imei1||"-"}<br>IMEI2: ${i.imei2||"-"}` : ""}
+      <br><br>
+      <button class="edit-btn">Edit</button>
+    `;
+    div.querySelector(".edit-btn").onclick=(e)=>{
+      e.stopPropagation();
+      openEdit(i);
+    };
     stockGrid.appendChild(div);
   });
 };
 
-/* OPEN EDIT */
 function openEdit(item){
-  editId = item.id;
+  editId=item.id;
   nameInput.value=item.name||"";
   barcodeInput.value=item.barcode||"";
   categoryInput.value=item.category||"";
   quantityInput.value=item.quantity||0;
   buyPriceInput.value=item.buyPrice||0;
   sellPriceInput.value=item.sellPrice||0;
+
+  if(item.category==="SECOND_HAND"){
+    imei1Input.style.display="block";
+    imei2Input.style.display="block";
+    imei1Input.value=item.imei1||"";
+    imei2Input.value=item.imei2||"";
+  }
+
   modal.style.display="flex";
 }
 
-/* ADD NEW */
 addBtn.onclick=()=>{
   editId=null;
   nameInput.value="";
@@ -234,11 +261,14 @@ addBtn.onclick=()=>{
   quantityInput.value="";
   buyPriceInput.value="";
   sellPriceInput.value="";
+  imei1Input.value="";
+  imei2Input.value="";
+  imei1Input.style.display="none";
+  imei2Input.style.display="none";
   modal.style.display="flex";
 };
 
-/* SAVE */
-saveBtn.onclick = async ()=>{
+saveBtn.onclick=async()=>{
   const data={
     name:nameInput.value.trim(),
     barcode:barcodeInput.value.trim(),
@@ -249,7 +279,12 @@ saveBtn.onclick = async ()=>{
     shopId
   };
 
-  if(!data.name || !data.category){
+  if(categoryInput.value==="SECOND_HAND"){
+    data.imei1=imei1Input.value.trim();
+    data.imei2=imei2Input.value.trim();
+  }
+
+  if(!data.name||!data.category){
     alert("Name & Category required");
     return;
   }
@@ -267,11 +302,9 @@ saveBtn.onclick = async ()=>{
   }
 };
 
-/* CLOSE MODAL */
 modal.onclick=(e)=>{
   if(e.target===modal) modal.style.display="none";
 };
-
 </script>
 </body>
 </html>
