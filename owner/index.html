@@ -47,18 +47,46 @@ main{
   gap:1rem;
   margin-bottom:2rem;
 }
+
+/* =========================
+   COLORFUL CARDS
+========================= */
 .card{
-  background:var(--card);
-  border:1px solid var(--border);
   border-radius:var(--radius);
   padding:1.5rem;
   cursor:pointer;
   transition:.25s;
+  color:white;
+  font-weight:500;
 }
+
+.card:nth-child(1){
+  background:linear-gradient(135deg,#16a34a,#22c55e);
+}
+.card:nth-child(2){
+  background:linear-gradient(135deg,#2563eb,#3b82f6);
+}
+.card:nth-child(3){
+  background:linear-gradient(135deg,#9333ea,#a855f7);
+}
+.card:nth-child(4){
+  background:linear-gradient(135deg,#ea580c,#f97316);
+}
+.card:nth-child(5){
+  background:linear-gradient(135deg,#0ea5e9,#38bdf8);
+}
+.card:nth-child(6){
+  background:linear-gradient(135deg,#e11d48,#f43f5e);
+}
+.card:nth-child(7){
+  background:linear-gradient(135deg,#f59e0b,#fbbf24);
+}
+
 .card:hover{
-  transform:translateY(-5px);
-  border-color:#60a5fa;
+  transform:translateY(-6px) scale(1.03);
+  box-shadow:0 12px 25px rgba(0,0,0,.35);
 }
+
 .shop-grid{
   display:grid;
   grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
@@ -186,22 +214,22 @@ onSnapshot(collection(db,"users"),snap=>{
     if(d.data().role==="SHOPKEEPER") s++;
     if(d.data().role==="WORKER") w++;
   });
-  shopkeepers.innerText=s;
-  workers.innerText=w;
+  document.getElementById("shopkeepers").innerText=s;
+  document.getElementById("workers").innerText=w;
 });
 
 onSnapshot(collection(db,"jobs"),snap=>{
-  jobs.innerText=snap.size;
+  document.getElementById("jobs").innerText=snap.size;
 });
 
 onSnapshot(collection(db,"sales"),snap=>{
   let total=0;
   snap.forEach(d=> total+=Number(d.data().amount||0));
-  revenue.innerText="₹"+total.toLocaleString();
+  document.getElementById("revenue").innerText="₹"+total.toLocaleString();
 });
 
 onSnapshot(collection(db,"stock"),snap=>{
-  stockCount.innerText=snap.size;
+  document.getElementById("stockCount").innerText=snap.size;
 });
 
 /* OPEN FUNCTIONS */
@@ -211,7 +239,7 @@ window.openRevenue=async()=>{
   panelContent.innerHTML=`
     <h3>Total Revenue</h3>
     <p>Total Sales: ${snap.size}</p>
-    <p>Revenue: ${revenue.innerText}</p>
+    <p>Revenue: ${document.getElementById("revenue").innerText}</p>
   `;
   panel.classList.add("active");
 };
