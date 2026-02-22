@@ -195,14 +195,20 @@ window.loadCategory = function(cat){
   list.forEach(i=>{
     const div = document.createElement("div");
     div.className="card";
-    div.innerHTML=`
-      <b>${i.name}</b><br>
-      Barcode: ${i.barcode||"-"}<br>
-      Qty: ${i.quantity}<br>
-      Buy: ₹${i.buyPrice||0}<br>
-      Sell: ₹${i.sellPrice||0}
-    `;
-    div.onclick=()=>openEdit(i);
+   div.innerHTML=`
+  <b>${i.name}</b><br>
+  Barcode: ${i.barcode||"-"}<br>
+  Qty: ${i.quantity}<br>
+  Buy: ₹${i.buyPrice||0}<br>
+  Sell: ₹${i.sellPrice||0}
+  <br><br>
+  <button class="edit-btn">Edit</button>
+`;
+
+div.querySelector(".edit-btn").onclick = (e)=>{
+  e.stopPropagation();
+  openEdit(i);
+};
     stockGrid.appendChild(div);
   });
 };
