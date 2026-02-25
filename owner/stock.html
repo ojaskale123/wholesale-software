@@ -100,7 +100,6 @@ button{
 </header>
 
 <div class="container">
-
 <div class="categories">
   <div class="cat" onclick="openCategory('SPARE')">Spare Parts</div>
   <div class="cat" onclick="openCategory('BATTERY')">Batteries</div>
@@ -108,7 +107,6 @@ button{
   <div class="cat" onclick="openCategory('SECOND_HAND')">Second Hand Mobiles</div>
   <div class="cat" onclick="openCategory('ALL')">All Products</div>
 </div>
-
 </div>
 
 <div class="overlay" id="overlay">
@@ -125,18 +123,32 @@ import { requireAuth } from "../auth/guard.js";
 import { db } from "../js/firebase.js";
 import {
   collection,
-  onSnapshot
+  onSnapshot,
+  deleteDoc,
+  doc
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-/* OWNER CHECK */
 requireAuth("OWNER");
 
 let ALL_PRODUCTS = [];
 
-/* 🔥 REALTIME LISTENER */
 onSnapshot(collection(db,"stock"),(snap)=>{
   ALL_PRODUCTS = snap.docs.map(d=>({id:d.id,...d.data()}));
 });
+
+/* DELETE */
+window.deleteStock = async function(id){
+  const confirmDelete = confirm("Are you sure you want to delete this stock?");
+  if(!confirmDelete) return;
+
+  try{
+    await deleteDoc(doc(db,"stock",id));
+    alert("Stock deleted successfully.");
+  }catch(err){
+    alert("Error deleting stock.");
+    console.error(err);
+  }
+};
 
 /* OPEN CATEGORY */
 window.openCategory = function(category){
@@ -150,8 +162,8 @@ window.openCategory = function(category){
   };
 
   const list = document.getElementById("popupList");
-  document.getElementById("popupTitle").innerText = titleMap[category];
   list.innerHTML="";
+  document.getElementById("popupTitle").innerText = titleMap[category];
 
   let products = category==="ALL"
       ? ALL_PRODUCTS
@@ -159,34 +171,74 @@ window.openCategory = function(category){
 
   products.sort((a,b)=>a.name.localeCompare(b.name));
 
+  /* SEARCH BAR (ALWAYS VISIBLE) */
+  const search = document.createElement("input");
+  search.type="text";
+  search.placeholder="Search by name or barcode...";
+  search.style.cssText="width:100%;padding:.6rem;margin-bottom:1rem;border-radius:8px;border:1px solid #334155;background:#0f172a;color:white";
+  list.appendChild(search);
+
+  search.addEventListener("input",()=>{
+    const val = search.value.toLowerCase();
+    document.querySelectorAll(".stock-item").forEach(item=>{
+      item.style.display =
+        item.innerText.toLowerCase().includes(val)
+        ? "block"
+        : "none";
+    });
+  });
+
   if(!products.length){
-    list.innerHTML = `<div class="empty">No items found</div>`;
+    const empty=document.createElement("div");
+    empty.className="empty";
+    empty.innerText="No items found";
+    list.appendChild(empty);
     document.getElementById("overlay").classList.add("active");
     return;
   }
 
   products.forEach(p=>{
-    const profit = (p.sellPrice||0)-(p.buyPrice||0);
+    const profit=(p.sellPrice||0)-(p.buyPrice||0);
 
-    list.innerHTML+=`
-      <div class="item">
-        <b>${p.name}</b><br>
-        Barcode: ${p.barcode||"-"}<br>
-        Quantity: ${p.quantity||0}<br>
-        Buy: ₹${p.buyPrice||0} | Sell: ₹${p.sellPrice||0}<br>
-        <span class="profit">Profit: ₹${profit}</span><br>
-        <small>Shop: ${p.shopId||"-"}</small>
-      </div>
+    const item=document.createElement("div");
+    item.className="item stock-item";
+
+    item.innerHTML=`
+      <b>${p.name}</b><br>
+      Barcode: ${p.barcode||"-"}<br>
+      Quantity: ${p.quantity||0}<br>
+      Buy: ₹${p.buyPrice||0} | Sell: ₹${p.sellPrice||0}<br>
+      <span class="profit">Profit: ₹${profit}</span><br>
+      <small>Shop: ${p.shopId||"-"}</small>
+      <br><br>
     `;
+
+    const editBtn=document.createElement("button");
+    editBtn.textContent="Edit";
+    editBtn.style.background="#3b82f6";
+    editBtn.style.marginRight="8px";
+    editBtn.onclick=()=>{
+      window.location.href=`../shopkeeper/edit-stock.html?id=${p.id}`;
+    };
+
+    const deleteBtn=document.createElement("button");
+    deleteBtn.textContent="Delete";
+    deleteBtn.onclick=()=>{
+      deleteStock(p.id);
+    };
+
+    item.appendChild(editBtn);
+    item.appendChild(deleteBtn);
+
+    list.appendChild(item);
   });
 
   document.getElementById("overlay").classList.add("active");
-}
+};
 
-/* CLOSE */
 window.closePopup=function(){
   document.getElementById("overlay").classList.remove("active");
-}
+};
 </script>
 
 </body>
