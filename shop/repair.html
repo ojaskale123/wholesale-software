@@ -1,176 +1,113 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Create Repair Job</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Create Repair Job</title>
 
-  <style>
-    :root {
-      --bg: #0f172a;
-      --card-bg: rgba(30, 41, 59, 0.85);
-      --border: rgba(148, 163, 184, 0.22);
-      --text: #e2e8f0;
-      --text-muted: #94a3b8;
-      --accent-green: #10b981;
-      --danger: #ef4444;
-      --radius: 16px;
-      --shadow: 0 8px 24px rgba(0,0,0,0.35);
-    }
+<style>
+:root {
+  --bg: #0f172a;
+  --card-bg: rgba(30, 41, 59, 0.85);
+  --border: rgba(148, 163, 184, 0.22);
+  --text: #e2e8f0;
+  --text-muted: #94a3b8;
+  --accent-green: #10b981;
+  --danger: #ef4444;
+  --radius: 16px;
+  --shadow: 0 8px 24px rgba(0,0,0,0.35);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+  font-family:system-ui;
+  background:var(--bg);
+  color:var(--text);
+  min-height:100vh;
+}
 
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+.app-header{
+  background:linear-gradient(135deg,#1e293b,#0f172a);
+  border-bottom:1px solid var(--border);
+  padding:1.2rem 1.5rem;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
 
-    body {
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      min-height: 100vh;
-      line-height: 1.5;
-    }
+.header-btn{
+  background:#ef4444;
+  color:white;
+  border:none;
+  padding:.6rem 1.3rem;
+  border-radius:10px;
+  cursor:pointer;
+}
 
-    .app-header {
-      background: linear-gradient(135deg, #1e293b, #0f172a);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      border-bottom: 1px solid var(--border);
-      padding: 1.2rem 1.5rem;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.35);
-    }
+.container{
+  max-width:720px;
+  margin:auto;
+  padding:2rem 1.5rem;
+}
 
-    .header-btn {
-      background: rgba(239, 68, 68, 0.9);
-      color: white;
-      border: none;
-      padding: 0.6rem 1.3rem;
-      border-radius: 10px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.22s ease;
-    }
+.form-group{
+  position:relative;
+  margin-bottom:1.6rem;
+}
 
-    .header-btn:hover {
-      background: #dc2626;
-      transform: translateY(-1px);
-    }
+.form-group input,
+.form-group select{
+  width:100%;
+  padding:1.1rem 1rem;
+  border:1px solid var(--border);
+  border-radius:12px;
+  background:rgba(51,65,85,0.6);
+  color:var(--text);
+  font-size:1rem;
+}
 
-    .app-header h2 {
-      font-size: 1.5rem;
-      font-weight: 700;
-      margin: 0;
-      background: linear-gradient(90deg, #93c5fd, #c7d2fe);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
+.form-group label{
+  position:absolute;
+  left:1rem;
+  top:50%;
+  transform:translateY(-50%);
+  color:var(--text-muted);
+  transition:.3s;
+}
 
-    .container {
-      max-width: 720px;
-      margin: 0 auto;
-      padding: 2rem 1.5rem;
-    }
+.form-group input:focus + label,
+.form-group input:not(:placeholder-shown) + label,
+.form-group select:focus + label,
+.form-group select:not([value=""]) + label{
+  top:-0.6rem;
+  font-size:.82rem;
+  background:var(--bg);
+  padding:0 .5rem;
+  color:var(--accent-green);
+}
 
-    .form-group {
-      position: relative;
-      margin-bottom: 1.6rem;
-    }
+.btn-primary{
+  width:100%;
+  padding:1.1rem;
+  background:linear-gradient(135deg,var(--accent-green),#059669);
+  color:white;
+  border:none;
+  border-radius:12px;
+  font-size:1.1rem;
+  cursor:pointer;
+  margin-top:1.5rem;
+}
 
-    .form-group input,
-    .form-group select {
-      width: 100%;
-      padding: 1.1rem 1rem;
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      background: rgba(51,65,85,0.6);
-      color: var(--text);
-      font-size: 1rem;
-      backdrop-filter: blur(6px);
-      transition: all 0.3s ease;
-    }
-
-    .form-group input:focus,
-    .form-group select:focus {
-      outline: none;
-      border-color: var(--accent-green);
-      box-shadow: 0 0 0 3px rgba(16,185,129,0.3);
-    }
-
-    .form-group label {
-      position: absolute;
-      left: 1rem;
-      top: 50%;
-      transform: translateY(-50%);
-      color: var(--text-muted);
-      font-size: 1rem;
-      pointer-events: none;
-      transition: all 0.3s ease;
-    }
-
-    .form-group input:focus + label,
-    .form-group input:not(:placeholder-shown) + label,
-    .form-group select:focus + label,
-    .form-group select:not([value=""]) + label {
-      top: -0.6rem;
-      left: 0.9rem;
-      font-size: 0.82rem;
-      background: var(--bg);
-      padding: 0 0.5rem;
-      color: var(--accent-green);
-    }
-
-    .btn-primary {
-      width: 100%;
-      padding: 1.1rem;
-      background: linear-gradient(135deg, var(--accent-green), #059669);
-      color: white;
-      border: none;
-      border-radius: 12px;
-      font-size: 1.1rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      box-shadow: 0 6px 20px rgba(16,185,129,0.3);
-      margin-top: 1.5rem;
-    }
-
-    .btn-primary:hover:not(:disabled) {
-      transform: translateY(-3px);
-      box-shadow: 0 12px 32px rgba(16,185,129,0.45);
-    }
-
-    .btn-primary:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-    }
-
-    .loading {
-      text-align: center;
-      color: var(--text-muted);
-      padding: 3rem 1rem;
-    }
-
-    .error {
-      background: rgba(239,68,68,0.15);
-      border: 1px solid var(--danger);
-      color: var(--danger);
-      padding: 1rem;
-      border-radius: 12px;
-      margin: 1rem 0;
-      text-align: center;
-    }
-
-    @media (max-width: 640px) {
-      .container { padding: 1.5rem 1rem; }
-    }
-  </style>
+.loading{text-align:center;padding:3rem}
+.error{
+  background:rgba(239,68,68,0.15);
+  border:1px solid var(--danger);
+  color:var(--danger);
+  padding:1rem;
+  border-radius:12px;
+  margin:1rem 0;
+  display:none;
+}
+</style>
 </head>
 
 <body>
@@ -182,207 +119,151 @@
 </header>
 
 <div class="container">
-  <div id="loading" class="loading">Loading form...</div>
-  <div id="error" class="error" style="display:none;"></div>
 
-  <div id="form" style="display:none;">
-    <div class="form-group">
-      <input id="device" placeholder=" " required />
-      <label for="device">Device / Model</label>
-    </div>
+<div id="error" class="error"></div>
 
-    <div class="form-group">
-      <input id="issue" placeholder=" " required />
-      <label for="issue">Issue / Problem</label>
-    </div>
+<div id="form">
 
-    <div class="form-group">
-      <input id="expectedCost" type="number" placeholder=" " required min="0" step="1" />
-      <label for="expectedCost">Expected Cost (₹)</label>
-    </div>
+<div class="form-group">
+<input id="device" placeholder=" " required />
+<label>Device / Model</label>
+</div>
 
-    <div class="form-group">
-      <input id="customerName" placeholder=" " required />
-      <label for="customerName">Customer / Retailer Name</label>
-    </div>
+<div class="form-group">
+<input id="issue" placeholder=" " required />
+<label>Issue / Problem</label>
+</div>
 
-    <div class="form-group">
-      <input id="customerPhone" placeholder=" " required pattern="[0-9]{10}" title="Enter 10-digit phone number" />
-      <label for="customerPhone">Phone Number</label>
-    </div>
+<div class="form-group">
+<input id="expectedCost" type="number" placeholder=" " required />
+<label>Expected Cost (₹)</label>
+</div>
 
-    <div class="form-group">
-      <select id="jobType" required>
-        <option value="">Select Type</option>
-        <option value="CUSTOMER">Regular Customer (Immediate Payment)</option>
-        <option value="RETAILER">Retailer / Shop (Credit Option)</option>
-      </select>
-      <label for="jobType">Type</label>
-    </div>
+<div class="form-group">
+<input id="customerName" placeholder=" " required />
+<label>Customer / Retailer Name</label>
+</div>
 
-    <div class="form-group">
-      <select id="paymentStatus" required>
-        <option value="PAID">Paid (Cash / UPI Now)</option>
-        <option value="PENDING">Pending (Credit / Later Payment)</option>
-      </select>
-      <label for="paymentStatus">Payment Status</label>
-    </div>
+<div class="form-group">
+<input id="customerPhone" placeholder=" " required />
+<label>Phone Number</label>
+</div>
 
-    <button class="btn-primary" id="createBtn" onclick="createJob()">Create Job</button>
-  </div>
+<!-- 🔐 NEW LOCK SECTION -->
+
+<div class="form-group">
+<select id="lockType">
+<option value="">Select Lock Type</option>
+<option value="NONE">No Lock</option>
+<option value="PIN">PIN (Numbers)</option>
+<option value="PASSWORD">Password (Alphanumeric)</option>
+<option value="PATTERN">Pattern (Describe Pattern)</option>
+</select>
+<label>Device Lock Type</label>
+</div>
+
+<div class="form-group">
+<input id="lockValue" placeholder=" " />
+<label>Lock / Pattern Value</label>
+</div>
+
+<div class="form-group">
+<select id="jobType" required>
+<option value="">Select Type</option>
+<option value="CUSTOMER">Regular Customer</option>
+<option value="RETAILER">Retailer / Shop</option>
+</select>
+<label>Type</label>
+</div>
+
+<div class="form-group">
+<select id="paymentStatus" required>
+<option value="PAID">Paid</option>
+<option value="PENDING">Pending</option>
+</select>
+<label>Payment Status</label>
+</div>
+
+<button class="btn-primary" id="createBtn" onclick="createJob()">Create Job</button>
+
+</div>
 </div>
 
 <script type="module">
-  import { db } from "../js/firebase.js";
-  import {
-    collection,
-    addDoc,
-    query,
-    where,
-    getDocs,
-    doc,
-    updateDoc,
-    serverTimestamp,
-    increment
-  } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { db } from "../js/firebase.js";
+import {
+collection,
+addDoc,
+serverTimestamp
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-  // === DEBUG MODE: Show form immediately ===
-  document.getElementById("loading").style.display = "none";
-  document.getElementById("form").style.display = "block";
-  console.log("Form forced visible");
+let user = JSON.parse(localStorage.getItem("currentUser"));
 
-  // === Load user safely ===
-  let user = null;
-  try {
-    const stored = localStorage.getItem("currentUser");
-    console.log("Raw currentUser from localStorage:", stored);
+const lockTypeInput = document.getElementById("lockType");
+const lockValueInput = document.getElementById("lockValue");
+const errorDiv = document.getElementById("error");
+const createBtn = document.getElementById("createBtn");
 
-    if (stored) {
-      user = JSON.parse(stored);
-      console.log("Parsed user:", user);
-      console.log("Role:", user?.role);
-      console.log("ShopId:", user?.shopId);
-      console.log("User ID/UID:", user?.uid || user?.id);
-    } else {
-      console.warn("No currentUser found in localStorage");
-    }
-  } catch (err) {
-    console.error("Error parsing currentUser:", err);
-  }
+window.createJob = async ()=>{
 
-  // Show warning if not SHOPKEEPER, but still allow form
-  if (!user || user.role !== "SHOPKEEPER") {
-    document.getElementById("error").innerText = 
-      "Warning: Not detected as SHOPKEEPER. Using fallback values. " +
-      "Make sure you are logged in correctly.";
-    document.getElementById("error").style.display = "block";
-  }
+createBtn.disabled = true;
+createBtn.innerText="Creating...";
+errorDiv.style.display="none";
 
-  // Auto-control payment status
-  const jobTypeSelect = document.getElementById("jobType");
-  const paymentStatusSelect = document.getElementById("paymentStatus");
-  const createBtn = document.getElementById("createBtn");
+const jobData = {
+type:"REPAIR",
+status:"OPEN",
+shopId:user?.shopId || "unknown",
+device:device.value.trim(),
+issue:issue.value.trim(),
+expectedCost:Number(expectedCost.value)||0,
+customerName:customerName.value.trim(),
+customerPhone:customerPhone.value.trim(),
+jobType:jobType.value,
+paymentStatus:paymentStatus.value,
 
-  jobTypeSelect.addEventListener("change", (e) => {
-    const isRetailer = e.target.value === "RETAILER";
-    paymentStatusSelect.disabled = !isRetailer;
-    if (!isRetailer) {
-      paymentStatusSelect.value = "PAID";
-    }
-  });
+deviceSecurity:{
+type:lockTypeInput.value || "NONE",
+value:lockValueInput.value.trim()
+},
 
-  window.createJob = async () => {
-    createBtn.disabled = true;
-    createBtn.innerText = "Creating...";
-    document.getElementById("error").style.display = "none";
+createdAt:serverTimestamp(),
+createdBy:user?.uid || user?.id || "unknown"
+};
 
-    const jobData = {
-      type: "REPAIR",
-      status: "OPEN",
-      shopId: user?.shopId || "test-shop-" + Date.now(),
-      device: document.getElementById("device").value.trim(),
-      issue: document.getElementById("issue").value.trim(),
-      expectedCost: Number(document.getElementById("expectedCost").value) || 0,
-      customerName: document.getElementById("customerName").value.trim(),
-      customerPhone: document.getElementById("customerPhone").value.trim(),
-      jobType: jobTypeSelect.value,
-      paymentStatus: paymentStatusSelect.value,
-      createdAt: serverTimestamp(),
-      createdBy: user?.uid || user?.id || "test-user-" + Date.now()
-    };
+if(!jobData.device || !jobData.issue || jobData.expectedCost<=0 ||
+!jobData.customerName || !jobData.customerPhone || !jobData.jobType){
+showError("Please fill all required fields");
+reset();
+return;
+}
 
-    console.log("Creating job with data:", jobData);
+if(jobData.deviceSecurity.type !== "NONE" && !jobData.deviceSecurity.value){
+showError("Please enter device lock value");
+reset();
+return;
+}
 
-    if (!jobData.device || !jobData.issue || jobData.expectedCost <= 0 ||
-        !jobData.customerName || !jobData.customerPhone || !jobData.jobType) {
-      showError("Please fill all required fields correctly");
-      resetButton();
-      return;
-    }
+try{
+await addDoc(collection(db,"jobs"),jobData);
+alert("Repair job created successfully!");
+location.href="repair.html";
+}catch(err){
+showError("Failed to create job");
+console.error(err);
+reset();
+}
+};
 
-    try {
-      const jobRef = await addDoc(collection(db, "jobs"), jobData);
-      console.log("Job created! ID:", jobRef.id);
+function showError(msg){
+errorDiv.innerText=msg;
+errorDiv.style.display="block";
+}
 
-      if (jobData.jobType === "RETAILER" && jobData.paymentStatus === "PENDING") {
-        const phone = jobData.customerPhone;
-
-        const q = query(
-          collection(db, "retailers"),
-          where("phone", "==", phone),
-          where("shopId", "==", jobData.shopId)
-        );
-        const snap = await getDocs(q);
-        console.log("Retailer search found:", snap.size, "matches");
-
-        if (snap.empty) {
-          await addDoc(collection(db, "retailers"), {
-            name: jobData.customerName,
-            phone,
-            shopId: jobData.shopId,
-            pendingAmount: jobData.expectedCost,
-            createdAt: serverTimestamp()
-          });
-          console.log("New retailer created");
-        } else {
-          const retailerDoc = snap.docs[0];
-          await updateDoc(doc(db, "retailers", retailerDoc.id), {
-            pendingAmount: increment(jobData.expectedCost)
-          });
-          console.log("Retailer updated");
-        }
-      }
-
-      await addDoc(collection(db, "auditLogs"), {
-        userId: user?.uid || user?.id || "unknown",
-        role: user?.role || "SHOPKEEPER",
-        shopId: jobData.shopId,
-        actionType: "JOB_CREATED",
-        action: `Created repair job (${jobData.device}) - ${jobData.jobType} (${jobData.paymentStatus})`,
-        timestamp: serverTimestamp()
-      });
-      console.log("Audit log added");
-
-      alert("Repair job created successfully!");
-      location.href = "repair.html"; // Change if needed
-    } catch (err) {
-      showError("Failed to create job: " + err.message);
-      console.error("Error details:", err);
-      resetButton();
-    }
-  };
-
-  function showError(msg) {
-    const errorDiv = document.getElementById("error");
-    errorDiv.innerText = msg;
-    errorDiv.style.display = "block";
-  }
-
-  function resetButton() {
-    const btn = document.getElementById("createBtn");
-    btn.disabled = false;
-    btn.innerText = "Create Job";
-  }
+function reset(){
+createBtn.disabled=false;
+createBtn.innerText="Create Job";
+}
 </script>
 
 </body>

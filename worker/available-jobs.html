@@ -17,11 +17,7 @@
   --shadow:0 8px 24px rgba(0,0,0,.35);
 }
 *{margin:0;padding:0;box-sizing:border-box}
-body{
-  font-family:system-ui;
-  background:var(--bg);
-  color:var(--text);
-}
+body{font-family:system-ui;background:var(--bg);color:var(--text);}
 .app-header{
   background:linear-gradient(135deg,#1e293b,#0f172a);
   border-bottom:1px solid var(--border);
@@ -54,6 +50,14 @@ body{
 .job h4{margin-bottom:.7rem}
 .job p{color:var(--text-muted);margin:.4rem 0}
 .job strong{color:var(--text)}
+.security-box{
+  background:rgba(16,185,129,0.1);
+  border:1px solid rgba(16,185,129,0.4);
+  padding:.8rem;
+  border-radius:10px;
+  margin-top:.8rem;
+  font-size:.9rem;
+}
 .accept-btn{
   width:100%;
   margin-top:1rem;
@@ -108,8 +112,7 @@ if (!currentUser || currentUser.role !== "WORKER") {
 
 const workerId = currentUser.uid || currentUser.id;
 
-/* ✅ LOAD AVAILABLE JOBS */
-
+/* LOAD JOBS */
 async function loadJobs() {
 
   const q = query(
@@ -132,6 +135,19 @@ async function loadJobs() {
     const job = docSnap.data();
     const jobId = docSnap.id;
 
+    const security = job.deviceSecurity || { type: "NONE", value: "" };
+
+    let securityHTML = `
+      <div class="security-box">
+        <strong>Device Lock:</strong> ${security.type}
+    `;
+
+    if (security.type !== "NONE") {
+      securityHTML += `<br><strong>Value:</strong> ${security.value || "—"}`;
+    }
+
+    securityHTML += `</div>`;
+
     const div = document.createElement("div");
     div.className = "job";
 
@@ -140,7 +156,7 @@ async function loadJobs() {
       <p><strong>Issue:</strong> ${job.issue || "—"}</p>
       <p><strong>Expected Cost:</strong> ₹${job.expectedCost || "—"}</p>
       <p><strong>Customer:</strong> ${job.customerName}</p>
-
+      ${securityHTML}
       <button class="accept-btn" data-id="${jobId}">
         ACCEPT JOB
       </button>
@@ -153,8 +169,7 @@ async function loadJobs() {
   });
 }
 
-/* ✅ ACCEPT JOB (SAFE) */
-
+/* ACCEPT JOB */
 async function acceptJob(jobId, btn) {
   btn.disabled = true;
   btn.innerText = "ACCEPTING...";
