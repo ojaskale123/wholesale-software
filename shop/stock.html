@@ -41,13 +41,23 @@ button{
   border-radius:8px;
 }
 
+.delete-btn{
+  position:absolute;
+  top:10px;
+  right:10px;
+  background:#ef4444;
+  padding:.35rem .7rem;
+  font-size:.75rem;
+  border-radius:8px;
+}
+
 .container{padding:2rem;max-width:1300px;margin:auto}
 
 .categories{
   display:grid;
   grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
   gap:1rem;
-  margin-bottom:2rem;
+  margin-bottom:1rem;
 }
 
 .cat{
@@ -61,6 +71,16 @@ button{
 }
 .cat:hover{transform:translateY(-5px)}
 
+.search-box{
+  width:100%;
+  padding:.7rem;
+  margin-bottom:1.5rem;
+  border-radius:10px;
+  border:1px solid var(--border);
+  background:#0f172a;
+  color:white;
+}
+
 .stock-grid{
   display:grid;
   grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
@@ -72,6 +92,7 @@ button{
   border:1px solid var(--border);
   border-radius:var(--radius);
   padding:1rem;
+  position:relative;
 }
 
 .modal{
@@ -120,6 +141,9 @@ button{
   <div class="cat" onclick="loadCategory('ALL')">All Products</div>
 </div>
 
+<input type="text" id="searchInput" class="search-box"
+       placeholder="Search by name or barcode..." />
+
 <div class="stock-grid" id="stockGrid"></div>
 
 </div>
@@ -140,11 +164,8 @@ button{
     <input id="quantityInput" type="number" placeholder="Quantity"/>
     <input id="buyPriceInput" type="number" placeholder="Buy Price"/>
     <input id="sellPriceInput" type="number" placeholder="Sell Price"/>
-
-    <!-- IMEI FIELDS -->
     <input id="imei1Input" placeholder="IMEI No. 1" style="display:none;"/>
     <input id="imei2Input" placeholder="IMEI No. 2" style="display:none;"/>
-
     <button id="saveBtn">Save</button>
   </div>
 </div>
@@ -155,6 +176,7 @@ import {
   collection,
   addDoc,
   updateDoc,
+  deleteDoc,
   doc,
   onSnapshot,
   query,
@@ -168,6 +190,7 @@ if(!user || user.role !== "SHOPKEEPER"){
 const shopId = user.shopId;
 
 const stockGrid = document.getElementById("stockGrid");
+const searchInput = document.getElementById("searchInput");
 const modal = document.getElementById("modal");
 const addBtn = document.getElementById("addBtn");
 const saveBtn = document.getElementById("saveBtn");
@@ -182,8 +205,10 @@ const imei1Input = document.getElementById("imei1Input");
 const imei2Input = document.getElementById("imei2Input");
 
 let ALL = [];
+let CURRENT = [];
 let editId = null;
 
+/* IMEI SHOW/HIDE (UNCHANGED ORIGINAL LOGIC) */
 categoryInput.addEventListener("change",()=>{
   if(categoryInput.value==="SECOND_HAND"){
     imei1Input.style.display="block";
@@ -196,27 +221,40 @@ categoryInput.addEventListener("change",()=>{
   }
 });
 
+/* REALTIME */
 const q = query(collection(db,"stock"), where("shopId","==",shopId));
 onSnapshot(q,(snap)=>{
   ALL = snap.docs.map(d=>({id:d.id,...d.data()}));
   loadCategory("ALL");
 });
 
+/* DELETE */
+window.deleteItem = async function(id){
+  if(!confirm("Delete this item?")) return;
+  await deleteDoc(doc(db,"stock",id));
+};
+
+/* CATEGORY */
 window.loadCategory=function(cat){
+  CURRENT = cat==="ALL"?ALL:ALL.filter(i=>i.category===cat);
+  render(CURRENT);
+};
+
+/* RENDER */
+function render(list){
   stockGrid.innerHTML="";
-  let list = cat==="ALL"?ALL:ALL.filter(i=>i.category===cat);
-
-  list.sort((a,b)=>a.name.localeCompare(b.name));
-
   if(list.length===0){
     stockGrid.innerHTML="<p>No items found</p>";
     return;
   }
 
+  list.sort((a,b)=>a.name.localeCompare(b.name));
+
   list.forEach(i=>{
     const div=document.createElement("div");
     div.className="card";
     div.innerHTML=`
+      <button class="delete-btn" onclick="deleteItem('${i.id}')">Delete</button>
       <b>${i.name}</b><br>
       Barcode: ${i.barcode||"-"}<br>
       Qty: ${i.quantity}<br>
@@ -226,14 +264,22 @@ window.loadCategory=function(cat){
       <br><br>
       <button class="edit-btn">Edit</button>
     `;
-    div.querySelector(".edit-btn").onclick=(e)=>{
-      e.stopPropagation();
-      openEdit(i);
-    };
+    div.querySelector(".edit-btn").onclick=()=>openEdit(i);
     stockGrid.appendChild(div);
   });
-};
+}
 
+/* SEARCH */
+searchInput.addEventListener("input",()=>{
+  const val=searchInput.value.toLowerCase();
+  const filtered=CURRENT.filter(i=>
+    (i.name||"").toLowerCase().includes(val) ||
+    (i.barcode||"").toLowerCase().includes(val)
+  );
+  render(filtered);
+});
+
+/* EDIT */
 function openEdit(item){
   editId=item.id;
   nameInput.value=item.name||"";
@@ -253,6 +299,7 @@ function openEdit(item){
   modal.style.display="flex";
 }
 
+/* ADD */
 addBtn.onclick=()=>{
   editId=null;
   nameInput.value="";
@@ -268,6 +315,7 @@ addBtn.onclick=()=>{
   modal.style.display="flex";
 };
 
+/* SAVE */
 saveBtn.onclick=async()=>{
   const data={
     name:nameInput.value.trim(),
@@ -289,22 +337,19 @@ saveBtn.onclick=async()=>{
     return;
   }
 
-  try{
-    if(editId){
-      await updateDoc(doc(db,"stock",editId),data);
-    }else{
-      await addDoc(collection(db,"stock"),data);
-    }
-    modal.style.display="none";
-  }catch(err){
-    console.error(err);
-    alert("Error saving item");
+  if(editId){
+    await updateDoc(doc(db,"stock",editId),data);
+  }else{
+    await addDoc(collection(db,"stock"),data);
   }
+
+  modal.style.display="none";
 };
 
 modal.onclick=(e)=>{
   if(e.target===modal) modal.style.display="none";
 };
 </script>
+
 </body>
 </html>
