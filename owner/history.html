@@ -1,203 +1,201 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>System Activity History</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Owner · Master History</title>
 
 <style>
-:root {
-  --bg: #0f172a;
-  --card-bg: rgba(30, 41, 59, 0.75);
-  --border: rgba(148, 163, 184, 0.18);
-  --text: #e2e8f0;
-  --text-muted: #94a3b8;
-  --accent: #3b82f6;
-  --radius: 14px;
+:root{
+  --bg:#0f172a;
+  --card:#1e293b;
+  --border:#334155;
+  --text:#e2e8f0;
+  --muted:#94a3b8;
+  --accent:#10b981;
+  --danger:#ef4444;
 }
-*{margin:0;padding:0;box-sizing:border-box}
-body{
-  font-family:system-ui;
-  background:var(--bg);
-  color:var(--text);
-  padding:2rem 1.5rem;
-}
-h2{
-  font-size:1.9rem;
-  margin-bottom:1.8rem;
-  text-align:center;
-  background:linear-gradient(90deg,#93c5fd,#c7d2fe);
-  -webkit-background-clip:text;
-  -webkit-text-fill-color:transparent;
-}
-.filters{
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
-  gap:1rem;
-  margin-bottom:2.5rem;
-}
-select,input{
-  padding:.9rem 1rem;
-  border-radius:12px;
-  border:1px solid var(--border);
-  background:rgba(51,65,85,.55);
-  color:var(--text);
-}
-.timeline{
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:system-ui}
+
+header{
+  padding:1rem 1.5rem;
+  border-bottom:1px solid var(--border);
   display:flex;
-  flex-direction:column;
-  gap:1rem;
-  max-width:900px;
-  margin:0 auto;
-}
-.log{
-  background:var(--card-bg);
-  border:1px solid var(--border);
-  border-radius:var(--radius);
-  padding:1.3rem 1.4rem;
-}
-.log-header{
-  display:flex;
+  justify-content:space-between;
   align-items:center;
-  gap:.8rem;
-  margin-bottom:.6rem;
 }
-.badge{
-  padding:.35rem .9rem;
-  border-radius:2rem;
-  font-size:.75rem;
-  font-weight:700;
+
+button{
+  background:var(--danger);
+  border:none;
+  padding:.5rem 1rem;
+  border-radius:8px;
   color:white;
+  cursor:pointer;
 }
-.SELL{background:#059669}
-.BUY{background:#2563eb}
-.WORK{background:#d97706}
-.ATTENDANCE{background:#7c3aed}
-.SHOP_CREATED{background:#475569}
-.SYSTEM{background:#64748b}
+
+.container{
+  max-width:1400px;
+  margin:auto;
+  padding:2rem;
+}
+
+.cards{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+  gap:1rem;
+  margin-bottom:2rem;
+}
+
+.card{
+  background:var(--card);
+  border:1px solid var(--border);
+  padding:1.2rem;
+  border-radius:12px;
+}
+
+.section{
+  margin-top:2rem;
+}
+
+.section h3{
+  margin-bottom:1rem;
+}
+
+.item{
+  background:#0f172a;
+  border:1px solid var(--border);
+  padding:1rem;
+  border-radius:10px;
+  margin-bottom:.8rem;
+  font-size:.9rem;
+}
+
+.green{color:var(--accent)}
+.red{color:var(--danger)}
+.muted{color:var(--muted)}
 </style>
 </head>
 
 <body>
 
-<h2>System Activity History</h2>
+<header>
+  <h2>Owner · Master History Dashboard</h2>
+  <button onclick="location.href='index.html'">Back</button>
+</header>
 
-<div class="filters">
-  <select id="shopFilter">
-    <option value="">All Shops</option>
-  </select>
+<div class="container">
 
-  <select id="roleFilter">
-    <option value="">All Roles</option>
-    <option value="SHOPKEEPER">Shopkeeper</option>
-    <option value="WORKER">Worker</option>
-  </select>
-
-  <select id="typeFilter">
-    <option value="">All Activities</option>
-    <option value="SELL">Sell</option>
-    <option value="BUY">Buy</option>
-    <option value="WORK">Work</option>
-    <option value="ATTENDANCE">Attendance</option>
-    <option value="SHOP_CREATED">Shop Created</option>
-  </select>
-
-  <input type="date" id="dateFilter">
+<div class="cards">
+  <div class="card"><h4>Total Revenue</h4><p id="totalRevenue">₹0</p></div>
+  <div class="card"><h4>Total Jobs</h4><p id="totalJobs">0</p></div>
+  <div class="card"><h4>Total Attendance Records</h4><p id="totalAttendance">0</p></div>
+  <div class="card"><h4>Total Stock Items</h4><p id="totalStock">0</p></div>
 </div>
 
-<div class="timeline" id="historyList"></div>
+<div id="content"></div>
+
+</div>
 
 <script type="module">
-import { requireAuth } from "../auth/guard.js";
 import { db } from "../js/firebase.js";
 import {
   collection,
-  getDocs,
-  onSnapshot,
-  query,
-  orderBy
+  getDocs
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-/* OWNER ONLY */
-requireAuth("OWNER");
-
-const shopFilter=document.getElementById("shopFilter");
-const roleFilter=document.getElementById("roleFilter");
-const typeFilter=document.getElementById("typeFilter");
-const dateFilter=document.getElementById("dateFilter");
-const historyList=document.getElementById("historyList");
-
-let ALL_LOGS=[];
-let USERS=[];
-let SHOPS=[];
-
-/* LOAD USERS */
-const usersSnap=await getDocs(collection(db,"users"));
-USERS=usersSnap.docs.map(d=>({id:d.id,...d.data()}));
-
-/* LOAD SHOPS */
-const shopsSnap=await getDocs(collection(db,"shops"));
-SHOPS=shopsSnap.docs.map(d=>({id:d.id,...d.data()}));
-
-/* POPULATE SHOP FILTER */
-SHOPS.forEach(s=>{
-  shopFilter.innerHTML+=`<option value="${s.id}">${s.shopName}</option>`;
-});
-
-/* REALTIME AUDIT LOGS */
-const q=query(collection(db,"auditLogs"),orderBy("timestamp","desc"));
-
-onSnapshot(q,(snap)=>{
-  ALL_LOGS=snap.docs.map(d=>({id:d.id,...d.data()}));
-  render();
-});
-
-/* RENDER FUNCTION */
-function render(){
-  historyList.innerHTML="";
-
-  ALL_LOGS
-  .filter(log=>{
-    if(shopFilter.value && log.shopId!==shopFilter.value) return false;
-    if(roleFilter.value && log.role!==roleFilter.value) return false;
-    if(typeFilter.value && log.actionType!==typeFilter.value) return false;
-
-    if(dateFilter.value){
-      const d=log.timestamp?.toDate().toISOString().slice(0,10);
-      if(d!==dateFilter.value) return false;
-    }
-    return true;
-  })
-  .forEach(log=>{
-
-    const user=USERS.find(u=>u.id===log.userId);
-    const shop=SHOPS.find(s=>s.id===log.shopId);
-
-    historyList.innerHTML+=`
-      <div class="log">
-        <div class="log-header">
-          <b>${user?.name || "System"}</b>
-          <span class="badge ${log.actionType || "SYSTEM"}">
-            ${log.actionType || "SYSTEM"}
-          </span>
-        </div>
-        <div class="action-text">${log.action}</div>
-        <small style="color:#94a3b8">
-          Role: ${log.role || "—"} • 
-          Shop: ${shop?.shopName || "—"} • 
-          ${log.timestamp?.toDate().toLocaleString() || ""}
-        </small>
-      </div>
-    `;
-  });
+/* SAFE REVENUE FIELD */
+function getRevenueValue(s){
+  return s.total || s.amount || s.finalAmount || s.grandTotal || 0;
 }
 
-/* FILTER EVENTS */
-shopFilter.onchange=
-roleFilter.onchange=
-typeFilter.onchange=
-dateFilter.onchange=render;
+async function loadData(){
 
+  const jobsSnap = await getDocs(collection(db,"jobs"));
+  const salesSnap = await getDocs(collection(db,"sales"));
+  const attendanceSnap = await getDocs(collection(db,"attendance"));
+  const stockSnap = await getDocs(collection(db,"stock"));
+  const auditSnap = await getDocs(collection(db,"auditLogs"));
+
+  const JOBS = jobsSnap.docs.map(d=>d.data());
+  const SALES = salesSnap.docs.map(d=>d.data());
+  const ATTENDANCE = attendanceSnap.docs.map(d=>d.data());
+  const STOCK = stockSnap.docs.map(d=>d.data());
+  const AUDIT = auditSnap.docs.map(d=>d.data());
+
+  /* SUMMARY */
+  const totalRevenue = SALES.reduce((sum,s)=>sum+getRevenueValue(s),0);
+
+  document.getElementById("totalRevenue").innerText="₹"+totalRevenue;
+  document.getElementById("totalJobs").innerText=JOBS.length;
+  document.getElementById("totalAttendance").innerText=ATTENDANCE.length;
+  document.getElementById("totalStock").innerText=STOCK.length;
+
+  const content = document.getElementById("content");
+
+  content.innerHTML=`
+
+  <div class="section">
+    <h3>Jobs</h3>
+    ${JOBS.map(j=>`
+      <div class="item">
+        <strong>${j.device||"-"}</strong>
+        <div>Status: ${j.status||"-"}</div>
+        <div>Shop: ${j.shopId||"-"}</div>
+        <div>Assigned To: ${j.assignedTo||"Unassigned"}</div>
+      </div>
+    `).join("")}
+  </div>
+
+  <div class="section">
+    <h3>Revenue</h3>
+    ${SALES.map(s=>`
+      <div class="item">
+        <strong class="green">₹${getRevenueValue(s)}</strong>
+        <div>Shop: ${s.shopId||"-"}</div>
+        <div>Sold By: ${s.soldBy||s.userId||"-"}</div>
+      </div>
+    `).join("")}
+  </div>
+
+  <div class="section">
+    <h3>Attendance</h3>
+    ${ATTENDANCE.map(a=>`
+      <div class="item">
+        <strong>${a.userId||"-"}</strong>
+        <div>Shop: ${a.shopId||"-"}</div>
+        <div>Check-In: ${a.checkIn ? new Date(a.checkIn.seconds*1000).toLocaleString():"-"}</div>
+        <div>Check-Out: ${a.checkOut ? new Date(a.checkOut.seconds*1000).toLocaleString():"-"}</div>
+      </div>
+    `).join("")}
+  </div>
+
+  <div class="section">
+    <h3>Stock</h3>
+    ${STOCK.map(s=>`
+      <div class="item">
+        <strong>${s.name||"-"}</strong>
+        <div>Qty: ${s.quantity||0}</div>
+        <div>Shop: ${s.shopId||"-"}</div>
+      </div>
+    `).join("")}
+  </div>
+
+  <div class="section">
+    <h3>Audit Logs</h3>
+    ${AUDIT.map(a=>`
+      <div class="item">
+        <strong>${a.role||"-"}</strong>
+        <div>${a.action||"-"}</div>
+        <div>Shop: ${a.shopId||"-"}</div>
+      </div>
+    `).join("")}
+  </div>
+  `;
+}
+
+loadData();
 </script>
 
 </body>

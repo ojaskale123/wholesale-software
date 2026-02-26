@@ -27,11 +27,10 @@ header{
 button{
   background:#ef4444;
   border:none;
-  padding:.5rem 1rem;
-  border-radius:8px;
+  padding:.6rem 1.2rem;
+  border-radius:10px;
   color:white;
   cursor:pointer;
-  font-size:.85rem;
 }
 
 .container{
@@ -79,32 +78,12 @@ button{
   padding:1.5rem;
 }
 
-.search-box{
-  width:100%;
-  padding:.6rem;
-  margin-bottom:1rem;
-  border-radius:8px;
-  border:1px solid var(--border);
-  background:#0f172a;
-  color:white;
-}
-
 .item{
   background:#0f172a;
   border:1px solid var(--border);
   border-radius:12px;
   padding:1rem;
   margin-bottom:1rem;
-  position:relative;
-}
-
-.delete-btn{
-  position:absolute;
-  top:10px;
-  right:10px;
-  background:#ef4444;
-  font-size:.75rem;
-  padding:.4rem .7rem;
 }
 
 .item b{font-size:1.1rem}
@@ -121,6 +100,7 @@ button{
 </header>
 
 <div class="container">
+
 <div class="categories">
   <div class="cat" onclick="openCategory('SPARE')">Spare Parts</div>
   <div class="cat" onclick="openCategory('BATTERY')">Batteries</div>
@@ -128,13 +108,12 @@ button{
   <div class="cat" onclick="openCategory('SECOND_HAND')">Second Hand Mobiles</div>
   <div class="cat" onclick="openCategory('ALL')">All Products</div>
 </div>
+
 </div>
 
 <div class="overlay" id="overlay">
   <div class="popup">
     <h3 id="popupTitle"></h3>
-    <input type="text" id="searchInput" class="search-box"
-           placeholder="Search by name or barcode..." />
     <div id="popupList"></div>
     <br>
     <button onclick="closePopup()">Close</button>
@@ -145,40 +124,19 @@ button{
 import { requireAuth } from "../auth/guard.js";
 import { db } from "../js/firebase.js";
 import {
-  collectionGroup,
-  onSnapshot,
-  deleteDoc
+  collection,
+  onSnapshot
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
+/* OWNER CHECK */
 requireAuth("OWNER");
 
 let ALL_PRODUCTS = [];
-let CURRENT_PRODUCTS = [];
 
-/* ✅ REALTIME LISTENER FOR ALL SHOPS */
-onSnapshot(collectionGroup(db,"stock"),(snap)=>{
-  ALL_PRODUCTS = snap.docs.map(d=>({
-    id:d.id,
-    ref:d.ref,
-    ...d.data()
-  }));
+/* 🔥 REALTIME LISTENER */
+onSnapshot(collection(db,"stock"),(snap)=>{
+  ALL_PRODUCTS = snap.docs.map(d=>({id:d.id,...d.data()}));
 });
-
-/* DELETE FUNCTION */
-window.deleteStock = async function(id){
-  const product = ALL_PRODUCTS.find(p=>p.id===id);
-  if(!product) return;
-
-  const confirmDelete = confirm("Are you sure you want to delete this item?");
-  if(!confirmDelete) return;
-
-  try{
-    await deleteDoc(product.ref);
-  }catch(err){
-    alert("Error deleting item");
-    console.error(err);
-  }
-};
 
 /* OPEN CATEGORY */
 window.openCategory = function(category){
@@ -191,39 +149,27 @@ window.openCategory = function(category){
     ALL:"All Products"
   };
 
+  const list = document.getElementById("popupList");
   document.getElementById("popupTitle").innerText = titleMap[category];
+  list.innerHTML="";
 
-  CURRENT_PRODUCTS = category==="ALL"
+  let products = category==="ALL"
       ? ALL_PRODUCTS
       : ALL_PRODUCTS.filter(p=>p.category===category);
 
-  renderProducts(CURRENT_PRODUCTS);
-
-  document.getElementById("searchInput").value="";
-  document.getElementById("overlay").classList.add("active");
-};
-
-/* RENDER PRODUCTS */
-function renderProducts(products){
-
-  const list=document.getElementById("popupList");
-  list.innerHTML="";
+  products.sort((a,b)=>a.name.localeCompare(b.name));
 
   if(!products.length){
-    list.innerHTML=`<div class="empty">No items found</div>`;
+    list.innerHTML = `<div class="empty">No items found</div>`;
+    document.getElementById("overlay").classList.add("active");
     return;
   }
 
-  products.sort((a,b)=>a.name.localeCompare(b.name));
-
   products.forEach(p=>{
-    const profit=(p.sellPrice||0)-(p.buyPrice||0);
+    const profit = (p.sellPrice||0)-(p.buyPrice||0);
 
     list.innerHTML+=`
       <div class="item">
-        <button class="delete-btn" onclick="deleteStock('${p.id}')">
-          Delete
-        </button>
         <b>${p.name}</b><br>
         Barcode: ${p.barcode||"-"}<br>
         Quantity: ${p.quantity||0}<br>
@@ -233,26 +179,14 @@ function renderProducts(products){
       </div>
     `;
   });
+
+  document.getElementById("overlay").classList.add("active");
 }
-
-/* SEARCH */
-document.getElementById("searchInput")
-.addEventListener("input",function(){
-
-  const value=this.value.toLowerCase();
-
-  const filtered=CURRENT_PRODUCTS.filter(p=>
-    (p.name||"").toLowerCase().includes(value) ||
-    (p.barcode||"").toLowerCase().includes(value)
-  );
-
-  renderProducts(filtered);
-});
 
 /* CLOSE */
 window.closePopup=function(){
   document.getElementById("overlay").classList.remove("active");
-};
+}
 </script>
 
 </body>
