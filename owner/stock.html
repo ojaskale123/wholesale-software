@@ -145,10 +145,9 @@ button{
 import { requireAuth } from "../auth/guard.js";
 import { db } from "../js/firebase.js";
 import {
-  collection,
+  collectionGroup,
   onSnapshot,
-  deleteDoc,
-  doc
+  deleteDoc
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 requireAuth("OWNER");
@@ -156,17 +155,25 @@ requireAuth("OWNER");
 let ALL_PRODUCTS = [];
 let CURRENT_PRODUCTS = [];
 
-onSnapshot(collection(db,"stock"),(snap)=>{
-  ALL_PRODUCTS = snap.docs.map(d=>({id:d.id,...d.data()}));
+/* ✅ REALTIME LISTENER FOR ALL SHOPS */
+onSnapshot(collectionGroup(db,"stock"),(snap)=>{
+  ALL_PRODUCTS = snap.docs.map(d=>({
+    id:d.id,
+    ref:d.ref,
+    ...d.data()
+  }));
 });
 
 /* DELETE FUNCTION */
 window.deleteStock = async function(id){
+  const product = ALL_PRODUCTS.find(p=>p.id===id);
+  if(!product) return;
+
   const confirmDelete = confirm("Are you sure you want to delete this item?");
   if(!confirmDelete) return;
 
   try{
-    await deleteDoc(doc(db,"stock",id));
+    await deleteDoc(product.ref);
   }catch(err){
     alert("Error deleting item");
     console.error(err);
